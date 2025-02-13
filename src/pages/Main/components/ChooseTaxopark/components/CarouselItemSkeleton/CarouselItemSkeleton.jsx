@@ -1,4 +1,4 @@
-const CarouselItemSkeleton: React.FC<{ slidesToShow: number }> = ({ slidesToShow }) => {
+const CarouselItemSkeleton = ({ slidesToShow }) => {
   return (
     <div className="flex-shrink-0 relative h-[650px] p-2"
       style={{

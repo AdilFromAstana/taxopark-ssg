@@ -1,9 +1,9 @@
-import { Helmet } from "react-helmet-async";
 import ChooseTaxopark from "./components/ChooseTaxopark/ChooseTaxopark";
 import Reviews from "./components/Reviews/Reviews";
 import HowItWorks from "./components/HowItWorks/HowItWorks";
 import Advantages from "./components/Advantages/Advantages";
 import FieldForm from "./components/FieldForm/FieldForm";
+import { Helmet } from "react-helmet-async";
 
 const Main = () => {
   return (

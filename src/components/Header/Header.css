@@ -1,0 +1,104 @@
+.header {
+    background-color: #5a9bf7;
+    padding: 10px 2.5vw;
+    box-sizing: border-box;
+    color: white;
+}
+
+.header-menu {
+    display: none;
+}
+
+.header-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.header-logo {
+    flex: 1;
+    text-align: left;
+}
+
+.header-logo-img {
+    width: 150px;
+    height: auto;
+}
+
+.header-contact {
+    flex: 1;
+    text-align: center;
+}
+
+.header-contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.header-contact-number,
+.header-contact-hours {
+    font-size: 0.9rem;
+}
+
+.header-nav {
+    flex: 3;
+    text-align: center;
+}
+
+.header-nav-links {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.header-link {
+    color: white;
+    font-size: 1rem;
+    margin: 5px;
+}
+
+.header-button {
+    flex: 1;
+    text-align: right;
+}
+
+.header-register-button {
+    border-radius: 24px;
+    background-color: #5a9bf7;
+    color: white;
+    border: 1px solid black;
+    font-size: 0.9rem;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+
+    .header-contact,
+    .header-nav,
+    .header-button {
+        display: none;
+    }
+
+    .header-menu {
+        display: block;
+    }
+
+    .header-logo-img {
+        width: 125px;
+    }
+
+    .header-nav-links {
+        flex-direction: column;
+    }
+
+    .drawer-links {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .header-link {
+        font-size: 24px;
+        margin: 5px 0;
+    }
+}

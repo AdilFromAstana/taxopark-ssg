@@ -1,15 +1,9 @@
-"use client";
-
 import React, { useState, useRef, useEffect } from "react";
+import { FaCircleArrowLeft, FaCircleArrowRight } from "react-icons/fa6";
 import CarouselItemSkeleton from "./CarouselItemSkeleton/CarouselItemSkeleton";
 import CarouselItem from "./CarouselItem/CarouselItem";
-import { FaCircleArrowLeft, FaCircleArrowRight } from "react-icons/fa6";
 
-type CarouselRef = {
-    startX: number | null;
-};
-
-const getCardCount = (width = 429): number => {
+const getCardCount = (width = 429) => {
     if (width <= 430) {
         return 1.1;
     } else if (width > 430 && width < 768) {
@@ -21,13 +15,13 @@ const getCardCount = (width = 429): number => {
     }
 };
 
-const Carousel: React.FC<{ items: any[]; isLoading: boolean }> = ({
+const Carousel = ({
     items,
     isLoading,
 }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [carouselItems, setCarouselItems] = useState<any[]>([]);
-    const carouselRef = useRef<CarouselRef>({ startX: null });
+    const [carouselItems, setCarouselItems] = useState([]);
+    const carouselRef = useRef({ startX: null });
     const [carouselDisabled, setCarouselDisabled] = useState(false);
     const [slidesToShow, setSlidesToShow] = useState(
         getCardCount()
@@ -45,12 +39,12 @@ const Carousel: React.FC<{ items: any[]; isLoading: boolean }> = ({
         setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0));
     };
 
-    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const handleTouchStart = (e) => {
         const touch = e.touches[0];
         carouselRef.current.startX = touch.clientX;
     };
 
-    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    const handleTouchMove = (e) => {
         if (carouselRef.current.startX === null) return;
         const touch = e.touches[0];
         const diffX = carouselRef.current.startX - touch.clientX;
@@ -103,13 +97,13 @@ const Carousel: React.FC<{ items: any[]; isLoading: boolean }> = ({
             <div className="relative mx-auto w-[90vw] 2xl:w-[70vw] overflow-y-visible">
                 <div className="relative overflow-x-hidden overflow-y-visible w-[90vw] 2xl:w-[70vw] pb-4">
                     <div
-                        ref={carouselRef as unknown as React.RefObject<HTMLDivElement>}
+                        ref={carouselRef}
                         className="flex transition-transform duration-300 bg-transparent w-[90vw] 2xl:w-[70vw]"
                         style={{ transform: `translateX(-${currentIndex * (100 / slidesToShow)}%)` }}
                         onTouchStart={handleTouchStart}
                         onTouchMove={handleTouchMove}
                     >
-                        {carouselItems.map((item: any) => (
+                        {carouselItems.map((item) => (
                             <CarouselItem
                                 key={item.id}
                                 slidesToShow={slidesToShow}

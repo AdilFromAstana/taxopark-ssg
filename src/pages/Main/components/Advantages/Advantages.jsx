@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import "./Advantages.css";
 
 const advantages = [
   {
@@ -57,30 +58,21 @@ const Advantages = () => {
   return (
     <section
       ref={sectionRef}
-      className={`py-10 px-5 text-center transform transition-all duration-700 ease-in-out ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
-      }`}
+      className={`advantages ${isVisible ? "visible" : ""}`}
     >
-      <div className="mx-auto max-w-[1400px]">
-        <h2 className="text-3xl font-bold text-gray-800">
-          Почему выбирают нас?
-        </h2>
-        <p className="text-lg text-gray-600 mt-4 mb-8">
+      <div className="container">
+        <h2 className="advantages-title">Почему выбирают нас?</h2>
+        <p className="advantages-description">
           С нами вы легко найдете идеальные условия для работы: прозрачные
           комиссии, моментальные выплаты, акции и бонусы — всё для вашего
           удобства.
         </p>
-        <div className="flex flex-wrap justify-center gap-5">
+        <div className="advantages-row">
           {advantages.map((adv, index) => (
-            <div
-              key={index}
-              className="bg-white border border-gray-200 rounded-lg shadow-md p-6 w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33%-40px)] lg:aspect-[1.6/1] aspect-[2.4/1] transition-transform transform hover:translate-y-[-5px] hover:shadow-lg"
-            >
-              <div className="text-5xl mb-4 text-orange-500">{adv.icon}</div>
-              <h3 className="text-xl font-semibold text-gray-700">
-                {adv.title}
-              </h3>
-              <p className="text-gray-600 mt-2">{adv.description}</p>
+            <div key={index} className="advantage-item">
+              <div className="advantage-icon">{adv.icon}</div>
+              <h3 className="advantage-title">{adv.title}</h3>
+              <p className="advantage-description">{adv.description}</p>
             </div>
           ))}
         </div>
@@ -88,5 +80,4 @@ const Advantages = () => {
     </section>
   );
 };
-
 export default Advantages;

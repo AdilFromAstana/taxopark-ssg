@@ -1,6 +1,3 @@
-"use client";
-
-import { ParkInCarousel } from "@/app/interfaces/interfaces";
 import { memo } from "react";
 import { BiMoneyWithdraw } from "react-icons/bi";
 import { FaGasPump, FaHandshake } from "react-icons/fa6";
@@ -23,13 +20,7 @@ const allParkPromotions = [
   { label: "Приведи друга", value: 5 },
 ];
 
-interface BackSideProps {
-  item: ParkInCarousel;
-  toggleFlip: () => void;
-  openModal: (e: any) => void;
-}
-
-const BackSide: React.FC<BackSideProps> = memo(
+const BackSide = memo(
   ({ item, toggleFlip, openModal }) => {
     const details = [
       {
@@ -112,7 +103,7 @@ const BackSide: React.FC<BackSideProps> = memo(
                 <LuGift className="text-xl" />
               </div>
               <div className="flex flex-wrap gap-2">
-                {item.parkPromotions.map((bonus: number) => {
+                {item.parkPromotions.map((bonus) => {
                   const promotion = allParkPromotions.find(
                     (promo) => promo.value === bonus
                   );

@@ -13,7 +13,7 @@ const allParkPromotions = [
   { label: "Приведи друга", value: 5 },
 ];
 
-const FrontSide: React.FC = memo(({ item, toggleFlip, openModal }) => {
+const FrontSide = memo(({ item, toggleFlip, openModal }) => {
   const details = [
     {
       icon: IoIosStar,
@@ -71,7 +71,7 @@ const FrontSide: React.FC = memo(({ item, toggleFlip, openModal }) => {
               <LuGift className="text-xl" />
             </div>
             <div className="flex flex-wrap gap-2">
-              {item.parkPromotions.map((bonus: number) => {
+              {item.parkPromotions.map((bonus) => {
                 const promotion = allParkPromotions.find(
                   (promo) => promo.value === bonus
                 );

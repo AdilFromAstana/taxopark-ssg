@@ -166,7 +166,7 @@
   height: 100%;
 }
 
-.carousel-card-info > h3 {
+.carousel-card-info>h3 {
   font-size: 20px;
   margin-bottom: 0;
   margin-top: 0;
@@ -190,7 +190,7 @@
   font-size: 30px;
 }
 
-.slick-slide > div {
+.slick-slide>div {
   margin: 10px;
 }
 
@@ -221,6 +221,7 @@
   margin-top: 8px;
   font-weight: bold;
 }
+
 .filter-select {
   width: 40%;
 }
@@ -243,6 +244,7 @@
 }
 
 @media (max-width: 764px) {
+
   .carousel-card .ant-card-body::after,
   .carousel-card .ant-card-body::before {
     content: none;
@@ -251,32 +253,41 @@
   .carousel-wrapper {
     margin-top: 0;
   }
-  .choose-taxopark-title > h2 {
+
+  .choose-taxopark-title>h2 {
     font-size: 30px;
   }
-  .choose-taxopark-title > span {
+
+  .choose-taxopark-title>span {
     font-size: 16px;
   }
+
   .carousel-filters-button {
     display: flex;
   }
+
   .desktop-filters {
     display: none;
   }
+
   .filters-card {
     background-color: white;
     border: none;
   }
+
   .filters-card .ant-card-body {
     padding: 0;
   }
+
   .filters-grid {
     background-color: white;
     grid-template-columns: repeat(1, 1fr);
   }
+
   .filters-title {
     display: none;
   }
+
   .filter-label {
     margin: 0;
   }
@@ -284,6 +295,7 @@
   .slick-track {
     display: flex;
   }
+
   .slick-slide {
     height: 100%;
   }
@@ -310,6 +322,7 @@
   .carousel-header {
     flex-direction: column;
   }
+
   .carousel-filters-button {
     width: 100%;
   }

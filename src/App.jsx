@@ -1,11 +1,12 @@
+import { HelmetProvider } from "react-helmet-async";
 import "./App.css";
-import Main from "./pages/Main";
+import AppRouter from "./AppRouter";
 
 function App() {
   return (
-    <>
-      <Main />
-    </>
+    <HelmetProvider>
+      <AppRouter />
+    </HelmetProvider>
   );
 }
 

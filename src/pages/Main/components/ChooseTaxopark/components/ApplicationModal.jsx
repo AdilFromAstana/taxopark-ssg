@@ -1,12 +1,10 @@
-"use client";
-
 import axios from "axios";
 import React, { memo, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = import.meta.env.VITE_API_URL;
 
 const ApplicationModal = memo(
   ({
@@ -14,20 +12,15 @@ const ApplicationModal = memo(
     onClose,
     formType = "consultation",
     parkId,
-  }: {
-    isOpen: boolean;
-    onClose: () => void;
-    formType: "taxiPark" | "consultation";
-    parkId?: string;
   }) => {
     const [step, setStep] = useState(1);
     const [otpSent, setOtpSent] = useState(false);
     const [timer, setTimer] = useState(60);
-    const [isAnimating, setIsAnimating] = useState(false); // Для анимации закрытия
+    const [isAnimating, setIsAnimating] = useState(false);
     const otp = "1234";
     const [inputOtp, setInputOtp] = useState("");
-    const [phone, setPhone] = useState<string>("");
-    const [name, setName] = useState<string>("");
+    const [phone, setPhone] = useState("");
+    const [name, setName] = useState("");
 
     console.log(otpSent);
     console.log(timer);
@@ -44,7 +37,7 @@ const ApplicationModal = memo(
           }
         );
         return response.data;
-      } catch (error: any) {
+      } catch (error) {
         console.error(
           "Ошибка при создании формы:",
           error.response?.data || error.message
@@ -100,17 +93,15 @@ const ApplicationModal = memo(
 
     return ReactDOM.createPortal(
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center transition-opacity duration-300 ${
-          isOpen ? "opacity-100" : "opacity-0"
-        }`}
+        className={`fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0"
+          }`}
         style={{
           pointerEvents: isOpen ? "auto" : "none",
         }}
       >
         <div
-          className={`bg-white rounded-lg shadow-lg w-full max-w-md p-6 transform transition-transform duration-300 ${
-            isOpen ? "scale-100" : "scale-90"
-          }`}
+          className={`bg-white rounded-lg shadow-lg w-full max-w-md p-6 transform transition-transform duration-300 ${isOpen ? "scale-100" : "scale-90"
+            }`}
         >
           <button
             className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
@@ -123,8 +114,8 @@ const ApplicationModal = memo(
             {step === 1
               ? "Отправить заявку"
               : step === 2
-              ? "Код подтверждения"
-              : "Успешно отправлено"}
+                ? "Код подтверждения"
+                : "Успешно отправлено"}
           </h2>
 
           {step === 1 && (
@@ -162,7 +153,7 @@ const ApplicationModal = memo(
                   country="kz"
                   onlyCountries={["kz"]}
                   value={phone}
-                  onChange={(value: string) => setPhone(value)}
+                  onChange={(value) => setPhone(value)}
                   placeholder="+7-777-77-77-77"
                   disableDropdown={true}
                   inputStyle={{ width: "100%" }}
