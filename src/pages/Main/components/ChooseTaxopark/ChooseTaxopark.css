@@ -1,0 +1,320 @@
+.desktop-filters {
+  display: flex;
+  width: 100%;
+}
+
+.react-tel-input .form-control {
+  width: 100% !important;
+}
+
+.ant-otp .ant-otp-input {
+  height: 50px;
+  font-size: 20px;
+}
+
+.choose-taxopark-title {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: black !important;
+}
+
+.carousel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.carousel-count {
+  text-align: start;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.carousel-filters-button {
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: none;
+}
+
+.carousel-filters-button:hover {
+  background-color: #40a9ff;
+}
+
+.carousel-drawer {
+  width: 100%;
+}
+
+.drawer-apply-button {
+  margin-top: 5vh;
+  width: 100%;
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  font-size: 1rem;
+}
+
+.drawer-apply-button:hover {
+  background-color: #40a9ff;
+}
+
+.carousel-slider {
+  margin: 0 auto;
+  width: 100%;
+}
+
+.carousel-card {
+  overflow: hidden;
+  border-radius: 20px;
+  align-items: center;
+  display: flex !important;
+  flex-direction: column;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+  height: 650px;
+  position: relative;
+}
+
+.carousel-card-image {
+  width: 100%;
+  height: 175px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 20px 20px 0 0;
+}
+
+.carousel-card-info {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+.carousel-card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.carousel-card-rating,
+.carousel-card-detail {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.carousel-card-icon {
+  font-size: 20px;
+}
+
+.star {
+  color: #f7c925;
+}
+
+.carousel-card-bonuses {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.carousel-card-bonus-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.carousel-card-bonus {
+  font-size: 14px;
+  background: #ffdb58;
+  padding: 2px 4px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.carousel-card-button {
+  width: 100%;
+  background: black !important;
+  color: white !important;
+  margin-top: auto;
+  border: none;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  color: black !important;
+}
+
+.carousel-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  margin-top: 10vh;
+}
+
+.carousel-card .ant-card-body {
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.carousel-card-info > h3 {
+  font-size: 20px;
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+.approximate-income-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
+.approximate-income-title {
+  font-size: 24px;
+}
+
+.approximate-income-value {
+  font-size: 30px;
+}
+
+.slick-slide > div {
+  margin: 10px;
+}
+
+.filters-card {
+  width: 100%;
+  background: rgb(247, 247, 247);
+  border-radius: 20px;
+}
+
+.filters-title {
+  text-align: start;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.filter-label {
+  text-align: start;
+  display: flex;
+  gap: 10px;
+}
+
+.filter-value {
+  display: block;
+  margin-top: 8px;
+  font-weight: bold;
+}
+.filter-select {
+  width: 40%;
+}
+
+.filter-checkbox-group {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 1400px) {
+  .carousel-wrapper {
+    width: 70vw;
+  }
+}
+
+@media (max-width: 1400px) {
+  .carousel-wrapper {
+    width: 90vw;
+  }
+}
+
+@media (max-width: 764px) {
+  .carousel-card .ant-card-body::after,
+  .carousel-card .ant-card-body::before {
+    content: none;
+  }
+
+  .carousel-wrapper {
+    margin-top: 0;
+  }
+  .choose-taxopark-title > h2 {
+    font-size: 30px;
+  }
+  .choose-taxopark-title > span {
+    font-size: 16px;
+  }
+  .carousel-filters-button {
+    display: flex;
+  }
+  .desktop-filters {
+    display: none;
+  }
+  .filters-card {
+    background-color: white;
+    border: none;
+  }
+  .filters-card .ant-card-body {
+    padding: 0;
+  }
+  .filters-grid {
+    background-color: white;
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .filters-title {
+    display: none;
+  }
+  .filter-label {
+    margin: 0;
+  }
+
+  .slick-track {
+    display: flex;
+  }
+  .slick-slide {
+    height: 100%;
+  }
+
+  .slick-prev,
+  .slick-next {
+    display: none !important;
+  }
+
+  .approximate-income-title {
+    font-size: 20px;
+  }
+
+  .approximate-income-value {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 430px) {
+  .carousel-card-image {
+    height: 140px;
+  }
+
+  .carousel-header {
+    flex-direction: column;
+  }
+  .carousel-filters-button {
+    width: 100%;
+  }
+
+  .carousel-card {
+    height: 600px;
+  }
+}
