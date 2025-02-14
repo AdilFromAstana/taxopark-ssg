@@ -1,76 +1,57 @@
+"use client";
+import { useEffect, useState } from "react";
+import { Drawer, Button } from "antd";
 import "./Header.css";
-// import logo from "assets/logo.svg";
-
-import { Button, Col, Drawer, Row, Typography } from "antd";
-import { MenuOutlined } from "@ant-design/icons";
-import React, { useState } from "react";
-const { Text } = Typography;
 
 function Header() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  return (
-    <header className="header">
-      <Row align="middle" justify="space-between" className="header-row">
-        <Col className="header-logo">
-          {/* <img alt="logo" src={logo} className="header-logo-img" /> */}
-        </Col>
-        <Col className="header-contact">
-          <div className="header-contact-info">
-            <span className="header-contact-number">+7-776-777-77-77</span>
-            <span className="header-contact-hours">Круглосуточно</span>
-          </div>
-        </Col>
-        <Col className="header-nav">
-          <Row justify="space-evenly" className="header-nav-links">
-            <Text strong className="header-link">
-              Главная
-            </Text>
-            <Text strong className="header-link">
-              Как это работает?
-            </Text>
-            <Text strong className="header-link">
-              Акции и бонусы
-            </Text>
-            <Text strong className="header-link">
-              Контакты
-            </Text>
-          </Row>
-        </Col>
-        <Col className="header-button">
-          <Button className="header-register-button">Зарегистрироваться</Button>
-        </Col>
-        <Col className="header-menu">
-          <MenuOutlined
-            style={{ color: "white", fontSize: "36px" }}
-            onClick={() => window.innerWidth <= 768 && setIsDrawerOpen(true)}
-          />
-        </Col>
-      </Row>
+  useEffect(() => {
+    if (isDrawerOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [isDrawerOpen]);
 
-      <Drawer
-        title="Меню"
-        placement="right"
-        open={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        className="header-drawer"
-      >
-        <div className="drawer-content">
-          <div className="drawer-links">
-            <Text strong className="header-link">
-              Главная
-            </Text>
-            <Text strong className="header-link">
-              Как это работает?
-            </Text>
-            <Text strong className="header-link">
-              Акции и бонусы
-            </Text>
-            <Text strong className="header-link">
-              Контакты
-            </Text>
-          </div>
+  return (
+    <header className="header-container">
+      <div className="header-inner">
+        {/* Логотип */}
+        <div className="header-logo-container">
+          <a href="/" className="header-logo">Лого</a>
         </div>
+
+        {/* Навигация (десктоп) */}
+        <nav className="header-nav-desktop">
+          <a href="/" className="header-nav-link" onClick={() => setIsDrawerOpen(false)}>Главная</a>
+          <a href="/how-it-works" className="header-nav-link" onClick={() => setIsDrawerOpen(false)}>Как это работает?</a>
+          <a href="/promotions" className="header-nav-link" onClick={() => setIsDrawerOpen(false)}>Акции и бонусы</a>
+          <a href="tel:+77767777777" className="header-phone-link">📞 +7-776-777-77-77</a>
+        </nav>
+
+        {/* Кнопка бургера (мобилка) */}
+        <div className="header-burger-menu">
+          <Button type="primary" onClick={() => setIsDrawerOpen(true)} className="header-burger-button">
+            ☰
+          </Button>
+        </div>
+      </div>
+
+      {/* Мобильное меню */}
+      <Drawer
+        title="MyCompany"
+        placement="right"
+        closable={true}
+        onClose={() => setIsDrawerOpen(false)}
+        visible={isDrawerOpen}
+      >
+        <nav className="header-mobile-nav">
+          <a href="/" className="header-mobile-link" onClick={() => setIsDrawerOpen(false)}>🏠 Главная</a>
+          <a href="/how-it-works" className="header-mobile-link" onClick={() => setIsDrawerOpen(false)}>⚙️ Как это работает?</a>
+          <a href="/promotions" className="header-mobile-link" onClick={() => setIsDrawerOpen(false)}>🎁 Акции и бонусы</a>
+          <a href="tel:+77767777777" className="header-mobile-link">📞 +7-776-777-77-77</a>
+        </nav>
       </Drawer>
     </header>
   );

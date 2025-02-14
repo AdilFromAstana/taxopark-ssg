@@ -1,0 +1,70 @@
+/* Контейнер акций */
+.promotions-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.promotions-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.promotions-description {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* Поиск и чекбокс */
+.promotions-search {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.promotions-checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Список акций */
+.promotions-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Карточка акции */
+.promotion-card {
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.promotion-card:hover {
+    transform: scale(1.03);
+}
+
+.promotion-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.promotion-description {
+    color: #555;
+    margin-top: 10px;
+}
+
+.promotion-expiry {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* Неактивные акции */
+.promotion-inactive {
+    opacity: 0.5;
+    pointer-events: none;
+}

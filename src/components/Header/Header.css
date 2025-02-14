@@ -1,104 +1,89 @@
-.header {
-    background-color: #5a9bf7;
-    padding: 10px 2.5vw;
-    box-sizing: border-box;
+/* Основные стили для шапки */
+.header-container {
+    background: linear-gradient(to right, #3b82f6, #2563eb);
     color: white;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 50;
 }
 
-.header-menu {
-    display: none;
-}
-
-.header-row {
+.header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.header-logo-container {
+    flex: 1;
 }
 
 .header-logo {
-    flex: 1;
-    text-align: left;
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
 }
 
-.header-logo-img {
-    width: 150px;
-    height: auto;
+.header-nav-desktop {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    font-weight: 500;
 }
 
-.header-contact {
-    flex: 1;
-    text-align: center;
+.header-nav-link {
+    text-decoration: none;
+    color: white;
+    transition: color 0.3s;
 }
 
-.header-contact-info {
+.header-nav-link:hover {
+    color: #dbeafe;
+}
+
+.header-phone-link {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+}
+
+.header-burger-menu {
+    display: none;
+}
+
+.header-burger-button {
+    font-size: 24px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+/* Стили мобильного меню */
+.header-mobile-nav {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    margin-top: 20px;
+    gap: 15px;
 }
 
-.header-contact-number,
-.header-contact-hours {
-    font-size: 0.9rem;
+.header-mobile-link {
+    text-decoration: none;
+    color: black;
+    font-size: 16px;
 }
 
-.header-nav {
-    flex: 3;
-    text-align: center;
-}
-
-.header-nav-links {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-}
-
-.header-link {
-    color: white;
-    font-size: 1rem;
-    margin: 5px;
-}
-
-.header-button {
-    flex: 1;
-    text-align: right;
-}
-
-.header-register-button {
-    border-radius: 24px;
-    background-color: #5a9bf7;
-    color: white;
-    border: 1px solid black;
-    font-size: 0.9rem;
-}
-
-/* Адаптивность для мобильных устройств */
+/* Адаптивные стили */
 @media (max-width: 768px) {
-
-    .header-contact,
-    .header-nav,
-    .header-button {
+    .header-nav-desktop {
         display: none;
     }
 
-    .header-menu {
+    .header-burger-menu {
         display: block;
-    }
-
-    .header-logo-img {
-        width: 125px;
-    }
-
-    .header-nav-links {
-        flex-direction: column;
-    }
-
-    .drawer-links {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .header-link {
-        font-size: 24px;
-        margin: 5px 0;
     }
 }

@@ -1,13 +1,11 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./pages/Main";
+import PromotionsPage from "./pages/Promotions";
 import AdminLayout from "./layouts/AdminLayout";
 import Forms from "./pages/Admin/Forms/Forms";
 import Parks from "./pages/Admin/Parks/Parks";
 import Promotions from "./pages/Admin/Promotions/Promotions";
-// import Table1Page from "@/pages/admin/Table1Page";
-// import Table2Page from "@/pages/admin/Table2Page";
-// import Table3Page from "@/pages/admin/Table3Page";
 
 const AppRouter = () => {
     return (
@@ -15,7 +13,9 @@ const AppRouter = () => {
             <Routes>
                 {/* Главная страница с Header */}
                 <Route path="/" element={<MainLayout />}>
+                    <Route index element={<Navigate to="/" replace />} /> {/* ✅ Редирект */}
                     <Route index element={<HomePage />} />
+                    <Route path="promotions" element={<PromotionsPage />} />
                 </Route>
 
                 {/* Админка с Sidebar */}
