@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+/* eslint-disable react/prop-types */
+import { useState } from "react";
 import { Card, Button } from "antd";
 import { IoIosStar } from "react-icons/io";
 import {

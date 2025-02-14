@@ -10,14 +10,13 @@ const ChooseTaxopark = () => {
   const [filteredItems, setFilteredItems] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  console.log("isLoading: ", isLoading);
   const [cities, setCities] = useState([]);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(
-        `${API_URL}/cities?page=1&limit=1000`
-      );
+      const response = await fetch(`${API_URL}/cities?page=1&limit=1000`);
       const result = await response.json();
       setCities(result);
     } catch (error) {
@@ -27,11 +26,11 @@ const ChooseTaxopark = () => {
     }
   };
 
-  console.log("cities: ", cities)
+  console.log("cities: ", cities);
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   return (
     <div className="carousel-wrapper">
@@ -42,7 +41,7 @@ const ChooseTaxopark = () => {
         </span>
       </div>
       <div className="desktop-filters">
-        <Filters setFilteredItems={setFilteredItems} cities={cities}/>
+        <Filters setFilteredItems={setFilteredItems} cities={cities} />
       </div>
       <div className="carousel-header">
         <h3 className="carousel-count">
