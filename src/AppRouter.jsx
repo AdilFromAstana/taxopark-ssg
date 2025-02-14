@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./pages/Main";
 import AdminLayout from "./layouts/AdminLayout";
@@ -20,8 +20,9 @@ const AppRouter = () => {
 
                 {/* Админка с Sidebar */}
                 <Route path="/admin" element={<AdminLayout />}>
-                    <Route path="forms" element={<Forms />} />
+                    <Route index element={<Navigate to="parks" replace />} /> {/* ✅ Редирект */}
                     <Route path="parks" element={<Parks />} />
+                    <Route path="forms" element={<Forms />} />
                     <Route path="promotions" element={<Promotions />} />
                 </Route>
             </Routes>

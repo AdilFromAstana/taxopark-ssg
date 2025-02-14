@@ -4,15 +4,14 @@ import { Outlet, useNavigate } from "react-router-dom";
 
 const AdminLayout = () => {
     const nav = useNavigate();
-
     const items = [
-        {
-            key: 'forms',
-            label: 'Заявки',
-        },
         {
             key: 'parks',
             label: 'Таксопарки',
+        },
+        {
+            key: 'forms',
+            label: 'Заявки',
         },
         {
             key: 'promotions',

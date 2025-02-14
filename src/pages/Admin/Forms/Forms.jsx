@@ -1,10 +1,21 @@
-import { Table, Input, Button, Modal } from "antd";
+import { Table, Input, Button, DatePicker, Tag } from "antd";
 import axios from "axios";
 import { useEffect, useState, useCallback } from "react";
 import CreateFormModal from "./CreateFormModal";
 import EditFormModal from "./EditFormModal";
+import moment from "moment";
 
+const { RangePicker } = DatePicker;
 const API_URL = import.meta.env.VITE_API_URL;
+
+const tagColor = {
+    "taxiPark": "green",
+    "consultation": "blue"
+}
+const tagTitle = {
+    "taxiPark": "Таксопарк",
+    "consultation": "Консультация"
+}
 
 const Forms = () => {
     const [data, setData] = useState([]);
@@ -27,6 +38,7 @@ const Forms = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const getData = async (page = 1, pageSize = 10, sortField = null, sortOrder = null, filters = {}) => {
+        console.log(page, pageSize, sortField, sortOrder, filters)
         try {
             setLoading(true);
             const response = await axios.get(`${API_URL}/forms`, {
@@ -35,6 +47,10 @@ const Forms = () => {
                     limit: pageSize,
                     sortField,
                     sortOrder,
+                    filterStartDate: filters.createdAtRange?.[0] || null,
+                    filterEndDate: filters.createdAtRange?.[1] || null,
+                    selectedParks: filters.selectedParks?.length ? filters.selectedParks.join(",") : null, // ✅ Парки передаем в виде строки
+                    filterName: filters.name || "",
                     ...filters,
                 },
             });
@@ -52,7 +68,6 @@ const Forms = () => {
             setLoading(false);
         }
     };
-
     useEffect(() => {
         getData(pagination.current, pagination.pageSize, sorter.field, sorter.order, searchFilters);
     }, []);
@@ -92,6 +107,18 @@ const Forms = () => {
         getData(pagination.current, pagination.pageSize, sortField, sortOrder, searchFilters);
     };
 
+    const handleDateRangeChange = (dates) => {
+        setSearchFilters((prev) => ({
+            ...prev,
+            createdAtRange: dates ? dates.map((date) => date.format("YYYY-MM-DD")) : [],
+        }));
+
+        getData(1, pagination.pageSize, sorter.field, sorter.order, {
+            ...searchFilters,
+            createdAtRange: dates ? dates.map((date) => date.format("YYYY-MM-DD")) : [],
+        });
+    };
+
     const columns = [
         {
             title: "ФИО",
@@ -110,10 +137,23 @@ const Forms = () => {
             ),
         },
         {
+            title: "Тип заявки",
+            dataIndex: "formType",
+            key: "formType",
+            sorter: true,
+            render: (record) => {
+                const title = tagTitle[record]
+                return <Tag color={tagColor[record]}>{title}</Tag>
+            }
+        },
+        {
             title: "Таксопарк",
-            dataIndex: ["Park", "title"],
+            dataIndex: "parkId",
             key: "parkId",
             sorter: true,
+            render: (_, record) => {
+                return record?.Park?.title ?? "-"
+            }
         },
         {
             title: "Номер",
@@ -132,25 +172,46 @@ const Forms = () => {
             ),
         },
         {
-            title: "Действия",
-            key: "actions",
-            render: (record) => (
-                <Button type="link" onClick={() => {
-                    setSelectedRecord(record);
-                    setIsEditModalOpen(true);
-                }}>
-                    Редактировать
-                </Button>
+            title: "Создано",
+            dataIndex: "createdAt",
+            key: "createdAt",
+            render: (record) => moment(record).format('DD.MM.YYYY HH:mm:ss'),
+            sorter: true,
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 12, minWidth: 250 }}>
+                    <RangePicker
+                        value={selectedKeys[0] ? [moment(selectedKeys[0][0]), moment(selectedKeys[0][1])] : []}
+                        onChange={(dates) => setSelectedKeys(dates ? [[dates[0].format("YYYY-MM-DD"), dates[1].format("YYYY-MM-DD")]] : [])}
+                        style={{ marginBottom: 8 }}
+                    />
+                    <div style={{ display: "flex", gap: 5 }}>
+                        <Button type="primary" onClick={() => { confirm(); handleDateRangeChange(selectedKeys[0]); }} size="small">
+                            Применить
+                        </Button>
+                        <Button onClick={() => { clearFilters(); handleDateRangeChange([]); }} size="small">
+                            Сбросить
+                        </Button>
+                    </div>
+                </div>
             ),
+            onFilter: (value, record) => {
+                const recordDate = moment(record.createdAt).format("YYYY-MM-DD");
+                return moment(recordDate).isBetween(value[0], value[1], undefined, "[]");
+            }
         },
     ];
 
     return (
         <div style={{ padding: "16px" }}>
-            <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
-                <h2 style={{ margin: 0 }}>Заявки</h2>
+            <div style={{ display: "flex", justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
+                    <h2 style={{ margin: 0 }}>Заявки</h2>
+                    <Button type="primary" onClick={() => setIsCreateModalOpen(true)}>
+                        Добавить запись
+                    </Button>
+                </div>
                 <Button type="primary" onClick={() => setIsCreateModalOpen(true)}>
-                    Добавить запись
+                    Скачать в Excel
                 </Button>
             </div>
             <Table
@@ -158,7 +219,13 @@ const Forms = () => {
                 dataSource={data}
                 loading={loading}
                 pagination={{ current: pagination.current, pageSize: pagination.pageSize, total: pagination.total, showSizeChanger: true }}
-                rowKey={(record) => record.id}
+                onRow={(record) => ({
+                    onClick: () => {
+                        console.log("record: ", record);
+                        setSelectedRecord(record);
+                        setIsEditModalOpen(true);
+                    }
+                })}
                 onChange={handleTableChange}
             />
 

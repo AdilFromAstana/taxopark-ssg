@@ -202,10 +202,7 @@ const EditFormModal = ({ open, onClose, record, refreshData }) => {
                     <h3>История изменений статуса</h3>
                     <Timeline>
                         {history.map((item) => {
-                            console.log("statuses[record?.formType]: ", statuses[record?.formType])
-                            console.log("[record?.formType]: ", record?.formType)
                             const newStatus = statuses[record?.formType]?.find((s) => s.code === item.newStatusCode);
-                            console.log("newStatus: ", newStatus)
                             return (
                                 <Timeline.Item key={item.id}>
                                     {newStatus ? newStatus.title : item.newStatusCode} ({new Date(item.createdAt).toLocaleString()})
