@@ -13,14 +13,14 @@ const AppRouter = () => {
             <Routes>
                 {/* Главная страница с Header */}
                 <Route path="/" element={<MainLayout />}>
-                    <Route index element={<Navigate to="/" replace />} /> {/* ✅ Редирект */}
-                    <Route index element={<HomePage />} />
+                    <Route path="/" index element={<HomePage />} />
+                    <Route index element={<Navigate to="/" replace />} />
                     <Route path="promotions" element={<PromotionsPage />} />
                 </Route>
 
                 {/* Админка с Sidebar */}
                 <Route path="/admin" element={<AdminLayout />}>
-                    <Route index element={<Navigate to="parks" replace />} /> {/* ✅ Редирект */}
+                    <Route index element={<Navigate to="parks" replace />} />
                     <Route path="parks" element={<Parks />} />
                     <Route path="forms" element={<Forms />} />
                     <Route path="promotions" element={<Promotions />} />

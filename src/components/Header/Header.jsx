@@ -44,7 +44,7 @@ function Header() {
         placement="right"
         closable={true}
         onClose={() => setIsDrawerOpen(false)}
-        visible={isDrawerOpen}
+        open={isDrawerOpen}
       >
         <nav className="header-mobile-nav">
           <a href="/" className="header-mobile-link" onClick={() => setIsDrawerOpen(false)}>🏠 Главная</a>

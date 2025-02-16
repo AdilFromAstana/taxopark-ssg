@@ -43,7 +43,6 @@ const FrontSide = memo(({ item, toggleFlip, openModal }) => {
       className="z-[1] absolute w-full h-full bg-white flex flex-col items-center cursor-pointer rounded-2xl"
       style={{
         backfaceVisibility: "hidden",
-        boxShadow: "0 4px 8px #0000004d",
       }}
       onClick={toggleFlip}
     >

@@ -54,7 +54,7 @@ const Filters = memo(
           `${API_URL}/parks?page=1&limit=1000&cityId=${selectedCityId}&parkPromotions=${parkPromotions}`
         );
         const result = await response.json();
-        const updatedParks = result.parks.map((park) => {
+        const updatedParks = result.data.map((park) => {
           return {
             ...park,
             approximateIncome:

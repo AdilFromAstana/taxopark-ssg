@@ -314,7 +314,7 @@
   }
 }
 
-@media (max-width: 430px) {
+@media (max-width: 480px) {
   .carousel-card-image {
     height: 140px;
   }

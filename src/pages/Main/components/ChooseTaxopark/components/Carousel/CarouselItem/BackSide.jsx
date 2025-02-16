@@ -81,7 +81,6 @@ const BackSide = memo(
         style={{
           transform: "rotateY(180deg)",
           backfaceVisibility: "hidden",
-          boxShadow: "0 4px 8px #0000004d",
         }}
       >
         <h3 className="font-semibold text-lg mb-4">{item.title}</h3>

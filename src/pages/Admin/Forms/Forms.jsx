@@ -221,7 +221,6 @@ const Forms = () => {
                 pagination={{ current: pagination.current, pageSize: pagination.pageSize, total: pagination.total, showSizeChanger: true }}
                 onRow={(record) => ({
                     onClick: () => {
-                        console.log("record: ", record);
                         setSelectedRecord(record);
                         setIsEditModalOpen(true);
                     }

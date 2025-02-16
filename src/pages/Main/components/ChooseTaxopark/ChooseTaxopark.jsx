@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import Carousel from "./components/Carousel";
+import Carousel from "./components/Carousel/Carousel";
 import Filters from "./components/Filters";
 import { Button, Drawer } from "antd";
 import "./ChooseTaxopark.css";
+import TestCarousel from "./components/TestCarousel/TestCarousel";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -10,7 +11,6 @@ const ChooseTaxopark = () => {
   const [filteredItems, setFilteredItems] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  console.log("isLoading: ", isLoading);
   const [cities, setCities] = useState([]);
 
   const fetchData = async () => {
@@ -41,7 +41,7 @@ const ChooseTaxopark = () => {
         </span>
       </div>
       <div className="desktop-filters">
-        <Filters setFilteredItems={setFilteredItems} cities={cities} />
+        <Filters setFilteredItems={setFilteredItems} cities={cities} setIsLoading={setIsLoading} />
       </div>
       <div className="carousel-header">
         <h3 className="carousel-count">
@@ -55,14 +55,15 @@ const ChooseTaxopark = () => {
           Расчитать доход
         </Button>
       </div>
-      <Carousel items={filteredItems} cities={cities} />
+      {/* <Carousel items={filteredItems} isLoading={isLoading} /> */}
+      <TestCarousel products={filteredItems} isLoading={isLoading} />
       <Drawer
         open={isDrawerOpen}
         title="Расчитать доход"
         onClose={() => setIsDrawerOpen(false)}
         className="carousel-drawer"
       >
-        <Filters setFilteredItems={setFilteredItems} cities={cities} />
+        <Filters setFilteredItems={setFilteredItems} cities={cities} setIsLoading={setIsLoading} />
         <Button
           className="drawer-apply-button"
           size="large"

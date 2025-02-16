@@ -1,11 +1,15 @@
 import { HelmetProvider } from "react-helmet-async";
 import "./App.css";
 import AppRouter from "./AppRouter";
+import { QueryClient, QueryClientProvider } from "react-query";
 
 function App() {
+  const queryClient = new QueryClient();
   return (
     <HelmetProvider>
-      <AppRouter />
+      <QueryClientProvider client={queryClient}>
+        <AppRouter />
+      </QueryClientProvider>
     </HelmetProvider>
   );
 }
