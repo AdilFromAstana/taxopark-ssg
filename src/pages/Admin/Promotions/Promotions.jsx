@@ -1,8 +1,8 @@
 import { Table, Input, Button, Modal } from "antd";
 import axios from "axios";
 import { useEffect, useState, useCallback } from "react";
-import CreateFormModal from "./CreateParkModal";
-import EditFormModal from "./EditParkModal";
+import CreatePromotionModal from "./CreatePromotionModal";
+import EditPromotionModal from "./EditPromotionModal";
 import moment from "moment";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -130,10 +130,10 @@ const Promotions = () => {
                 rowKey={(record) => record.id}
             />
 
-            <CreateFormModal open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} refreshData={getData} />
+            <CreatePromotionModal open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} refreshData={getData} />
             {
                 selectedRecord && (
-                    <EditFormModal open={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} record={selectedRecord} refreshData={getData} />
+                    <EditPromotionModal open={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} record={selectedRecord} refreshData={getData} />
                 )
             }
         </div >

@@ -9,19 +9,11 @@ import { useQuery, useQueryClient } from "react-query";
 const API_URL = import.meta.env.VITE_API_URL;
 const { RangePicker } = DatePicker;
 
-const fetchParks = async ({ queryKey }) => {
-    const [_key, { page, pageSize, sortField, sortOrder, filters }] = queryKey;
+const fetchParks = async ({ page, pageSize, sortField, sortOrder, filters }) => {
     const response = await axios.get(`${API_URL}/parks`, {
         params: { page, limit: pageSize, sortField, sortOrder, ...filters },
     });
-    console.log("response.data: ", response.data)
-    console.log("response.data.total: ", response.data.total)
-    return {
-        data: response.data.data,
-        page: response.data.page,
-        total: response.data.total,
-        totalPages: response.data.totalPages,
-    };
+    return response.data;
 };
 
 const fetchCities = async () => {
@@ -39,7 +31,6 @@ const debounce = (func, delay) => {
     };
 };
 
-
 const Parks = memo(() => {
     const queryClient = useQueryClient();
     const [pagination, setPagination] = useState({
@@ -56,14 +47,39 @@ const Parks = memo(() => {
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    const { data: parksData, totalPages, total, page, isLoading } = useQuery([
-        "parks",
-        { page: pagination.current, pageSize: pagination.pageSize, sortField: sorter.field, sortOrder: sorter.order, filters: searchFilters }],
-        fetchParks,
-        { keepPreviousData: true, staleTime: 5000 } // ✅ Добавлено кеширование на 5 секунд
-    );
+    const {
+        data: parksData,
+        isLoading,
+    } = useQuery({
+        queryKey: ["parks", {
+            page: pagination.current,
+            pageSize: pagination.pageSize,
+            sortField: sorter.field,
+            sortOrder: sorter.order,
+            filters: searchFilters
+        }],
+        queryFn: async ({ queryKey }) => {
+            const [, params] = queryKey;
+            console.log("Запрос с параметрами: ", params);
 
-    const { data: cities = [] } = useQuery("cities", fetchCities);
+            const cachedData = queryClient.getQueryData(["parks", params]);
+            if (cachedData) {
+                return cachedData;
+            }
+
+            return fetchParks(params);
+        },
+        keepPreviousData: true,
+        staleTime: 5 * 60 * 1000,
+        cacheTime: 10 * 60 * 1000,
+    });
+
+    const { data: cities = [] } = useQuery({
+        queryKey: ["cities"],
+        queryFn: fetchCities,
+        staleTime: 60 * 1000,
+        cacheTime: 5 * 60 * 1000,
+    });
 
     const handleTableChange = (pagination, _filters, sorter) => {
         setPagination({ ...pagination });
@@ -167,7 +183,6 @@ const Parks = memo(() => {
         },
     ];
 
-    console.log("total: ", total)
     console.log("parksData: ", parksData)
 
     return (
@@ -182,7 +197,7 @@ const Parks = memo(() => {
                 columns={columns}
                 dataSource={parksData?.data || []}
                 loading={isLoading}
-                pagination={{ current: pagination.current, pageSize: pagination.pageSize, total: parksData.total, showSizeChanger: true }}
+                pagination={{ current: pagination.current, pageSize: pagination.pageSize, total: parksData?.total, showSizeChanger: true }}
                 onRow={(record) => ({
                     onClick: () => {
                         setSelectedRecord(record);

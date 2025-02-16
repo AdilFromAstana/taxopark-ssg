@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import CreateFormModal from "./CreateFormModal";
 import EditFormModal from "./EditFormModal";
 import moment from "moment";
+import { useQuery, useQueryClient } from "react-query";
 
 const { RangePicker } = DatePicker;
 const API_URL = import.meta.env.VITE_API_URL;
@@ -17,9 +18,15 @@ const tagTitle = {
     "consultation": "Консультация"
 }
 
+const fetchForms = async ({ page, pageSize, sortField, sortOrder, filters }) => {
+    const response = await axios.get(`${API_URL}/forms`, {
+        params: { page, limit: pageSize, sortField, sortOrder, ...filters },
+    });
+    return response.data;
+};
+
 const Forms = () => {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const queryClient = useQueryClient();
     const [pagination, setPagination] = useState({
         current: 1,
         pageSize: 10,
@@ -37,40 +44,32 @@ const Forms = () => {
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    const getData = async (page = 1, pageSize = 10, sortField = null, sortOrder = null, filters = {}) => {
-        console.log(page, pageSize, sortField, sortOrder, filters)
-        try {
-            setLoading(true);
-            const response = await axios.get(`${API_URL}/forms`, {
-                params: {
-                    page,
-                    limit: pageSize,
-                    sortField,
-                    sortOrder,
-                    filterStartDate: filters.createdAtRange?.[0] || null,
-                    filterEndDate: filters.createdAtRange?.[1] || null,
-                    selectedParks: filters.selectedParks?.length ? filters.selectedParks.join(",") : null, // ✅ Парки передаем в виде строки
-                    filterName: filters.name || "",
-                    ...filters,
-                },
-            });
+    const {
+        data: formsData,
+        isLoading,
+    } = useQuery({
+        queryKey: ["forms", {
+            page: pagination.current,
+            pageSize: pagination.pageSize,
+            sortField: sorter.field,
+            sortOrder: sorter.order,
+            filters: searchFilters
+        }],
+        queryFn: async ({ queryKey }) => {
+            const [, params] = queryKey;
+            console.log("Запрос с параметрами: ", params);
 
-            setData(response.data.data);
-            setPagination((prev) => ({
-                ...prev,
-                current: page,
-                pageSize,
-                total: response.data.total || 0,
-            }));
-        } catch (error) {
-            console.error("Ошибка при загрузке данных:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-    useEffect(() => {
-        getData(pagination.current, pagination.pageSize, sorter.field, sorter.order, searchFilters);
-    }, []);
+            const cachedData = queryClient.getQueryData(["forms", params]);
+            if (cachedData) {
+                return cachedData;
+            }
+
+            return fetchForms(params);
+        },
+        keepPreviousData: true,
+        staleTime: 5 * 60 * 1000,
+        cacheTime: 10 * 60 * 1000,
+    });
 
     const debounce = (func, delay) => {
         let timer;
@@ -216,9 +215,9 @@ const Forms = () => {
             </div>
             <Table
                 columns={columns}
-                dataSource={data}
-                loading={loading}
-                pagination={{ current: pagination.current, pageSize: pagination.pageSize, total: pagination.total, showSizeChanger: true }}
+                dataSource={formsData?.data || []}
+                loading={isLoading}
+                pagination={{ current: pagination.current, pageSize: pagination.pageSize, total: formsData?.total, showSizeChanger: true }}
                 onRow={(record) => ({
                     onClick: () => {
                         setSelectedRecord(record);
@@ -228,10 +227,10 @@ const Forms = () => {
                 onChange={handleTableChange}
             />
 
-            <CreateFormModal open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} refreshData={getData} />
+            <CreateFormModal open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
             {
                 selectedRecord && (
-                    <EditFormModal open={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} record={selectedRecord} refreshData={getData} />
+                    <EditFormModal open={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} record={selectedRecord} />
                 )
             }
         </div >

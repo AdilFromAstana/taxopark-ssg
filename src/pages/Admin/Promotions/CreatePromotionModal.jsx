@@ -4,7 +4,7 @@ import { useState } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const CreateParkModal = ({ open, onClose, refreshData }) => {
+const CreatePromotionModal = ({ open, onClose, refreshData }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
 
@@ -39,4 +39,4 @@ const CreateParkModal = ({ open, onClose, refreshData }) => {
     );
 };
 
-export default CreateParkModal;
+export default CreatePromotionModal;
