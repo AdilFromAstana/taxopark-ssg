@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 // import { formatNumber } from "@/app/common/common";
 import { memo } from "react";
 import { FaLocationDot } from "react-icons/fa6";

@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Card, Button } from "antd";
 import { IoIosStar } from "react-icons/io";
 import {
@@ -23,18 +23,16 @@ function formatNumber(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
-const CarouselItem = ({ item, index, setCarouselDisabled, carouselItemWidth }) => {
+const CarouselItem = memo(({ item, index, carouselItemWidth }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [flipped, setFlipped] = useState(false);
 
   const openModal = (event) => {
     event.stopPropagation();
-    setCarouselDisabled(true);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
-    setCarouselDisabled(false);
     setIsModalOpen(false);
   };
 
@@ -43,7 +41,10 @@ const CarouselItem = ({ item, index, setCarouselDisabled, carouselItemWidth }) =
   };
 
   return (
-    <div className="related-carousel-item" style={{ width: `${carouselItemWidth}px` }}>
+    <div
+      className="related-carousel-item"
+      style={{ width: `${carouselItemWidth}px` }}
+    >
       <div className="flip-card">
         <div className={`flip-card-inner ${flipped ? "flipped" : ""}`}>
           <div className="flip-card-front">
@@ -248,9 +249,15 @@ const CarouselItem = ({ item, index, setCarouselDisabled, carouselItemWidth }) =
           </div>
         </div>
       </div>
-      <ApplicationModal isOpen={isModalOpen} onClose={closeModal} />
+      <ApplicationModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        parkId={item.id}
+      />
     </div>
   );
-};
+});
+
+CarouselItem.displayName = "CarouselItem";
 
 export default CarouselItem;

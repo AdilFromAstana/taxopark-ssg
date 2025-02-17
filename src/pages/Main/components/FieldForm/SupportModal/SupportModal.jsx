@@ -4,7 +4,6 @@ import { Modal, Button, Input, message } from "antd";
 import "react-phone-input-2/lib/style.css";
 import moment from "moment";
 
-// 📌 Компонент для OTP ввода
 const OTPInput = ({ value, onChange }) => (
   <Input.OTP
     style={{ width: "100%", height: "50px" }}
@@ -16,7 +15,6 @@ const OTPInput = ({ value, onChange }) => (
   />
 );
 
-// 📌 Компонент проверки OTP
 const OtpVerification = ({ phone, setStep, onClose, resendTime }) => {
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("1234");

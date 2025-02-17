@@ -1,20 +1,11 @@
+/* eslint-disable react/prop-types */
 import { Modal, Form, Input, Button, Select, Timeline, message } from "antd";
 import axios from "axios";
 import { useState, useEffect } from "react";
+import "./style.css";
 
 const statuses = {
   consultation: [
-    {
-      code: "pending",
-      title: "Ожидание обработки",
-      next: [
-        {
-          code: "registered",
-          title: "Зарегистрирован",
-          requires_reason: false,
-        },
-      ],
-    },
     {
       code: "registered",
       title: "Зарегистрирован",
@@ -92,7 +83,7 @@ const statuses = {
   ],
   taxiPark: [
     {
-      code: "pending",
+      code: "registered",
       title: "Ожидание обработки",
       next: [
         {
@@ -142,19 +133,15 @@ const statuses = {
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const EditFormModal = ({ open, onClose, record, refreshData }) => {
+const EditFormModal = ({ open, onClose, record }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [statusOptions, setStatusOptions] = useState([]);
   const [requiresReason, setRequiresReason] = useState(false);
   const [history, setHistory] = useState([]);
-
-  useEffect(() => {
-    if (record?.id) {
-      fetchStatusHistory();
-    }
-  }, [record]);
+  const status = Form.useWatch("status", form);
+  const reason = Form.useWatch("reason", form);
 
   const fetchStatusHistory = async () => {
     try {
@@ -167,7 +154,12 @@ const EditFormModal = ({ open, onClose, record, refreshData }) => {
     }
   };
 
-  // Загружаем доступные статусы для текущего статуса
+  useEffect(() => {
+    if (record?.id) {
+      fetchStatusHistory();
+    }
+  }, [record?.id]);
+
   useEffect(() => {
     if (record?.statusCode) {
       const currentStatus = statuses.taxiPark.find(
@@ -179,40 +171,57 @@ const EditFormModal = ({ open, onClose, record, refreshData }) => {
     }
   }, [record?.statusCode]);
 
-  // Проверяем, нужен ли ввод причины
   const handleStatusChange = (value) => {
     const selectedStatus = statusOptions.find((s) => s.code === value);
     setRequiresReason(selectedStatus?.requires_reason || false);
   };
 
-  const handleUpdate = async (values) => {
+  const handleUpdate = async () => {
+    const data = form.getFieldsValue();
     try {
       setLoading(true);
-
-      const payload = { newStatusCode: values.status };
-      if (requiresReason) {
-        if (!values.reason) {
-          message.error("Введите причину смены статуса!");
-          return;
-        }
-        payload.reason = values.reason;
+      if (requiresReason && !data.reason) {
+        message.error("❌ Введите причину смены статуса!");
+        return;
       }
+      const payload = { newStatusCode: data.status };
+      if (requiresReason) {
+        payload.reason = data.reason;
+      }
+      const response = await axios.put(
+        `${API_URL}/forms/${record.id}/status`,
+        payload
+      );
 
-      await axios.put(`${API_URL}/forms/${record.id}/status`, payload);
-      refreshData();
-      handleClose();
+      console.log("✅ Статус успешно обновлен:", response.data);
+      message.success("🎉 Статус успешно обновлен!");
+
+      handleClose(); // Закрываем модальное окно
     } catch (error) {
-      console.error("Ошибка при обновлении статуса:", error);
+      console.error("❌ Ошибка при обновлении статуса:", error);
+      message.error(
+        `Ошибка обновления: ${
+          error.response?.data?.message || "Неизвестная ошибка"
+        }`
+      );
     } finally {
       setLoading(false);
+      console.log("🔽 Завершение обновления статуса.");
     }
   };
 
   const handleClose = () => {
-    form.resetFields(); // ✅ Сбрасываем поля формы
-    setIsEditMode(false); // ✅ Выключаем режим редактирования
-    onClose(); // ✅ Закрываем модальное окно
+    form.resetFields();
+    setIsEditMode(false);
+    onClose();
   };
+
+  const resetStatusAndReason = () => {
+    form.setFieldValue("status", undefined);
+    form.setFieldValue("reason", undefined);
+  };
+
+  const isUpdateButtonDisabled = requiresReason ? !(status && reason) : !status;
 
   return (
     <Modal
@@ -220,6 +229,7 @@ const EditFormModal = ({ open, onClose, record, refreshData }) => {
       onCancel={handleClose}
       title="Просмотр и редактирование"
       footer={null}
+      maskClosable={false}
     >
       <Form
         form={form}
@@ -228,45 +238,31 @@ const EditFormModal = ({ open, onClose, record, refreshData }) => {
         onFinish={handleUpdate}
       >
         <Form.Item name="name" label="ФИО">
-          <Input disabled={!isEditMode} />
+          <Input disabled />
         </Form.Item>
         <Form.Item name="phoneNumber" label="Номер">
-          <Input disabled={!isEditMode} />
+          <Input disabled />
         </Form.Item>
-        <Form.Item name="status" label="Статус">
-          <Select disabled={!isEditMode} onChange={handleStatusChange}>
-            {statusOptions.map((status) => (
-              <Select.Option key={status.code} value={status.code}>
-                {status.title}
-              </Select.Option>
-            ))}
-          </Select>
+        <Form.Item name="formType" label="Тип заявки">
+          <Input disabled />
         </Form.Item>
-
-        {/* Поле для причины, если требуется */}
-        {requiresReason && (
-          <Form.Item
-            name="reason"
-            label="Причина смены статуса"
-            rules={[{ required: true, message: "Введите причину!" }]}
-          >
-            <Input.TextArea
-              rows={3}
-              placeholder="Введите причину смены статуса"
-            />
+        {record.parkId && (
+          <Form.Item name={["Park", "title"]} label="Таксопарк">
+            <Input disabled />
           </Form.Item>
         )}
-
-        {/* История изменений статуса */}
-        <div style={{ marginTop: "16px" }}>
-          <h3>История изменений статуса</h3>
-          <Timeline>
-            {history.map((item) => {
+        <Form.Item label="История изменений статуса">
+          <Timeline style={{ marginTop: 8 }}>
+            {history.map((item, index) => {
               const newStatus = statuses[record?.formType]?.find(
                 (s) => s.code === item.newStatusCode
               );
+              const isLastItem = index === history.length - 1;
               return (
-                <Timeline.Item key={item.id}>
+                <Timeline.Item
+                  key={item.id}
+                  className={isLastItem ? "blinking" : ""}
+                >
                   {newStatus ? newStatus.title : item.newStatusCode} (
                   {new Date(item.createdAt).toLocaleString()})
                   {item.reason && (
@@ -276,7 +272,33 @@ const EditFormModal = ({ open, onClose, record, refreshData }) => {
               );
             })}
           </Timeline>
-        </div>
+        </Form.Item>
+        <Form.Item name="status" label="Сменить статус на">
+          <Select
+            disabled={!isEditMode}
+            onChange={handleStatusChange}
+            allowClear
+          >
+            {statusOptions.map((status) => (
+              <Select.Option key={status.code} value={status.code}>
+                {status.title}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+        {requiresReason && (
+          <Form.Item
+            name="reason"
+            label="Причина смены статуса"
+            rules={[{ required: true, message: "Введите причину!" }]}
+          >
+            <Input.TextArea
+              disabled={!isEditMode}
+              rows={3}
+              placeholder="Введите причину смены статуса"
+            />
+          </Form.Item>
+        )}
 
         <div
           style={{
@@ -287,14 +309,28 @@ const EditFormModal = ({ open, onClose, record, refreshData }) => {
         >
           {isEditMode ? (
             <>
-              <Button onClick={() => setIsEditMode(false)}>Отмена</Button>
-              <Button type="primary" htmlType="submit" loading={loading}>
+              <Button
+                type="primary"
+                onClick={handleUpdate}
+                loading={loading}
+                disabled={isUpdateButtonDisabled}
+              >
                 Сохранить
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsEditMode(false);
+                  resetStatusAndReason();
+                  handleStatusChange(undefined);
+                }}
+                danger
+              >
+                Отмена
               </Button>
             </>
           ) : (
             <Button type="primary" onClick={() => setIsEditMode(true)}>
-              Редактировать
+              Обновить статус
             </Button>
           )}
         </div>
