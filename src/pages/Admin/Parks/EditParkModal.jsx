@@ -12,20 +12,52 @@ import {
   Radio,
   Select,
   message,
+  Upload,
+  Image,
 } from "antd";
 import axios from "axios";
 import moment from "moment";
 import { memo, useEffect, useState } from "react";
 const { RangePicker } = TimePicker;
+import { UploadOutlined } from "@ant-design/icons";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 const EditParkModal = memo(
-  ({ open, onClose, record, cities = [], queryClient }) => {
+  ({ open, onClose, record, cities = [], queryClient, queryData, setSelectedRecord }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [radioValues, setRadioValues] = useState({});
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState(false);
+
+    const handleImageUpload = async (info) => {
+      if (info.file.status === "uploading") return;
+
+      if (info.file.status === "done") {
+        message.success("Файл успешно загружен!");
+        queryClient.setQueryData(["parks", queryData], (oldData) => {
+          if (!oldData || !oldData.data) return oldData;
+
+          return {
+            ...oldData,
+            data: oldData.data.map(item => {
+              if (item.id === record.id) {
+                setSelectedRecord({ ...item, imageUrl: info.file.response })
+                return { ...item, imageUrl: info.file.response }
+              } else {
+                return item
+              }
+            }
+            ),
+          };
+        });
+
+      } else if (info.file.status === "error") {
+        message.error("Ошибка загрузки файла");
+      }
+    };
 
     const handleClose = () => {
       form.resetFields();
@@ -39,9 +71,9 @@ const EditParkModal = memo(
         supportWorkTime:
           record?.supportAlwaysAvailable === false
             ? [
-                moment(record?.supportStartWorkTime, "HH:mm"),
-                moment(record?.supportEndWorkTime, "HH:mm"),
-              ]
+              moment(record?.supportStartWorkTime, "HH:mm"),
+              moment(record?.supportEndWorkTime, "HH:mm"),
+            ]
             : [],
       });
     };
@@ -53,9 +85,9 @@ const EditParkModal = memo(
           supportWorkTime:
             record?.supportStartWorkTime && record?.supportEndWorkTime
               ? [
-                  moment(record.supportStartWorkTime, "HH:mm"),
-                  moment(record.supportEndWorkTime, "HH:mm"),
-                ]
+                moment(record.supportStartWorkTime, "HH:mm"),
+                moment(record.supportEndWorkTime, "HH:mm"),
+              ]
               : [],
         });
         setRadioValues({
@@ -69,8 +101,23 @@ const EditParkModal = memo(
       const data = form.getFieldsValue();
       try {
         setLoading(true);
-        await axios.put(`${API_URL}/parks/${record.id}`, data);
-        queryClient.refetchQueries("parks");
+        const updatedData = await axios.put(`${API_URL}/parks/update/${record.id}`, data);
+        queryClient.setQueryData(["parks", queryData], (oldData) => {
+          if (!oldData || !oldData.data) return oldData;
+          return {
+            ...oldData,
+            data: oldData.data.map(item => {
+              if (item.id === record.id) {
+                setSelectedRecord(updatedData.data)
+                form.setFieldsValue(updatedData.data)
+                return updatedData.data
+              } else {
+                return item
+              }
+            }
+            ),
+          };
+        });
         message.success("Запись успешно обновлена!");
         setIsEditMode((prev) => !prev);
         handleClose();
@@ -90,9 +137,6 @@ const EditParkModal = memo(
         return { ...prev, [name]: newValue };
       });
     };
-
-    console.log("record: ", record);
-    console.log("form.getFieldsValue(): ", form.getFieldsValue());
 
     return (
       <Modal
@@ -302,6 +346,81 @@ const EditParkModal = memo(
             </Col>
           </Row>
           <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item
+                name="image"
+                label="Изображение парка"
+                valuePropName="fileList"
+                getValueFromEvent={(e) => e && e.fileList}
+              >
+                <Upload
+                  name="file"
+                  listType="picture-card"
+                  action={`${API_URL}/parks/uploadImage/${form.getFieldValue("id")}`}
+                  onChange={handleImageUpload}
+                  showUploadList={true}
+                  fileList={
+                    record?.imageUrl
+                      ? [{ uid: "1", name: "image", status: "done", url: `${API_URL}/uploads/${record?.imageUrl}` }]
+                      : []
+                  }
+                  onPreview={() => {
+                    setPreviewImage(`${API_URL}/uploads/${record?.imageUrl}`);
+                    setPreviewOpen(true);
+                  }}
+                  onRemove={() => {
+                    Modal.confirm({
+                      title: "Вы действительно хотите удалить изображение?",
+                      content: "Это действие нельзя отменить.",
+                      okText: "Удалить",
+                      cancelText: "Отмена",
+                      onOk: () => {
+                        fetch(`${API_URL}/parks/deleteImage/${record.id}`, {
+                          method: "DELETE",
+                        })
+                          .then((res) => res.json())
+                          .then(() => {
+                            message.success("Изображение удалено");
+                            queryClient.setQueryData(["parks", queryData], (oldData) => {
+                              if (!oldData || !oldData.data) return oldData;
+                              return {
+                                ...oldData,
+                                data: oldData.data.map(item => {
+                                  if (item.id === record.id) {
+                                    setSelectedRecord({ ...item, imageUrl: null })
+                                    return { ...item, imageUrl: null }
+                                  } else {
+                                    return item
+                                  }
+                                }
+                                ),
+                              };
+                            });
+                          })
+                          .catch((error) => {
+                            console.error("Ошибка при удалении изображения:", error);
+                            message.error("Не удалось удалить изображение");
+                          });
+                      },
+                    });
+                    return false; // предотвращаем автоматическое удаление до подтверждения
+                  }}
+                >
+                  {!record?.imageUrl && <UploadOutlined />}
+                </Upload>
+                {record?.imageUrl && (
+                  <Image
+                    wrapperStyle={{ display: "none" }}
+                    preview={{
+                      visible: previewOpen,
+                      onVisibleChange: (visible) => setPreviewOpen(visible),
+                      afterOpenChange: (visible) => !visible && setPreviewImage(""),
+                    }}
+                    src={previewImage}
+                  />
+                )}
+              </Form.Item>
+            </Col>
             <Col span={8}>
               <Form.Item
                 name="supportAlwaysAvailable"

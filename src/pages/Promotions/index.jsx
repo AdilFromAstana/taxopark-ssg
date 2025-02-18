@@ -47,7 +47,7 @@ export default function PromotionsPage() {
       .filter((promo) =>
         showActiveOnly
           ? promo.active &&
-            (!promo.expires || new Date(promo.expires) > new Date())
+          (!promo.expires || new Date(promo.expires) > new Date())
           : true
       )
       .sort(
@@ -84,15 +84,14 @@ export default function PromotionsPage() {
           <Card
             key={promo.id}
             hoverable
-            className={`promotion-card ${
-              !promo.active ||
-              (promo.expires && new Date(promo.expires) < new Date())
+            className={`promotion-card ${!promo.active ||
+                (promo.expires && new Date(promo.expires) < new Date())
                 ? "promotion-inactive"
                 : ""
-            }`}
+              }`}
             cover={
               <img
-                src={promo.image}
+                src={`${API_URL}/uploads/${promo?.imageUrl}`}
                 alt={promo.title}
                 className="promotion-image"
               />

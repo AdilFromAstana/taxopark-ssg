@@ -56,8 +56,6 @@ const Parks = memo(() => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  console.log("selectedRecord: ", selectedRecord);
-
   const { data: parksData, isLoading } = useQuery({
     queryKey: [
       "parks",
@@ -99,28 +97,28 @@ const Parks = memo(() => {
         sorter.order === "ascend"
           ? "asc"
           : sorter.order === "descend"
-          ? "desc"
-          : null,
+            ? "desc"
+            : null,
     });
-    queryClient.invalidateQueries("parks");
+    queryClient.invalidateQueries(["parks"]);
   };
 
   const handleSearchDebounced = useCallback(
     debounce((key, value) => {
       setSearchFilters((prev) => ({ ...prev, [key]: value }));
-      queryClient.invalidateQueries("parks");
+      queryClient.invalidateQueries(["parks"]);
     }, 700),
     []
   );
 
   const handleCityFilterChange = (value) => {
     setSearchFilters((prev) => ({ ...prev, cityId: value }));
-    queryClient.invalidateQueries("parks");
+    queryClient.invalidateQueries(["parks"]);
   };
 
   const handleDateRangeChange = (value) => {
     setSearchFilters((prev) => ({ ...prev, dateRange: value || [] }));
-    queryClient.invalidateQueries("parks");
+    queryClient.invalidateQueries(["parks"]);
   };
 
   const columns = [
@@ -157,16 +155,14 @@ const Parks = memo(() => {
             placeholder="Выберите статус"
             value={selectedKeys[0] ?? undefined} // Устанавливаем выбранное значение
             onChange={(value) => {
-              setSelectedKeys(value !== undefined ? [value] : []); // Устанавливаем ключ
-              handleSearchDebounced("supportAlwaysAvailable", value); // Запускаем фильтр
-              confirm(); // Подтверждаем выбор
+              setSearchFilters((prev) => ({ ...prev, "supportAlwaysAvailable": value }));
+              confirm();
             }}
             allowClear
             onClear={clearFilters}
           >
             <Select.Option value={true}>Да</Select.Option>
             <Select.Option value={false}>Нет</Select.Option>
-            <Select.Option value={null}>Не указано</Select.Option>
           </Select>
         </div>
       ),
@@ -233,11 +229,11 @@ const Parks = memo(() => {
               setSelectedKeys(
                 dates
                   ? [
-                      [
-                        dates[0].format("YYYY-MM-DD"),
-                        dates[1].format("YYYY-MM-DD"),
-                      ],
-                    ]
+                    [
+                      dates[0].format("YYYY-MM-DD"),
+                      dates[1].format("YYYY-MM-DD"),
+                    ],
+                  ]
                   : []
               )
             }
@@ -330,6 +326,14 @@ const Parks = memo(() => {
       />
       {selectedRecord && (
         <EditParkModal
+          queryData={{
+            page: pagination.current,
+            pageSize: pagination.pageSize,
+            sortField: sorter.field,
+            sortOrder: sorter.order,
+            filters: searchFilters,
+          }}
+          setSelectedRecord={setSelectedRecord}
           queryClient={queryClient}
           open={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}

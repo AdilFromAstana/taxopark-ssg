@@ -143,6 +143,8 @@ const EditFormModal = ({ open, onClose, record }) => {
   const status = Form.useWatch("status", form);
   const reason = Form.useWatch("reason", form);
 
+  
+
   const fetchStatusHistory = async () => {
     try {
       const response = await axios.get(
@@ -189,7 +191,7 @@ const EditFormModal = ({ open, onClose, record }) => {
         payload.reason = data.reason;
       }
       const response = await axios.put(
-        `${API_URL}/forms/${record.id}/status`,
+        `${API_URL}/forms/update/${record.id}/status`,
         payload
       );
 
@@ -198,7 +200,6 @@ const EditFormModal = ({ open, onClose, record }) => {
 
       handleClose(); // Закрываем модальное окно
     } catch (error) {
-      console.error("❌ Ошибка при обновлении статуса:", error);
       message.error(
         `Ошибка обновления: ${
           error.response?.data?.message || "Неизвестная ошибка"

@@ -10,29 +10,58 @@ import {
   Row,
   Col,
   message,
+  Upload,
+  Image,
 } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import moment from "moment";
+import { UploadOutlined } from "@ant-design/icons";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const EditPromotionModal = ({ open, onClose, record, parks }) => {
+const EditPromotionModal = ({ open, onClose, record, parks = [], queryClient, queryData, setSelectedRecord }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState(false);
+
+  const handleImageUpload = async (info) => {
+    if (info.file.status === "uploading") return;
+
+    if (info.file.status === "done") {
+      message.success("Файл успешно загружен!");
+      queryClient.setQueryData(["promotions", queryData], (oldData) => {
+        if (!oldData || !oldData.data) return oldData;
+
+        return {
+          ...oldData,
+          data: oldData.data.map(item => {
+            if (item.id === record.id) {
+              setSelectedRecord({ ...item, imageUrl: info.file.response })
+              return { ...item, imageUrl: info.file.response }
+            } else {
+              return item
+            }
+          }
+          ),
+        };
+      });
+
+    } else if (info.file.status === "error") {
+      message.error("Ошибка загрузки файла");
+    }
+  };
 
   useEffect(() => {
-    if (record) {
+    if (open && record) {
       form.setFieldsValue({
-        title: record.title,
-        parkId: record.parkId,
-        description: record.description,
+        ...record,
         expires: record.expires ? moment(record.expires) : null,
-        active: record.active,
       });
     }
-  }, [record, form]);
+  }, [record, open]);
 
   const handleCancel = () => {
     setIsEditMode(false);
@@ -49,28 +78,28 @@ const EditPromotionModal = ({ open, onClose, record, parks }) => {
     const data = form.getFieldsValue();
     try {
       setLoading(true);
-      console.log("🔄 Начало обновления...");
 
-      // let imageUrl = record.imageUrl;
+      const updatedData = await axios.put(`${API_URL}/promotions/update/${record.id}`,
+        data,
+      );
 
-      // if (fileList.length > 0 && fileList[0].originFileObj) {
-      //   console.log("📤 Загрузка файла...");
-      // const formData = new FormData();
-      // formData.append("file", fileList[0].originFileObj);
-
-      // const uploadResponse = await axios.post(`${API_URL}/upload`, formData);
-      // imageUrl = uploadResponse?.data?.url;
-
-      // console.log("✅ Файл загружен:", imageUrl);
-      // }
-
-      console.log("📡 Отправка обновленных данных...");
-      const response = await axios.put(`${API_URL}/promotions/${record.id}`, {
-        ...data,
-        // imageUrl,
+      queryClient.setQueryData(["promotions", queryData], (oldData) => {
+        if (!oldData || !oldData.data) return oldData;
+        return {
+          ...oldData,
+          data: oldData.data.map(item => {
+            if (item.id === record.id) {
+              setSelectedRecord(updatedData.data)
+              form.setFieldsValue(updatedData.data)
+              return updatedData.data
+            } else {
+              return item
+            }
+          }
+          ),
+        };
       });
 
-      console.log("✅ Успешный ответ сервера:", response.data);
       message.success("🎉 Промо-акция успешно обновлена!");
 
       setIsEditMode(false);
@@ -78,8 +107,7 @@ const EditPromotionModal = ({ open, onClose, record, parks }) => {
     } catch (error) {
       console.error("❌ Ошибка при обновлении:", error);
       message.error(
-        `Ошибка при обновлении акции: ${
-          error.response?.data?.message || "Неизвестная ошибка"
+        `Ошибка при обновлении акции: ${error.response?.data?.message || "Неизвестная ошибка"
         }`
       );
     } finally {
@@ -87,6 +115,8 @@ const EditPromotionModal = ({ open, onClose, record, parks }) => {
       console.log("🔽 Завершение обновления.");
     }
   };
+
+  console.log("record?.imageUrl: ", record?.imageUrl)
 
   return (
     <Modal
@@ -157,23 +187,83 @@ const EditPromotionModal = ({ open, onClose, record, parks }) => {
           </Col>
         </Row>
 
-        {/* <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item name="imageUrl" label="Заменить изображение">
+        <Row gutter={16}>
+          <Col span={8}>
+            <Form.Item
+              name="image"
+              label="Изображение парка"
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e && e.fileList}
+            >
               <Upload
-                fileList={fileList}
-                beforeUpload={() => false}
-                onChange={({ fileList }) => setFileList(fileList)}
-                maxCount={1}
-                disabled={!isEditMode}
+                name="file"
+                listType="picture-card"
+                action={`${API_URL}/promotions/uploadImage/${record.id}`}
+                onChange={handleImageUpload}
+                showUploadList={true}
+                fileList={
+                  record?.imageUrl
+                    ? [{ uid: "1", name: "image", status: "done", url: `${API_URL}/uploads/${record?.imageUrl}` }]
+                    : []
+                }
+                onPreview={() => {
+                  setPreviewImage(`${API_URL}/uploads/${record?.imageUrl}`);
+                  setPreviewOpen(true);
+                }}
+                onRemove={() => {
+                  Modal.confirm({
+                    title: "Вы действительно хотите удалить изображение?",
+                    content: "Это действие нельзя отменить.",
+                    okText: "Удалить",
+                    cancelText: "Отмена",
+                    onOk: () => {
+                      fetch(`${API_URL}/promotions/deleteImage/${record.id}`, {
+                        method: "DELETE",
+                      })
+                        .then((res) => res.json())
+                        .then(() => {
+                          message.success("Изображение удалено");
+                          queryClient.setQueryData(["promotions", queryData], (oldData) => {
+                            if (!oldData || !oldData.data) return oldData;
+                            return {
+                              ...oldData,
+                              data: oldData.data.map(item => {
+                                if (item.id === record.id) {
+                                  setSelectedRecord({ ...item, imageUrl: null })
+                                  return { ...item, imageUrl: null }
+                                } else {
+                                  return item
+                                }
+                              }
+                              ),
+                            };
+                          });
+                        })
+                        .catch((error) => {
+                          console.error("Ошибка при удалении изображения:", error);
+                          message.error("Не удалось удалить изображение");
+                        });
+                    },
+                  });
+                  return false; // предотвращаем автоматическое удаление до подтверждения
+                }}
               >
-                <Button icon={<UploadOutlined />} disabled={!isEditMode}>
-                  Выбрать файл
-                </Button>
+                {!record?.imageUrl && <UploadOutlined />}
               </Upload>
+              {record?.imageUrl && (
+                <Image
+                  wrapperStyle={{ display: "none" }}
+                  preview={{
+                    visible: previewOpen,
+                    onVisibleChange: (visible) => setPreviewOpen(visible),
+                    afterOpenChange: (visible) => !visible && setPreviewImage(""),
+                  }}
+                  src={previewImage}
+                />
+              )}
             </Form.Item>
           </Col>
-        </Row> */}
+        </Row>
 
         <div style={{ display: "flex", gap: 10 }}>
           {isEditMode ? (

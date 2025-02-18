@@ -98,8 +98,8 @@ const Promotions = memo(() => {
         sorter.order === "ascend"
           ? "asc"
           : sorter.order === "descend"
-          ? "desc"
-          : null,
+            ? "desc"
+            : null,
     });
     queryClient.invalidateQueries("promotions");
   };
@@ -201,11 +201,11 @@ const Promotions = memo(() => {
               setSelectedKeys(
                 dates
                   ? [
-                      [
-                        dates[0].format("YYYY-MM-DD"),
-                        dates[1].format("YYYY-MM-DD"),
-                      ],
-                    ]
+                    [
+                      dates[0].format("YYYY-MM-DD"),
+                      dates[1].format("YYYY-MM-DD"),
+                    ],
+                  ]
                   : []
               )
             }
@@ -281,6 +281,15 @@ const Promotions = memo(() => {
       />
       {selectedRecord && (
         <EditPromotionModal
+          queryData={{
+            page: pagination.current,
+            pageSize: pagination.pageSize,
+            sortField: sorter.field,
+            sortOrder: sorter.order,
+            filters: searchFilters,
+          }}
+          setSelectedRecord={setSelectedRecord}
+          queryClient={queryClient}
           open={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           record={selectedRecord}

@@ -59,6 +59,7 @@ const Forms = () => {
   const [searchFilters, setSearchFilters] = useState({
     name: "",
     phoneNumber: "",
+    formType: ""
   });
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -108,8 +109,8 @@ const Forms = () => {
   );
 
   const handleParkFilterChange = (value) => {
-    setSearchFilters((prev) => ({ ...prev, cityId: value }));
-    queryClient.invalidateQueries("parks");
+    setSearchFilters((prev) => ({ ...prev, parkId: value }));
+    queryClient.invalidateQueries("forms");
   };
 
   const handleTableChange = (pagination, filters, sorter) => {
@@ -120,8 +121,8 @@ const Forms = () => {
         sorter.order === "ascend"
           ? "asc"
           : sorter.order === "descend"
-          ? "desc"
-          : null,
+            ? "desc"
+            : null,
     });
     queryClient.invalidateQueries("forms");
   };
@@ -157,6 +158,36 @@ const Forms = () => {
       dataIndex: "formType",
       key: "formType",
       sorter: true,
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) => (
+        <div style={{ padding: 8 }}>
+          <Select
+            style={{ width: 200 }}
+            placeholder="Выберите тип заявки"
+            value={selectedKeys[0] ?? undefined} // Устанавливаем выбранное значение
+            onChange={(value) => {
+              setSearchFilters((prev) => ({
+                ...prev,
+                formType: value,
+              }));
+              confirm();
+            }}
+            allowClear
+            onClear={clearFilters}
+          >
+            <Select.Option value="consultation">{tagTitle["consultation"]}</Select.Option>
+            <Select.Option value="taxiPark">{tagTitle["taxiPark"]}</Select.Option>
+          </Select>
+        </div>
+      ),
+      onFilter: (value, record) => {
+        if (value === null) return record.supportAlwaysAvailable === null; // Фильтр по "Не указано"
+        return record.supportAlwaysAvailable === value; // Фильтр по true/false
+      },
       render: (record) => {
         const title = tagTitle[record];
         return <Tag color={tagColor[record]}>{title}</Tag>;
@@ -168,17 +199,20 @@ const Forms = () => {
       key: "parkId",
       render: (_, record) => record.Park?.title || "—",
       sorter: true,
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, }) => (
         <div style={{ padding: 8 }}>
           <Select
             allowClear
             showSearch
             style={{ width: 200 }}
             placeholder="Выберите таксопарк"
-            value={selectedKeys[0]}
+            value={selectedKeys[0] ?? undefined}
+            onClear={clearFilters}
             onChange={(value) => {
-              setSelectedKeys(value ? [value] : []);
-              handleParkFilterChange(value);
+              setSearchFilters((prev) => ({
+                ...prev,
+                parkId: value,
+              }));
               confirm();
             }}
           >
@@ -233,11 +267,11 @@ const Forms = () => {
               setSelectedKeys(
                 dates
                   ? [
-                      [
-                        dates[0].format("YYYY-MM-DD"),
-                        dates[1].format("YYYY-MM-DD"),
-                      ],
-                    ]
+                    [
+                      dates[0].format("YYYY-MM-DD"),
+                      dates[1].format("YYYY-MM-DD"),
+                    ],
+                  ]
                   : []
               )
             }

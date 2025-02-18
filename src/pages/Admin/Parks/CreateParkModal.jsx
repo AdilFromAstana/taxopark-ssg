@@ -26,7 +26,7 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
   const handleSubmit = async (values) => {
     try {
       setLoading(true);
-      await axios.post(`${API_URL}/parks`, values);
+      await axios.post(`${API_URL}/parks/create`, values);
       onClose();
       form.resetFields();
       setRadioValues({});
