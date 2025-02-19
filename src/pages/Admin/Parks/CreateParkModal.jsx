@@ -12,6 +12,7 @@ import {
   Radio,
   Select,
   Flex,
+  message,
 } from "antd";
 import axios from "axios";
 import { useState } from "react";
@@ -27,11 +28,16 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
     try {
       setLoading(true);
       await axios.post(`${API_URL}/parks/create`, values);
+
+      message.success("Запись успешно создана!"); // Уведомление об успехе
+
       onClose();
       form.resetFields();
       setRadioValues({});
     } catch (error) {
       console.error("Ошибка при создании записи:", error);
+
+      message.error("Не удалось создать запись. Попробуйте снова."); // Уведомление об ошибке
     } finally {
       setLoading(false);
     }
@@ -106,8 +112,20 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item name="paymentType" label="Тип оплаты">
-              <InputNumber min={0} style={{ width: "100%" }} />
+            <Form.Item name="parkPromotions" label="Акции и бонусы">
+              <Select
+                maxTagCount={1}
+                mode="multiple"
+                options={[
+                  { label: "Гарантированные бонусы", value: 1 },
+                  { label: "Приветственные бонусы", value: 2 },
+                  { label: "Розыгрыш", value: 3 },
+                  { label: "Бонус за активность", value: 4 },
+                  { label: "Приведи друга", value: 5 },
+                ]}
+                min={0}
+                style={{ width: "100%" }}
+              />
             </Form.Item>
           </Col>
         </Row>

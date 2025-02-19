@@ -5,7 +5,7 @@ import { memo, useEffect, useRef, useState } from "react";
 import "./TestCarousel.css";
 import CarouselItem from "../Carousel/CarouselItem/CarouselItem";
 
-const TestCarousel = memo(({ products, isLoading = true }) => {
+const TestCarousel = memo(({ items, isLoading = true }) => {
   const [carouselItemWidth, setCarouselItemWidth] = useState(0);
   const carouselWrapperRef = useRef(null);
   const carouselListRef = useRef(null);
@@ -96,9 +96,9 @@ const TestCarousel = memo(({ products, isLoading = true }) => {
             ))}
           </div>
         )}
-        {products.length > 0 && (
+        {items.length > 0 && (
           <div ref={carouselListRef} className="ant-list-items">
-            {products.map((item) => {
+            {items.map((item) => {
               return (
                 <CarouselItem
                   key={item.id}

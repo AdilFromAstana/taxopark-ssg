@@ -213,11 +213,21 @@ const EditParkModal = memo(
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="paymentType" label="Тип оплаты">
-                <InputNumber
+              <Form.Item name="parkPromotions" label="Акции и бонусы">
+                <Select
+                  maxTagCount={1}
+                  disabled={!isEditMode}
+                  allowClear
+                  mode="multiple"
+                  options={[
+                    { label: "Гарантированные бонусы", value: 1 },
+                    { label: "Приветственные бонусы", value: 2 },
+                    { label: "Розыгрыш", value: 3 },
+                    { label: "Бонус за активность", value: 4 },
+                    { label: "Приведи друга", value: 5 },
+                  ]}
                   min={0}
                   style={{ width: "100%" }}
-                  disabled={!isEditMode}
                 />
               </Form.Item>
             </Col>

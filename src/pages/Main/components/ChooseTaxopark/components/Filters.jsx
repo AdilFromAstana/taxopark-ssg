@@ -7,6 +7,8 @@ import { FiHeadphones } from "react-icons/fi";
 import { FaCarSide } from "react-icons/fa6";
 import { FaLocationDot } from "react-icons/fa6";
 import { Card, Checkbox, Col, Row, Select, Slider } from "antd";
+import { useQuery } from "react-query";
+import axios from "axios";
 
 const allParkPromotions = [
   { label: "Гарантированные бонусы", value: 1 },
@@ -18,215 +20,139 @@ const allParkPromotions = [
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const Filters = memo(
-  ({ setFilteredItems, setIsLoading, setTotalRecords, cities }) => {
-    const [supportTimeFilters, setSupportTimeFilters] = useState({
-      allDay: false,
-      limited: false,
-    });
+const fetchParks = async (filters) => {
+  const response = await axios.get(`${API_URL}/parks`, { params: filters });
+  return response.data;
+};
 
-    console.log("cities: ", cities)
+const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
+  const [supportTimeFilters, setSupportTimeFilters] = useState({
+    allDay: false,
+    limited: false,
+  });
+  const handleSupportTimeFilters = (filterType) => {
+    setSupportTimeFilters((prevFilters) => ({
+      ...prevFilters,
+      [filterType]: !prevFilters[filterType],
+    }));
+  };
 
-    const handleSupportTimeFilters = (
-      filterType
-    ) => {
-      setSupportTimeFilters((prevFilters) => ({
-        ...prevFilters,
-        [filterType]: !prevFilters[filterType],
+  const [workDays, setWorkDays] = useState(10);
+  const [orderPerDay, setOrderPerDay] = useState(10);
+  const yandexCommission = 7;
+  const [parkPromotions, setParkPromotions] = useState([]);
+  const [selectedCityId, setSelectedCityId] = useState(null);
+  const [isPaymentWithCommission, setIsPaymentWithCommission] = useState(false);
+
+  const { data, isLoading } = useQuery([
+    "parks",
+    { selectedCityId, parkPromotions, isPaymentWithCommission, supportTimeFilters },
+  ], () => fetchParks({
+    limit: 1000,
+    cityId: selectedCityId,
+    parkPromotions: parkPromotions.join(","),
+    isPaymentWithCommission,
+    supportAllDay: supportTimeFilters.allDay,
+    supportLimited: supportTimeFilters.limited,
+  }), {
+    keepPreviousData: true,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (data) {
+      const updatedParks = data.data.map((park) => ({
+        ...park,
+        approximateIncome:
+          workDays * orderPerDay * Number(park.averageCheck) -
+          (yandexCommission + Number(park.parkCommission)) *
+          ((workDays * orderPerDay * Number(park.averageCheck)) / 100),
       }));
-    };
+      setItemsCount(data?.total)
+      setItems(updatedParks);
+    }
+    setIsLoading(isLoading);
+  }, [workDays, orderPerDay, data]);
 
-    const [workDays, setWorkDays] = useState(10);
-    const [orderPerDay, setOrderPerDay] = useState(10);
-    const yandexCommission = 7;
+  return (
+    <Card className="filters-card">
+      <h2 className="filters-title">Выбрать таксопарк</h2>
+      <Row className="filters-grid">
+        <Col>
+          <h4 className="filter-label">
+            Кол-во дней в парке <MdOutlineCalendarToday fontSize="20px" />
+          </h4>
+          <Slider min={0} max={30} value={workDays} onChange={setWorkDays} />
+          <span className="filter-value">{workDays}</span>
+        </Col>
 
-    const [parkPromotions, setParkPromotions] = useState([]);
-    const [selectedCityId, setSelectedCityId] = useState(null);
-    const [isPaymentWithCommission, setIsPaymentWithCommission] =
-      useState(false);
+        <Col>
+          <h4 className="filter-label">
+            Выплаты <LuClock3 fontSize="20px" />
+          </h4>
+          <div className="filter-checkbox-group">
+            <Checkbox checked={isPaymentWithCommission} onChange={() => setIsPaymentWithCommission(true)}>С комиссией</Checkbox>
+            <Checkbox checked={!isPaymentWithCommission} onChange={() => setIsPaymentWithCommission(false)}>Без комиссии</Checkbox>
+          </div>
+        </Col>
 
-    const debounceTimeout = useRef(null);
+        <Col>
+          <h4 className="filter-label">
+            Техподдержка <FiHeadphones fontSize="20px" />
+          </h4>
+          <div className="filter-checkbox-group">
+            <Checkbox checked={supportTimeFilters.allDay} onChange={() => handleSupportTimeFilters("allDay")}>
+              Круглосуточно
+            </Checkbox>
+            <Checkbox checked={supportTimeFilters.limited} onChange={() => handleSupportTimeFilters("limited")}>
+              Ограниченное время
+            </Checkbox>
+          </div>
+        </Col>
 
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(
-          `${API_URL}/parks?page=1&limit=1000&cityId=${selectedCityId}&parkPromotions=${parkPromotions}`
-        );
-        const result = await response.json();
-        const updatedParks = result.data.map((park) => {
-          return {
-            ...park,
-            approximateIncome:
-              workDays * orderPerDay * Number(park.averageCheck) -
-              (yandexCommission + Number(park.parkCommission)) *
-              ((workDays * orderPerDay * Number(park.averageCheck)) / 100),
-            // (yandexCommission + park.parkCommission)
-          };
-        });
-        setFilteredItems(updatedParks);
-        setTotalRecords(result.total);
-      } catch (error) {
-        console.error("Ошибка при загрузке данных: ", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+        <Col>
+          <h4 className="filter-label">
+            Кол-во заказов в день <FaCarSide fontSize="20px" />
+          </h4>
+          <Slider min={0} max={50} value={orderPerDay} onChange={setOrderPerDay} />
+          <span className="filter-value">{orderPerDay}</span>
+        </Col>
 
-    const debouncedFilter = () => {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current); // Очистить предыдущий таймер
-      }
-      debounceTimeout.current = setTimeout(() => {
-        fetchData();
-      }, 700);
-    };
+        <Col>
+          <h4 className="filter-label">
+            Город <FaLocationDot fontSize="20px" />
+          </h4>
+          <Select
+            style={{ width: "100%" }}
+            allowClear
+            placeholder="Выберите город"
+            options={cities.map((city) => ({ value: city.id, label: city.title, key: city.id }))}
+            onChange={setSelectedCityId}
+            value={selectedCityId}
+          />
+        </Col>
 
-    useEffect(() => {
-      debouncedFilter();
-      return () => {
-        if (debounceTimeout.current) {
-          clearTimeout(debounceTimeout.current);
-        }
-      };
-    }, [
-      workDays,
-      orderPerDay,
-      parkPromotions,
-      isPaymentWithCommission,
-      selectedCityId,
-      supportTimeFilters,
-    ]);
+        <Col>
+          <h4 className="filter-label">
+            Акции и бонусы <LuGift fontSize="20px" />
+          </h4>
+          <Select
+            mode="multiple"
+            style={{ width: "100%" }}
+            allowClear
+            placeholder="Выберите город"
+            options={allParkPromotions}
+            onChange={setParkPromotions}
+            value={parkPromotions}
+            maxTagCount={2}
+          />
+        </Col>
+      </Row>
+    </Card>
+  );
+});
 
-    return (
-      <Card className="filters-card">
-        <h2 className="filters-title">Выбрать таксопарк</h2>
-        <Row className="filters-grid">
-          <Col>
-            <h4 className="filter-label">
-              Кол-во дней в парке
-              <MdOutlineCalendarToday fontSize="20px" />
-            </h4>
-            <Slider
-              min={0}
-              max={30}
-              value={workDays}
-              onChange={setWorkDays}
-              tooltip={{ formatter: (value) => value }}
-            />
-            <span className="filter-value">{workDays}</span>
-          </Col>
-
-          <Col>
-            <h4 className="filter-label">
-              Выплаты <LuClock3 fontSize="20px" />
-            </h4>
-            <div className="filter-checkbox-group">
-              <Checkbox
-                checked={isPaymentWithCommission}
-                onChange={(e) => setIsPaymentWithCommission(true)}
-              >
-                С комиссией
-              </Checkbox>
-              <Checkbox
-                checked={!isPaymentWithCommission}
-                onChange={(e) => setIsPaymentWithCommission(false)}
-              >
-                Без комиссии
-              </Checkbox>
-            </div>
-          </Col>
-
-          <Col>
-            <h4 className="filter-label">
-              Техподдержка <FiHeadphones fontSize="20px" />
-            </h4>
-            <div className="filter-checkbox-group">
-              <Checkbox
-                type="checkbox"
-                checked={supportTimeFilters.allDay}
-                onChange={() => handleSupportTimeFilters("allDay")}
-              >
-                Круглосуточно
-              </Checkbox>
-              <Checkbox
-                type="checkbox"
-                checked={supportTimeFilters.limited}
-                onChange={() => handleSupportTimeFilters("limited")}
-              >
-                Ограниченное время
-              </Checkbox>
-            </div>
-          </Col>
-
-          <Col>
-            <h4 className="filter-label">
-              Кол-во заказов в день <FaCarSide fontSize="20px" />
-            </h4>
-            <Slider
-              min={0}
-              max={50}
-              value={orderPerDay}
-              onChange={setOrderPerDay}
-              tooltip={{ formatter: (value) => value }}
-            />
-            <span className="filter-value">{orderPerDay}</span>
-          </Col>
-
-          <Col>
-            <h4 className="filter-label">
-              Акции парка <LuGift fontSize="20px" />
-            </h4>
-            {/* <div className="filter-checkbox-group">
-              {allParkPromotions.map((parkPromotion) => {
-                return (
-                  <Checkbox
-                    key={parkPromotion}
-                    checked={parkPromotions.includes(parkPromotion)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setParkPromotions((parkPromotions) => [
-                          ...parkPromotions,
-                          parkPromotion,
-                        ]);
-                      } else {
-                        setParkPromotions((parkPromotions) =>
-                          parkPromotions.filter((item) => item !== parkPromotion)
-                        );
-                      }
-                    }}
-                  >
-                    {parkPromotion}
-                  </Checkbox>
-                );
-              })}
-            </div> */}
-          </Col>
-
-          <Col>
-            <h4 className="filter-label">
-              Город <FaLocationDot fontSize="20px" />
-            </h4>
-            <div className="filter-select">
-              <Select
-                style={{ width: "100%" }}
-                allowClear
-                placeholder="Выберите город"
-                options={cities.map((city) => ({
-                  value: city.id, // Значение для выбора
-                  label: city.title, // Отображаемый текст
-                  key: city.id, // Уникальный ключ (необязательно)
-                }))}
-                onChange={setSelectedCityId}
-                value={selectedCityId}
-              />
-            </div>
-          </Col>
-        </Row>
-      </Card>
-    );
-  }
-);
 
 Filters.displayName = "Filters";
 

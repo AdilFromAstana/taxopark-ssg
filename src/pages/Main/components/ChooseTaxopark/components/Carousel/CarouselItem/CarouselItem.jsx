@@ -23,6 +23,19 @@ function formatNumber(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
+const allParkPromotions = [
+  { label: "Гарантированные бонусы", value: 1 },
+  { label: "Приветственные бонусы", value: 2 },
+  { label: "Розыгрыш", value: 3 },
+  { label: "Бонус за активность", value: 4 },
+  { label: "Приведи друга", value: 5 },
+];
+
+const getPromotionLabel = (id) => {
+  const promotion = allParkPromotions.find((promo) => promo.value === id);
+  return promotion ? promotion.label : "Неизвестная акция";
+};
+
 const CarouselItem = memo(({ item, index, carouselItemWidth }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [flipped, setFlipped] = useState(false);
@@ -93,7 +106,7 @@ const CarouselItem = memo(({ item, index, carouselItemWidth }) => {
                   <div className="carousel-card-bonus-list">
                     {item.parkPromotions.map((bonus, idx) => (
                       <span className="carousel-card-bonus" key={idx}>
-                        {bonus}
+                        {getPromotionLabel(bonus)}
                       </span>
                     ))}
                   </div>

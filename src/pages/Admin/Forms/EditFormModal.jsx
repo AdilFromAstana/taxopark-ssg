@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { Modal, Form, Input, Button, Select, Timeline, message } from "antd";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import "./style.css";
 
 const statuses = {
@@ -131,9 +131,25 @@ const statuses = {
   ],
 };
 
+const tagTitle = {
+  taxiPark: "Таксопарк",
+  consultation: "Консультация",
+};
+
+function formatPhoneNumber(phoneNumber) {
+  const cleaned = phoneNumber.replace(/\D/g, "");
+
+  if (cleaned.length !== 11 || cleaned[0] !== "7") {
+    throw new Error("Некорректный номер телефона. Убедитесь, что номер начинается с +7 и состоит из 11 цифр.");
+  }
+
+  const formatted = `+7-(${cleaned.slice(1, 4)})-${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}-${cleaned.slice(9)}`;
+  return formatted;
+}
+
 const API_URL = import.meta.env.VITE_API_URL;
 
-const EditFormModal = ({ open, onClose, record }) => {
+const EditFormModal = memo(({ open, onClose, record }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -142,8 +158,6 @@ const EditFormModal = ({ open, onClose, record }) => {
   const [history, setHistory] = useState([]);
   const status = Form.useWatch("status", form);
   const reason = Form.useWatch("reason", form);
-
-  
 
   const fetchStatusHistory = async () => {
     try {
@@ -158,13 +172,15 @@ const EditFormModal = ({ open, onClose, record }) => {
 
   useEffect(() => {
     if (record?.id) {
+      form.setFieldValue('formType', tagTitle[record?.formType])
+      form.setFieldValue('phoneNumber', formatPhoneNumber(record?.phoneNumber))
       fetchStatusHistory();
     }
   }, [record?.id]);
 
   useEffect(() => {
     if (record?.statusCode) {
-      const currentStatus = statuses.taxiPark.find(
+      const currentStatus = statuses[record?.formType].find(
         (s) => s.code === record.statusCode
       );
       if (currentStatus) {
@@ -201,8 +217,7 @@ const EditFormModal = ({ open, onClose, record }) => {
       handleClose(); // Закрываем модальное окно
     } catch (error) {
       message.error(
-        `Ошибка обновления: ${
-          error.response?.data?.message || "Неизвестная ошибка"
+        `Ошибка обновления: ${error.response?.data?.message || "Неизвестная ошибка"
         }`
       );
     } finally {
@@ -241,7 +256,7 @@ const EditFormModal = ({ open, onClose, record }) => {
         <Form.Item name="name" label="ФИО">
           <Input disabled />
         </Form.Item>
-        <Form.Item name="phoneNumber" label="Номер">
+        <Form.Item name="phoneNumber" label="Номер телефона">
           <Input disabled />
         </Form.Item>
         <Form.Item name="formType" label="Тип заявки">
@@ -255,6 +270,7 @@ const EditFormModal = ({ open, onClose, record }) => {
         <Form.Item label="История изменений статуса">
           <Timeline style={{ marginTop: 8 }}>
             {history.map((item, index) => {
+              console.log("record?.formType: ", record?.formType)
               const newStatus = statuses[record?.formType]?.find(
                 (s) => s.code === item.newStatusCode
               );
@@ -338,6 +354,6 @@ const EditFormModal = ({ open, onClose, record }) => {
       </Form>
     </Modal>
   );
-};
+});
 
 export default EditFormModal;

@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import EditFormModal from "./EditFormModal";
 import moment from "moment";
 import { useQuery, useQueryClient } from "react-query";
+import ExcelJS from 'exceljs';
 
 const { RangePicker } = DatePicker;
 const API_URL = import.meta.env.VITE_API_URL;
@@ -44,6 +45,17 @@ const debounce = (func, delay) => {
     }, delay);
   };
 };
+
+function formatPhoneNumber(phoneNumber) {
+  const cleaned = phoneNumber.replace(/\D/g, "");
+
+  if (cleaned.length !== 11 || cleaned[0] !== "7") {
+    throw new Error("Некорректный номер телефона. Убедитесь, что номер начинается с +7 и состоит из 11 цифр.");
+  }
+
+  const formatted = `+7-(${cleaned.slice(1, 4)})-${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}-${cleaned.slice(9)}`;
+  return formatted;
+}
 
 const Forms = () => {
   const queryClient = useQueryClient();
@@ -134,6 +146,51 @@ const Forms = () => {
         ? dates.map((date) => date.format("YYYY-MM-DD"))
         : [],
     }));
+  };
+
+  const handleDownloadExcel = async () => {
+    const { data: allFormsData } = await fetchForms({
+      page: 1,
+      pageSize: 1000,
+      sortField: sorter.field,
+      sortOrder: sorter.order,
+      filters: searchFilters,
+    });
+
+    if (!allFormsData || allFormsData.length === 0) {
+      return;
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Parks");
+
+    const col = [
+      { key: "name", width: 50, "header": "ФИО" },
+      { key: "Park", width: 50, "header": "Таксопарк" },
+      { key: "statusCode", width: 50, "header": "Статус" },
+      { key: "formType", width: 50, "header": "Тип заявки" },
+      { key: "phoneNumber", width: 50, "header": "Номеп телефона" },
+      { key: "createdAt", width: 50, "header": "Создано" },
+    ]
+
+    worksheet.columns = col
+    worksheet.addRows(allFormsData.map((formData) => {
+      return {
+        name: formData?.name || '-',
+        Park: formData?.Park?.title || '-',
+        statusCode: formData?.statusCode || '-',
+        formType: formData?.formType || "-",
+        phoneNumber: formData?.phoneNumber || "-",
+        createdAt: moment(formData?.createdAt).format('DD.MM.YYYY HH:mm')
+      }
+    }));
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'parks_data.xlsx';
+    link.click();
   };
 
   const columns = [
@@ -243,6 +300,7 @@ const Forms = () => {
           />
         </div>
       ),
+      render: (record) => formatPhoneNumber(record)
     },
     {
       title: "Создано",
@@ -324,7 +382,7 @@ const Forms = () => {
         <div style={{ display: "flex", gap: "10px" }}>
           <h2 style={{ margin: 0 }}>Заявки</h2>
         </div>
-        <Button type="primary">Скачать в Excel</Button>
+        <Button type="primary" onClick={handleDownloadExcel}>Скачать в Excel</Button>
       </div>
       <Table
         columns={columns}

@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { Input, Checkbox, Card, Button, Modal } from "antd";
+import { Input, Checkbox, Card, Button, Modal, Select } from "antd";
 import "./style.css";
-import { useQuery, useQueryClient } from "react-query";
+import { useQuery } from "react-query";
 import axios from "axios";
 import moment from "moment";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const fetchPromotions = async () => {
-  const response = await axios.get(`${API_URL}/promotions`);
+const fetchPromotions = async ({ queryKey }) => {
+  const [, params] = queryKey;
+  const response = await axios.get(`${API_URL}/promotions`, { params });
   return response.data;
 };
 
@@ -16,52 +17,20 @@ export default function PromotionsPage() {
   const [selectedPromo, setSelectedPromo] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showActiveOnly, setShowActiveOnly] = useState(false);
-  const queryClient = useQueryClient();
+  const [sortField, setSortField] = useState(null);
+  const [sortOrder, setSortOrder] = useState(null);
 
-  const { data: promotionsData } = useQuery({
-    queryKey: ["promotions"],
-    queryFn: async ({ queryKey }) => {
-      const [, params] = queryKey;
-
-      const cachedData = queryClient.getQueryData(["promotions", params]);
-      if (cachedData) {
-        return cachedData;
-      }
-
-      return fetchPromotions(params);
-    },
+  const { data: promotionsData } = useQuery(["promotions", { searchQuery, showActiveOnly, sortField, sortOrder, active: true }], fetchPromotions, {
     keepPreviousData: true,
     staleTime: 5 * 60 * 1000,
     cacheTime: 10 * 60 * 1000,
   });
 
-  const filteredPromotions =
-    promotionsData?.data ||
-    []
-      .filter(
-        (promo) =>
-          promo.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          promo.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          promo.description.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-      .filter((promo) =>
-        showActiveOnly
-          ? promo.active &&
-          (!promo.expires || new Date(promo.expires) > new Date())
-          : true
-      )
-      .sort(
-        (a, b) =>
-          (b.expires ? new Date(b.expires).getTime() : Infinity) -
-          (a.expires ? new Date(a.expires).getTime() : Infinity)
-      );
-
   return (
     <div className="promotions-container">
       <h1 className="promotions-title">Акции и бонусы от таксопарков</h1>
       <p className="promotions-description">
-        Следите за актуальными предложениями, участвуйте в розыгрышах, получайте
-        бонусы и скидки!
+        Следите за актуальными предложениями, участвуйте в розыгрышах, получайте бонусы и скидки!
       </p>
 
       <Input
@@ -71,24 +40,15 @@ export default function PromotionsPage() {
         onChange={(e) => setSearchQuery(e.target.value)}
       />
 
-      <Checkbox
-        checked={showActiveOnly}
-        onChange={() => setShowActiveOnly(!showActiveOnly)}
-        className="promotions-checkbox"
-      >
-        Показывать только активные акции
-      </Checkbox>
-
       <div className="promotions-list">
-        {filteredPromotions.map((promo) => (
+        {promotionsData?.data?.map((promo) => (
           <Card
             key={promo.id}
             hoverable
             className={`promotion-card ${!promo.active ||
-                (promo.expires && new Date(promo.expires) < new Date())
-                ? "promotion-inactive"
-                : ""
-              }`}
+              (promo.expires && new Date(promo.expires) < new Date())
+              ? "promotion-inactive"
+              : ""}`}
             cover={
               <img
                 src={`${API_URL}/uploads/${promo?.imageUrl}`}
@@ -117,13 +77,6 @@ export default function PromotionsPage() {
           <Button key="close" onClick={() => setSelectedPromo(null)}>
             Закрыть
           </Button>,
-          // <Button
-          //   key="apply"
-          //   type="primary"
-          //   onClick={() => alert("Заявка отправлена")}
-          // >
-          //   Оставить заявку
-          // </Button>,
         ]}
       >
         {selectedPromo && (
@@ -134,8 +87,7 @@ export default function PromotionsPage() {
             <p className="promotion-description">{selectedPromo.description}</p>
             {selectedPromo.expires && (
               <p className="promotion-expiry">
-                Действует до{" "}
-                {moment(selectedPromo.expires).format("DD.MM.YYYY")}
+                Действует до {moment(selectedPromo.expires).format("DD.MM.YYYY")}
               </p>
             )}
           </>

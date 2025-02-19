@@ -25,7 +25,7 @@ function Header() {
         {/* Навигация (десктоп) */}
         <nav className="header-nav-desktop">
           <a href="/" className="header-nav-link" onClick={() => setIsDrawerOpen(false)}>Главная</a>
-          <a href="/how-it-works" className="header-nav-link" onClick={() => setIsDrawerOpen(false)}>Как это работает?</a>
+          {/* <a href="/how-it-works" className="header-nav-link" onClick={() => setIsDrawerOpen(false)}>Как это работает?</a> */}
           <a href="/promotions" className="header-nav-link" onClick={() => setIsDrawerOpen(false)}>Акции и бонусы</a>
           <a href="tel:+77767777777" className="header-phone-link">📞 +7-776-777-77-77</a>
         </nav>
@@ -48,7 +48,7 @@ function Header() {
       >
         <nav className="header-mobile-nav">
           <a href="/" className="header-mobile-link" onClick={() => setIsDrawerOpen(false)}>🏠 Главная</a>
-          <a href="/how-it-works" className="header-mobile-link" onClick={() => setIsDrawerOpen(false)}>⚙️ Как это работает?</a>
+          {/* <a href="/how-it-works" className="header-mobile-link" onClick={() => setIsDrawerOpen(false)}>⚙️ Как это работает?</a> */}
           <a href="/promotions" className="header-mobile-link" onClick={() => setIsDrawerOpen(false)}>🎁 Акции и бонусы</a>
           <a href="tel:+77767777777" className="header-mobile-link">📞 +7-776-777-77-77</a>
         </nav>
