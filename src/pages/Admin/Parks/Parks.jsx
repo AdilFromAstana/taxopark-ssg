@@ -4,6 +4,7 @@ import { useState, useCallback, memo } from "react";
 import CreateFormModal from "./CreateParkModal";
 import EditParkModal from "./EditParkModal";
 import moment from "moment";
+import ExcelJS from 'exceljs';
 import { useQuery, useQueryClient } from "react-query";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -119,6 +120,75 @@ const Parks = memo(() => {
   const handleDateRangeChange = (value) => {
     setSearchFilters((prev) => ({ ...prev, dateRange: value || [] }));
     queryClient.invalidateQueries(["parks"]);
+  };
+
+  const handleDownloadExcel = async () => {
+    const { data: allParksData } = await fetchParks({
+      page: 1,
+      pageSize: 1000,
+      sortField: sorter.field,
+      sortOrder: sorter.order,
+      filters: searchFilters,
+    });
+
+    if (!allParksData || allParksData.length === 0) {
+      return;
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Parks");
+
+    const col = [
+      { key: "title", width: 50, "header": "Название" },
+      { key: "City", width: 50, "header": "Город" },
+      { key: "averageCheck", width: 50, "header": "Средний чек" },
+      { key: "parkEntrepreneurSupport", width: 50, "header": "ИП таксопарка" },
+      { key: "entrepreneurSupport", width: 50, "header": "Поддержка ИП" },
+      { key: "commissionWithdraw", width: 50, "header": "Комиссия за снятия" },
+      { key: "transferPaymentCommission", width: 50, "header": "Комиссия за перевод" },
+      { key: "accountantSupport", width: 50, "header": "Поддержка Бухгалтерии" },
+      { key: "yandexGasStation", width: 50, "header": "Яндекс Заправки" },
+      { key: "supportAlwaysAvailable", width: 50, "header": "Тех.Поддержка 24/7" },
+      { key: "supportStartWorkTime", width: 50, "header": "Начала работы тех.под" },
+      { key: "supportEndWorkTime", width: 50, "header": "Конец работы тех.под" },
+      { key: "parkCommission", width: 50, "header": "Комиссия парка" },
+      { key: "parkPromotions", width: 50, "header": "Акции" },
+      { key: "paymentType", width: 50, "header": "Тип оплаты" },
+      { key: "active", width: 50, "header": "Статус" },
+      { key: "rating", width: 50, "header": "Рейтинг" },
+      { key: "createdAt", width: 50, "header": "Создано" },
+    ]
+
+    worksheet.columns = col
+    worksheet.addRows(allParksData.map((parkData) => {
+      return {
+        title: parkData?.title,
+        City: parkData?.City?.title || '-',
+        averageCheck: parkData?.averageCheck || '-',
+        parkEntrepreneurSupport: typeof parkData?.parkEntrepreneurSupport === "boolean" ? parkData?.parkEntrepreneurSupport ? "Да" : "Нет" : "-",
+        entrepreneurSupport: typeof parkData?.entrepreneurSupport === "boolean" ? parkData?.entrepreneurSupport ? "Да" : "Нет" : "-",
+        commissionWithdraw: parkData?.commissionWithdraw || '-',
+        transferPaymentCommission: parkData?.transferPaymentCommission || "-",
+        accountantSupport: typeof parkData?.accountantSupport === "boolean" ? parkData?.accountantSupport ? "Да" : "Нет" : "-",
+        yandexGasStation: typeof parkData?.yandexGasStation === "boolean" ? parkData?.yandexGasStation ? "Да" : "Нет" : "-",
+        supportAlwaysAvailable: typeof parkData?.supportAlwaysAvailable === "boolean" ? parkData?.supportAlwaysAvailable ? "Да" : "Нет" : "-",
+        supportStartWorkTime: parkData?.supportStartWorkTime ? moment(parkData?.supportStartWorkTime).format('HH:mm') : "-",
+        supportEndWorkTime: parkData?.supportEndWorkTime ? moment(parkData?.supportEndWorkTime).format('HH:mm') : "-",
+        parkCommission: parkData?.parkCommission || "-",
+        parkPromotions: parkData?.parkPromotions,
+        paymentType: parkData?.paymentType || "-",
+        active: parkData?.active ? "Активен" : "Неактивен",
+        rating: parkData?.rating || "-",
+        createdAt: moment(parkData?.createdAt).format('DD.MM.YYYY HH:mm')
+      }
+    }));
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'parks_data.xlsx';
+    link.click();
   };
 
   const columns = [
@@ -290,13 +360,13 @@ const Parks = memo(() => {
           alignItems: "center",
         }}
       >
-        <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
+        <div style={{ display: "flex", gap: "10px" }}>
           <h2 style={{ margin: 0 }}>Таксопарки</h2>
           <Button type="primary" onClick={() => setIsCreateModalOpen(true)}>
             Добавить запись
           </Button>
         </div>
-        <Button type="primary" onClick={() => setIsCreateModalOpen(true)}>
+        <Button type="primary" onClick={handleDownloadExcel}>
           Скачать в Excel
         </Button>
       </div>

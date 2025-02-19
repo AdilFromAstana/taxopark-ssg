@@ -12,6 +12,7 @@
   "dependencies": {
     "antd": "^5.24.0",
     "axios": "^1.7.9",
+    "exceljs": "^4.4.0",
     "moment": "^2.30.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -20,7 +21,8 @@
     "react-phone-input-2": "^2.15.1",
     "react-query": "^3.39.3",
     "react-router-dom": "^7.1.5",
-    "react-snap": "^1.13.1"
+    "react-snap": "^1.13.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",

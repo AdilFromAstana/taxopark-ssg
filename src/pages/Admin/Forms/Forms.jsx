@@ -321,7 +321,7 @@ const Forms = () => {
           alignItems: "center",
         }}
       >
-        <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
+        <div style={{ display: "flex", gap: "10px" }}>
           <h2 style={{ margin: 0 }}>Заявки</h2>
         </div>
         <Button type="primary">Скачать в Excel</Button>

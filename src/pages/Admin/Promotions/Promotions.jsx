@@ -249,7 +249,7 @@ const Promotions = memo(() => {
 
   return (
     <div style={{ padding: "16px" }}>
-      <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
+      <div style={{ display: "flex", gap: "10px" }}>
         <h2 style={{ margin: 0 }}>Акции</h2>
         <Button type="primary" onClick={() => setIsCreateModalOpen(true)}>
           Добавить запись
