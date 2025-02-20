@@ -74,41 +74,44 @@ const CarouselItem = memo(({ item, index, carouselItemWidth }) => {
                 >
                   {formatNumber(item.approximateIncome)} ₸
                 </div>
-                <h3 className="carousel-card-title">{item.title}</h3>
-                <div className="carousel-card-rating">
-                  <IoIosStar className="carousel-card-icon star" />
-                  <span>4.8</span>
-                </div>
-                <div className="carousel-card-detail">
-                  <MdPercent className="carousel-card-icon" />
-                  <span>Комиссия {item.commission}%</span>
-                </div>
-                <div className="carousel-card-detail">
-                  <LuClock3 className="carousel-card-icon" />
-                  {/* <span>{item.paymentType}</span> */}
-                  <span>Моментальные выплаты</span>
-                </div>
-                <div className="carousel-card-detail">
-                  <MdHeadsetMic className="carousel-card-icon" />
-                  <span>{item.supportWorkTime}</span>
-                </div>
-                <div className="carousel-card-detail">
-                  <PiWallet className="carousel-card-icon" />
-                  {/* <span>{item.commissionWithdraw}</span> */}
-                  <span>Парковое ИП</span>
-                </div>
-                <div className="carousel-card-detail">
-                  <FaLocationDot className="carousel-card-icon" />
-                  <span>{item.city}</span>
-                </div>
-                <div className="carousel-card-bonuses">
-                  <LuGift className="carousel-card-icon" />
-                  <div className="carousel-card-bonus-list">
-                    {item.parkPromotions.map((bonus, idx) => (
-                      <span className="carousel-card-bonus" key={idx}>
-                        {getPromotionLabel(bonus)}
-                      </span>
-                    ))}
+                <div className="carousel-card-details">
+
+                  <h3 className="carousel-card-title">{item.title}</h3>
+                  <div className="carousel-card-rating">
+                    <IoIosStar className="carousel-card-icon star" />
+                    <span>4.8</span>
+                  </div>
+                  <div className="carousel-card-detail">
+                    <MdPercent className="carousel-card-icon" />
+                    <span>Комиссия {item.commission}%</span>
+                  </div>
+                  <div className="carousel-card-detail">
+                    <LuClock3 className="carousel-card-icon" />
+                    {/* <span>{item.paymentType}</span> */}
+                    <span>Моментальные выплаты</span>
+                  </div>
+                  <div className="carousel-card-detail">
+                    <MdHeadsetMic className="carousel-card-icon" />
+                    <span>{item.supportWorkTime}</span>
+                  </div>
+                  <div className="carousel-card-detail">
+                    <PiWallet className="carousel-card-icon" />
+                    {/* <span>{item.commissionWithdraw}</span> */}
+                    <span>Парковое ИП</span>
+                  </div>
+                  <div className="carousel-card-detail">
+                    <FaLocationDot className="carousel-card-icon" />
+                    <span>{item.city}</span>
+                  </div>
+                  <div className="carousel-card-bonuses">
+                    <LuGift className="carousel-card-icon" />
+                    <div className="carousel-card-bonus-list">
+                      {item.parkPromotions.map((bonus, idx) => (
+                        <span className="carousel-card-bonus" key={idx}>
+                          {getPromotionLabel(bonus)}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 <Button
@@ -244,7 +247,7 @@ const CarouselItem = memo(({ item, index, carouselItemWidth }) => {
                     <div className="carousel-card-bonus-list">
                       {item.parkPromotions.map((bonus, idx) => (
                         <span className="carousel-card-bonus" key={idx}>
-                          {bonus}
+                          {getPromotionLabel(bonus)}
                         </span>
                       ))}
                     </div>

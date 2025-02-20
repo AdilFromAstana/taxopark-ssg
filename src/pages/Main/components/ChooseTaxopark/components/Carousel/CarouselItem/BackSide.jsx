@@ -21,6 +21,11 @@ const allParkPromotions = [
   { label: "Приведи друга", value: 5 },
 ];
 
+const getPromotionLabel = (id) => {
+  const promotion = allParkPromotions.find((promo) => promo.value === id);
+  return promotion ? promotion.label : "Неизвестная акция";
+};
+
 const BackSide = memo(({ item, toggleFlip, openModal }) => {
   const details = [
     {
