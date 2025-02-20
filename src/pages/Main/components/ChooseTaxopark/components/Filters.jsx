@@ -1,6 +1,5 @@
-"use clinet";
-
-import React, { memo, useEffect, useRef, useState } from "react";
+/* eslint-disable react/prop-types */
+import { memo, useEffect, useState } from "react";
 import { MdOutlineCalendarToday } from "react-icons/md";
 import { LuClock3, LuGift } from "react-icons/lu";
 import { FiHeadphones } from "react-icons/fi";
@@ -44,21 +43,31 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
   const [selectedCityId, setSelectedCityId] = useState(null);
   const [isPaymentWithCommission, setIsPaymentWithCommission] = useState(false);
 
-  const { data, isLoading } = useQuery([
-    "parks",
-    { selectedCityId, parkPromotions, isPaymentWithCommission, supportTimeFilters },
-  ], () => fetchParks({
-    limit: 1000,
-    cityId: selectedCityId,
-    parkPromotions: parkPromotions.join(","),
-    isPaymentWithCommission,
-    supportAllDay: supportTimeFilters.allDay,
-    supportLimited: supportTimeFilters.limited,
-  }), {
-    keepPreviousData: true,
-    staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
-  });
+  const { data, isLoading } = useQuery(
+    [
+      "parks",
+      {
+        selectedCityId,
+        parkPromotions,
+        isPaymentWithCommission,
+        supportTimeFilters,
+      },
+    ],
+    () =>
+      fetchParks({
+        limit: 1000,
+        cityId: selectedCityId,
+        parkPromotions: parkPromotions.join(","),
+        isPaymentWithCommission,
+        supportAllDay: supportTimeFilters.allDay,
+        supportLimited: supportTimeFilters.limited,
+      }),
+    {
+      keepPreviousData: true,
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 10 * 60 * 1000,
+    }
+  );
 
   useEffect(() => {
     if (data) {
@@ -67,9 +76,9 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
         approximateIncome:
           workDays * orderPerDay * Number(park.averageCheck) -
           (yandexCommission + Number(park.parkCommission)) *
-          ((workDays * orderPerDay * Number(park.averageCheck)) / 100),
+            ((workDays * orderPerDay * Number(park.averageCheck)) / 100),
       }));
-      setItemsCount(data?.total)
+      setItemsCount(data?.total);
       setItems(updatedParks);
     }
     setIsLoading(isLoading);
@@ -92,8 +101,18 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
             Выплаты <LuClock3 fontSize="20px" />
           </h4>
           <div className="filter-checkbox-group">
-            <Checkbox checked={isPaymentWithCommission} onChange={() => setIsPaymentWithCommission(true)}>С комиссией</Checkbox>
-            <Checkbox checked={!isPaymentWithCommission} onChange={() => setIsPaymentWithCommission(false)}>Без комиссии</Checkbox>
+            <Checkbox
+              checked={isPaymentWithCommission}
+              onChange={() => setIsPaymentWithCommission(true)}
+            >
+              С комиссией
+            </Checkbox>
+            <Checkbox
+              checked={!isPaymentWithCommission}
+              onChange={() => setIsPaymentWithCommission(false)}
+            >
+              Без комиссии
+            </Checkbox>
           </div>
         </Col>
 
@@ -102,10 +121,16 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
             Техподдержка <FiHeadphones fontSize="20px" />
           </h4>
           <div className="filter-checkbox-group">
-            <Checkbox checked={supportTimeFilters.allDay} onChange={() => handleSupportTimeFilters("allDay")}>
+            <Checkbox
+              checked={supportTimeFilters.allDay}
+              onChange={() => handleSupportTimeFilters("allDay")}
+            >
               Круглосуточно
             </Checkbox>
-            <Checkbox checked={supportTimeFilters.limited} onChange={() => handleSupportTimeFilters("limited")}>
+            <Checkbox
+              checked={supportTimeFilters.limited}
+              onChange={() => handleSupportTimeFilters("limited")}
+            >
               Ограниченное время
             </Checkbox>
           </div>
@@ -115,7 +140,12 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
           <h4 className="filter-label">
             Кол-во заказов в день <FaCarSide fontSize="20px" />
           </h4>
-          <Slider min={0} max={50} value={orderPerDay} onChange={setOrderPerDay} />
+          <Slider
+            min={0}
+            max={50}
+            value={orderPerDay}
+            onChange={setOrderPerDay}
+          />
           <span className="filter-value">{orderPerDay}</span>
         </Col>
 
@@ -127,7 +157,11 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
             style={{ width: "100%" }}
             allowClear
             placeholder="Выберите город"
-            options={cities.map((city) => ({ value: city.id, label: city.title, key: city.id }))}
+            options={cities.map((city) => ({
+              value: city.id,
+              label: city.title,
+              key: city.id,
+            }))}
             onChange={setSelectedCityId}
             value={selectedCityId}
           />
@@ -152,7 +186,6 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
     </Card>
   );
 });
-
 
 Filters.displayName = "Filters";
 

@@ -1,117 +1,29 @@
+/* eslint-disable no-undef */
 /* eslint-disable react/prop-types */
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect } from "react";
 import { Modal, Button, Input, message } from "antd";
 import "react-phone-input-2/lib/style.css";
-import moment from "moment";
+import axios from "axios";
 
-const OTPInput = ({ value, onChange }) => (
-  <Input.OTP
-    style={{ width: "100%", height: "50px" }}
-    length={4}
-    type="tel"
-    value={value}
-    onChange={(e) => onChange(e)}
-    placeholder="Введите OTP-код"
-  />
-);
+const API_URL = import.meta.env.VITE_API_URL;
 
-const OtpVerification = ({ phone, setStep, onClose, resendTime }) => {
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState("1234");
-  const [inputOtp, setInputOtp] = useState("");
-  const now = moment();
-  const isResendDisabled = resendTime && now.isBefore(resendTime);
-
-  // Запуск таймера при отправке OTP
-  useEffect(() => {
-    let interval;
-    if (otpSent) {
-      interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev === 1) {
-            clearInterval(interval);
-            setOtpSent(false);
-            return 60; // Сброс таймера
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [otpSent]);
-
-  const sendOtp = () => {
-    if (!phone || phone.length < 11) {
-      message.error("Введите корректный номер телефона.");
-      return;
-    }
-    setOtpSent(true);
-    setTimer(60);
-    message.success("OTP отправлен!");
-  };
-
-  const handleOtpVerification = () => {
-    if (inputOtp === otp) {
-      message.success("Заявка успешно отправлена!");
-      setStep(3);
-    } else {
-      message.error("Неправильный OTP-код. Попробуйте снова.");
-    }
-  };
-
-  return (
-    <>
-      <p>Введите код из SMS для подтверждения заявки:</p>
-      <OTPInput value={inputOtp} onChange={setInputOtp} />
-      <Button
-        type="primary"
-        size="large"
-        block
-        style={{ marginTop: "10px" }}
-        onClick={handleOtpVerification}
-      >
-        Подтвердить
-      </Button>
-      <div className="flex flex-col items-center mt-2">
-        <Button type="link" onClick={() => setStep(1)}>
-          Сменить номер
-        </Button>
-        <Button
-          type="link"
-          onClick={sendOtp}
-          disabled={isResendDisabled} // Заблокирована до истечения времени
-        >
-          {isResendDisabled
-            ? `Отправить OTP снова (${resendTime.diff(now, "seconds")} сек)`
-            : "Отправить OTP снова"}
-        </Button>
-      </div>
-    </>
-  );
-};
-
-// 📌 Компонент успешного сообщения
-const SuccessMessage = ({ setStep, onClose }) => (
-  <div className="text-center">
-    <p className="text-lg mb-4">Заявка успешно отправлена!</p>
-    <p>Ожидайте звонка в ближайшее время.</p>
-    <Button
-      type="primary"
-      size="large"
-      className="mt-4"
-      onClick={() => {
-        setStep(1);
-        onClose();
-      }}
-    >
-      Закрыть
-    </Button>
-  </div>
-);
-
-// 📌 Основной компонент
 const ApplicationModal = memo(
-  ({ isOpen, onClose, phone, setStep, step, resendTime }) => {
+  ({
+    formId,
+    handleSendOtp,
+    isOpen,
+    onClose,
+    phone,
+    setStep,
+    step,
+    timer,
+    setTimer,
+    otpSent,
+    setOtpSent,
+  }) => {
+
+    
+
     useEffect(() => {
       document.body.style.overflow = isOpen ? "hidden" : "";
       return () => {
@@ -119,28 +31,117 @@ const ApplicationModal = memo(
       };
     }, [isOpen]);
 
+    useEffect(() => {
+      if (otpSent && timer > 0) {
+        const interval = setInterval(() => {
+          setTimer((prev) => {
+            if (prev === 1) {
+              clearInterval(interval);
+              setOtpSent(false);
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        return () => clearInterval(interval);
+      }
+    }, [otpSent, timer]);
+
+    const handleVerifyOtp = async () => {
+      try {
+        const response = await axios.post(`${API_URL}/smsCodes/verifyOtp`, {
+          formId,
+          otpCode: inputOtp,
+        });
+
+        message.success(response.data.message);
+        setStep(3); // Переход на следующий шаг
+      } catch (error) {
+        message.error(
+          error.response?.data?.error || "Ошибка при подтверждении OTP"
+        );
+      }
+    };
+
+    const handleClose = () => {
+      form.resetFields();
+      setStep(1);
+      setInputOtp("");
+      setOtpSent(false);
+      setTimer(60);
+      onClose();
+    };
+
     return (
       <Modal
-        title={
-          step === 2
-            ? "Код подтверждения"
-            : step === 3
-            ? "Успешно отправлено"
-            : ""
-        }
-        open={isOpen}
-        onCancel={onClose}
         maskClosable={false}
+        open={isOpen}
+        onCancel={handleClose}
         footer={null}
+        title={step === 2 ? "Подтверждение OTP" : "Успех!"}
+        centered
       >
         {step === 2 && (
-          <OtpVerification phone={phone} setStep={setStep} onClose={onClose} />
+          <StepTwo
+            inputOtp
+            phone={phone}
+            setStep={setStep}
+            onClose={onClose}
+            handleSendOtp={handleSendOtp}
+            handleVerifyOtp={handleVerifyOtp}
+          />
         )}
-        {step === 3 && <SuccessMessage setStep={setStep} onClose={onClose} />}
+        {step === 3 && <StepThree handleClose={handleClose} />}
       </Modal>
     );
   }
 );
+
+const StepTwo = ({
+  inputOtp,
+  setInputOtp,
+  handleVerifyOtp,
+  handleSendOtp,
+  otpSent,
+  timer,
+}) => {
+  return (
+    <>
+      <p>Введите код из SMS для подтверждения заявки:</p>
+      <Input.OTP
+        type="text"
+        length={4}
+        value={inputOtp}
+        onChange={(e) => setInputOtp(e)}
+        placeholder="Введите OTP-код"
+      />
+      <Button type="primary" block onClick={handleVerifyOtp} className="mt-3">
+        Подтвердить
+      </Button>
+      <Button
+        type="link"
+        disabled={otpSent}
+        onClick={handleSendOtp}
+        className="mt-2"
+      >
+        {otpSent
+          ? `Запросить код повторно через ${timer} сек.`
+          : "Запросить новый код"}
+      </Button>
+    </>
+  );
+};
+
+const StepThree = ({ handleClose }) => {
+  return (
+    <div className="text-center">
+      <p>Заявка успешно отправлена!</p>
+      <Button type="primary" block onClick={handleClose}>
+        Хорошо
+      </Button>
+    </div>
+  );
+};
 
 ApplicationModal.displayName = "ApplicationModal";
 export default ApplicationModal;

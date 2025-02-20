@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import EditFormModal from "./EditFormModal";
 import moment from "moment";
 import { useQuery, useQueryClient } from "react-query";
-import ExcelJS from 'exceljs';
+import ExcelJS from "exceljs";
 
 const { RangePicker } = DatePicker;
 const API_URL = import.meta.env.VITE_API_URL;
@@ -50,10 +50,15 @@ function formatPhoneNumber(phoneNumber) {
   const cleaned = phoneNumber.replace(/\D/g, "");
 
   if (cleaned.length !== 11 || cleaned[0] !== "7") {
-    throw new Error("Некорректный номер телефона. Убедитесь, что номер начинается с +7 и состоит из 11 цифр.");
+    throw new Error(
+      "Некорректный номер телефона. Убедитесь, что номер начинается с +7 и состоит из 11 цифр."
+    );
   }
 
-  const formatted = `+7-(${cleaned.slice(1, 4)})-${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}-${cleaned.slice(9)}`;
+  const formatted = `+7-(${cleaned.slice(1, 4)})-${cleaned.slice(
+    4,
+    7
+  )}-${cleaned.slice(7, 9)}-${cleaned.slice(9)}`;
   return formatted;
 }
 
@@ -71,7 +76,7 @@ const Forms = () => {
   const [searchFilters, setSearchFilters] = useState({
     name: "",
     phoneNumber: "",
-    formType: ""
+    formType: "",
   });
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -120,11 +125,6 @@ const Forms = () => {
     [pagination.pageSize, sorter.field, sorter.order, searchFilters]
   );
 
-  const handleParkFilterChange = (value) => {
-    setSearchFilters((prev) => ({ ...prev, parkId: value }));
-    queryClient.invalidateQueries("forms");
-  };
-
   const handleTableChange = (pagination, filters, sorter) => {
     setPagination({ ...pagination });
     setSorter({
@@ -133,8 +133,8 @@ const Forms = () => {
         sorter.order === "ascend"
           ? "asc"
           : sorter.order === "descend"
-            ? "desc"
-            : null,
+          ? "desc"
+          : null,
     });
     queryClient.invalidateQueries("forms");
   };
@@ -165,31 +165,35 @@ const Forms = () => {
     const worksheet = workbook.addWorksheet("Parks");
 
     const col = [
-      { key: "name", width: 50, "header": "ФИО" },
-      { key: "Park", width: 50, "header": "Таксопарк" },
-      { key: "statusCode", width: 50, "header": "Статус" },
-      { key: "formType", width: 50, "header": "Тип заявки" },
-      { key: "phoneNumber", width: 50, "header": "Номеп телефона" },
-      { key: "createdAt", width: 50, "header": "Создано" },
-    ]
+      { key: "name", width: 50, header: "ФИО" },
+      { key: "Park", width: 50, header: "Таксопарк" },
+      { key: "statusCode", width: 50, header: "Статус" },
+      { key: "formType", width: 50, header: "Тип заявки" },
+      { key: "phoneNumber", width: 50, header: "Номеп телефона" },
+      { key: "createdAt", width: 50, header: "Создано" },
+    ];
 
-    worksheet.columns = col
-    worksheet.addRows(allFormsData.map((formData) => {
-      return {
-        name: formData?.name || '-',
-        Park: formData?.Park?.title || '-',
-        statusCode: formData?.statusCode || '-',
-        formType: formData?.formType || "-",
-        phoneNumber: formData?.phoneNumber || "-",
-        createdAt: moment(formData?.createdAt).format('DD.MM.YYYY HH:mm')
-      }
-    }));
+    worksheet.columns = col;
+    worksheet.addRows(
+      allFormsData.map((formData) => {
+        return {
+          name: formData?.name || "-",
+          Park: formData?.Park?.title || "-",
+          statusCode: formData?.statusCode || "-",
+          formType: formData?.formType || "-",
+          phoneNumber: formData?.phoneNumber || "-",
+          createdAt: moment(formData?.createdAt).format("DD.MM.YYYY HH:mm"),
+        };
+      })
+    );
 
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const link = document.createElement('a');
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = 'parks_data.xlsx';
+    link.download = "parks_data.xlsx";
     link.click();
   };
 
@@ -215,12 +219,7 @@ const Forms = () => {
       dataIndex: "formType",
       key: "formType",
       sorter: true,
-      filterDropdown: ({
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-      }) => (
+      filterDropdown: ({ selectedKeys, confirm, clearFilters }) => (
         <div style={{ padding: 8 }}>
           <Select
             style={{ width: 200 }}
@@ -236,8 +235,12 @@ const Forms = () => {
             allowClear
             onClear={clearFilters}
           >
-            <Select.Option value="consultation">{tagTitle["consultation"]}</Select.Option>
-            <Select.Option value="taxiPark">{tagTitle["taxiPark"]}</Select.Option>
+            <Select.Option value="consultation">
+              {tagTitle["consultation"]}
+            </Select.Option>
+            <Select.Option value="taxiPark">
+              {tagTitle["taxiPark"]}
+            </Select.Option>
           </Select>
         </div>
       ),
@@ -256,7 +259,7 @@ const Forms = () => {
       key: "parkId",
       render: (_, record) => record.Park?.title || "—",
       sorter: true,
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, }) => (
+      filterDropdown: ({ selectedKeys, confirm, clearFilters }) => (
         <div style={{ padding: 8 }}>
           <Select
             allowClear
@@ -300,7 +303,7 @@ const Forms = () => {
           />
         </div>
       ),
-      render: (record) => formatPhoneNumber(record)
+      render: (record) => formatPhoneNumber(record),
     },
     {
       title: "Создано",
@@ -325,11 +328,11 @@ const Forms = () => {
               setSelectedKeys(
                 dates
                   ? [
-                    [
-                      dates[0].format("YYYY-MM-DD"),
-                      dates[1].format("YYYY-MM-DD"),
-                    ],
-                  ]
+                      [
+                        dates[0].format("YYYY-MM-DD"),
+                        dates[1].format("YYYY-MM-DD"),
+                      ],
+                    ]
                   : []
               )
             }
@@ -382,11 +385,13 @@ const Forms = () => {
         <div style={{ display: "flex", gap: "10px" }}>
           <h2 style={{ margin: 0 }}>Заявки</h2>
         </div>
-        <Button type="primary" onClick={handleDownloadExcel}>Скачать в Excel</Button>
+        <Button type="primary" onClick={handleDownloadExcel}>
+          Скачать в Excel
+        </Button>
       </div>
       <Table
         columns={columns}
-        dataSource={formsData?.data || []}
+        dataSource={formsData?.data}
         loading={isLoading}
         pagination={{
           current: pagination.current,
@@ -408,7 +413,11 @@ const Forms = () => {
           parks={parks}
           open={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
-          record={selectedRecord}
+          record={{
+            ...selectedRecord,
+            phoneNumber: formatPhoneNumber(selectedRecord?.phoneNumber || ""),
+            formType: tagTitle[selectedRecord?.formType] || "",
+          }}
         />
       )}
     </div>

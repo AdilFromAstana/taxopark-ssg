@@ -4,43 +4,34 @@ import PhoneInput from "react-phone-input-2";
 import "./FieldForm.css";
 import SupportModal from "./SupportModal/SupportModal";
 import axios from "axios";
-import moment from "moment"; // Подключаем moment.js
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 function FieldForm() {
+  const [form] = Form.useForm();
   const [phone, setPhone] = useState("");
   const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [resendTime, setResendTime] = useState(null); // Время, когда можно повторно отправить OTP
+  const [otpSent, setOtpSent] = useState(false);
+  const [timer, setTimer] = useState(60);
+  const [formId, setFormId] = useState("");
 
-  const handleSubmit = async (values) => {
-    setLoading(true);
+  const handleSendOtp = async () => {
     try {
-      const response = await axios.post(`${API_URL}/forms`, {
-        name: values.name,
-        phoneNumber: phone,
+      const values = await form.validateFields();
+      const formData = await axios.post(`${API_URL}/forms`, {
+        ...values,
         formType: "consultation",
       });
-
-      if (response.status === 201) {
-        message.success("OTP отправлен!");
-        setStep(2);
-        setIsModalOpen(true);
-
-        // 📌 Берем время `createdAt`, добавляем 1 минуту
-        const createdAt = response.data.createdAt;
-        const nextResendTime = moment(createdAt).add(1, "minute"); // +1 минута
-        setResendTime(nextResendTime);
-      } else {
-        message.error("Ошибка при отправке OTP.");
-      }
+      setFormId(formData.data.id);
+      message.success("OTP-код отправлен!");
+      setStep(2);
+      setOtpSent(true);
+      setTimer(60);
+      setIsModalOpen(true);
     } catch (error) {
+      message.error("Ошибка при отправке заявки");
       console.error("Ошибка:", error);
-      message.error("Ошибка при подключении к серверу.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -57,7 +48,7 @@ function FieldForm() {
 
           <div className="field-form-right">
             <h2 className="field-form-form-title">Бесплатная консультация!</h2>
-            <Form layout="vertical" onFinish={handleSubmit}>
+            <Form layout="vertical" form={form}>
               <Form.Item
                 label="ФИО"
                 name="name"
@@ -67,7 +58,7 @@ function FieldForm() {
               </Form.Item>
               <Form.Item
                 label="Телефон"
-                name="phone"
+                name="phoneNumber"
                 rules={[
                   {
                     required: true,
@@ -85,13 +76,7 @@ function FieldForm() {
                   masks={{ kz: "(...) ...-..-.." }}
                 />
               </Form.Item>
-              <Button
-                type="primary"
-                size="large"
-                htmlType="submit"
-                block
-                loading={loading}
-              >
+              <Button type="primary" size="large" onClick={handleSendOtp} block>
                 Отправить
               </Button>
             </Form>
@@ -100,13 +85,18 @@ function FieldForm() {
       </div>
 
       <SupportModal
+        handleSendOtp={handleSendOtp}
+        formId={formId}
+        setOtpSent={setOtpSent}
+        otpSent={otpSent}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         phone={phone}
         setPhone={setPhone}
         setStep={setStep}
         step={step}
-        resendTime={resendTime} // Передаем время повторной отправки
+        setTimer={setTimer}
+        timer={timer}
       />
     </div>
   );

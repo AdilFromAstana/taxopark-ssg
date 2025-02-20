@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Input, Checkbox, Card, Button, Modal, Select } from "antd";
+import { Input, Card, Button, Modal } from "antd";
 import "./style.css";
 import { useQuery } from "react-query";
 import axios from "axios";
@@ -16,21 +16,25 @@ const fetchPromotions = async ({ queryKey }) => {
 export default function PromotionsPage() {
   const [selectedPromo, setSelectedPromo] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showActiveOnly, setShowActiveOnly] = useState(false);
   const [sortField, setSortField] = useState(null);
   const [sortOrder, setSortOrder] = useState(null);
 
-  const { data: promotionsData } = useQuery(["promotions", { searchQuery, showActiveOnly, sortField, sortOrder, active: true }], fetchPromotions, {
-    keepPreviousData: true,
-    staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
-  });
+  const { data: promotionsData } = useQuery(
+    ["promotions", { searchQuery, sortField, sortOrder, active: true }],
+    fetchPromotions,
+    {
+      keepPreviousData: true,
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 10 * 60 * 1000,
+    }
+  );
 
   return (
     <div className="promotions-container">
       <h1 className="promotions-title">Акции и бонусы от таксопарков</h1>
       <p className="promotions-description">
-        Следите за актуальными предложениями, участвуйте в розыгрышах, получайте бонусы и скидки!
+        Следите за актуальными предложениями, участвуйте в розыгрышах, получайте
+        бонусы и скидки!
       </p>
 
       <Input
@@ -45,10 +49,12 @@ export default function PromotionsPage() {
           <Card
             key={promo.id}
             hoverable
-            className={`promotion-card ${!promo.active ||
+            className={`promotion-card ${
+              !promo.active ||
               (promo.expires && new Date(promo.expires) < new Date())
-              ? "promotion-inactive"
-              : ""}`}
+                ? "promotion-inactive"
+                : ""
+            }`}
             cover={
               <img
                 src={`${API_URL}/uploads/${promo?.imageUrl}`}
@@ -87,7 +93,8 @@ export default function PromotionsPage() {
             <p className="promotion-description">{selectedPromo.description}</p>
             {selectedPromo.expires && (
               <p className="promotion-expiry">
-                Действует до {moment(selectedPromo.expires).format("DD.MM.YYYY")}
+                Действует до{" "}
+                {moment(selectedPromo.expires).format("DD.MM.YYYY")}
               </p>
             )}
           </>

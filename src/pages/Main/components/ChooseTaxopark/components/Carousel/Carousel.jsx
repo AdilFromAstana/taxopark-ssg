@@ -1,133 +1,120 @@
 /* eslint-disable react/prop-types */
-import { useState, useRef, useEffect } from "react";
-import { FaCircleArrowLeft, FaCircleArrowRight } from "react-icons/fa6";
-import CarouselItemSkeleton from "./CarouselItemSkeleton/CarouselItemSkeleton";
+import { Skeleton, Button } from "antd";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { memo, useEffect, useRef, useState } from "react";
+import "./Carousel.css";
 import CarouselItem from "./CarouselItem/CarouselItem";
 
-const getCardCount = (width = 429) => {
-  if (width <= 430) {
-    return 1.1;
-  } else if (width > 430 && width < 768) {
-    return 1.5;
-  } else if (width > 768 && width < 1024) {
-    return 2;
-  } else {
-    return 3;
-  }
-};
+const Carousel = memo(({ items, isLoading = true }) => {
+  const [carouselItemWidth, setCarouselItemWidth] = useState(0);
+  const carouselWrapperRef = useRef(null);
+  const carouselListRef = useRef(null);
+  const listRef = useRef(null);
 
-const Carousel = ({ items, isLoading }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [carouselItems, setCarouselItems] = useState([]);
-  const carouselRef = useRef({ startX: null });
-  const [carouselDisabled, setCarouselDisabled] = useState(false);
-  const [slidesToShow, setSlidesToShow] = useState(getCardCount());
-
-  console.log(carouselDisabled);
-
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) =>
-      Math.min(prevIndex + 1, items.length - slidesToShow)
-    );
+  const scrollToStart = () => {
+    if (listRef.current) {
+      listRef.current.scrollTo({
+        left: 0,
+        behavior: "smooth",
+      });
+    }
   };
 
-  const handlePrev = () => {
-    setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+  const scrollLeft = () => {
+    if (carouselListRef.current) {
+      carouselListRef.current.scrollBy({
+        left: -carouselItemWidth,
+        behavior: "smooth",
+      });
+    }
   };
 
-  const handleTouchStart = (e) => {
-    const touch = e.touches[0];
-    carouselRef.current.startX = touch.clientX;
-  };
-
-  const handleTouchMove = (e) => {
-    if (carouselRef.current.startX === null) return;
-    const touch = e.touches[0];
-    const diffX = carouselRef.current.startX - touch.clientX;
-
-    if (diffX > 50) {
-      handleNext();
-      carouselRef.current.startX = null;
-    } else if (diffX < -50) {
-      handlePrev();
-      carouselRef.current.startX = null;
+  const scrollRight = () => {
+    if (carouselListRef.current) {
+      carouselListRef.current.scrollBy({
+        left: carouselItemWidth,
+        behavior: "smooth",
+      });
     }
   };
 
   useEffect(() => {
-    const handleResize = () => {
-      setSlidesToShow(getCardCount(window.innerWidth));
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    setCarouselItems(items);
-
-    const carouselElement = carouselRef.current;
-    if (!carouselElement) return;
-
-    return () => {
-      if (carouselRef.current) {
-        carouselRef.current.startX = null;
+    const updateItemWidth = () => {
+      if (carouselWrapperRef.current) {
+        const pageWidth = window.innerWidth;
+        const carouselWidth = carouselWrapperRef.current.offsetWidth;
+        let cardWidth;
+        if (pageWidth <= 449) {
+          cardWidth = carouselWidth / 1.15;
+        } else if (pageWidth <= 768) {
+          cardWidth = carouselWidth / 1.5;
+        } else if (pageWidth <= 1024) {
+          cardWidth = carouselWidth / 2;
+        } else {
+          cardWidth = carouselWidth / 3;
+        }
+        setCarouselItemWidth(cardWidth);
       }
     };
-  }, [items]);
 
-  if (items && isLoading) {
-    return (
-      <div className="relative overflow-x-hidden overflow-y-visible w-[90vw] 2xl:w-[70vw] pb-4">
-        <div className="flex transition-transform duration-300 bg-transparent w-[90vw] 2xl:w-[70vw]">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <CarouselItemSkeleton key={index} slidesToShow={slidesToShow} />
-          ))}
-        </div>
-      </div>
-    );
-  } else {
-    return (
-      <div className="relative mx-auto w-[90vw] 2xl:w-[70vw] overflow-y-visible">
-        <div className="relative overflow-x-hidden overflow-y-visible w-[90vw] 2xl:w-[70vw] pb-4">
-          <div
-            ref={carouselRef}
-            className="flex transition-transform duration-300 bg-transparent w-[90vw] 2xl:w-[70vw]"
-            style={{
-              transform: `translateX(-${currentIndex * (100 / slidesToShow)}%)`,
-            }}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-          >
-            {carouselItems.map((item) => (
-              <CarouselItem
-                key={item.id}
-                slidesToShow={slidesToShow}
-                item={item}
-                setCarouselDisabled={setCarouselDisabled}
-              />
+    updateItemWidth();
+    scrollToStart();
+
+    window.addEventListener("resize", updateItemWidth);
+    return () => window.removeEventListener("resize", updateItemWidth);
+  }, []);
+
+  return (
+    <div
+      ref={carouselWrapperRef}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+        position: "relative",
+      }}
+    >
+      {window.innerWidth >= 768 && (
+        <>
+          <Button
+            className="related-carousel-button-left"
+            onClick={scrollLeft}
+            icon={<LeftOutlined />}
+          />
+          <Button
+            className="related-carousel-button-right"
+            onClick={scrollRight}
+            icon={<RightOutlined />}
+          />
+        </>
+      )}
+      <div ref={listRef} className="horizontal-scroll-container">
+        {isLoading && (
+          <div ref={carouselListRef} className="ant-list-items">
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton key={index} active className="flip-card" />
             ))}
           </div>
-        </div>
-
-        <button
-          className="absolute top-1/2 -left-4 lg:-left-4 transform -translate-y-1/2 lg:block hidden "
-          onClick={handlePrev}
-        >
-          <FaCircleArrowLeft fontSize="lg:36px 20px" />
-        </button>
-
-        <button
-          className="absolute top-1/2 -right-4 lg:-right-4 transform -translate-y-1/2 lg:block hidden "
-          onClick={handleNext}
-        >
-          <FaCircleArrowRight fontSize="lg:36px 20px" />
-        </button>
+        )}
+        {items.length > 0 && (
+          <div ref={carouselListRef} className="ant-list-items">
+            {items.map((item) => {
+              return (
+                <CarouselItem
+                  key={item.id}
+                  index={item.id}
+                  item={item}
+                  carouselItemWidth={carouselItemWidth}
+                />
+              );
+            })}
+          </div>
+        )}
       </div>
-    );
-  }
-};
+    </div>
+  );
+});
+
+Carousel.displayName = "Carousel";
 
 export default Carousel;

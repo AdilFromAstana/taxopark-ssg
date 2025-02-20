@@ -20,7 +20,15 @@ import { UploadOutlined } from "@ant-design/icons";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const EditPromotionModal = ({ open, onClose, record, parks = [], queryClient, queryData, setSelectedRecord }) => {
+const EditPromotionModal = ({
+  open,
+  onClose,
+  record,
+  parks = [],
+  queryClient,
+  queryData,
+  setSelectedRecord,
+}) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -37,18 +45,16 @@ const EditPromotionModal = ({ open, onClose, record, parks = [], queryClient, qu
 
         return {
           ...oldData,
-          data: oldData.data.map(item => {
+          data: oldData.data.map((item) => {
             if (item.id === record.id) {
-              setSelectedRecord({ ...item, imageUrl: info.file.response })
-              return { ...item, imageUrl: info.file.response }
+              setSelectedRecord({ ...item, imageUrl: info.file.response });
+              return { ...item, imageUrl: info.file.response };
             } else {
-              return item
+              return item;
             }
-          }
-          ),
+          }),
         };
       });
-
     } else if (info.file.status === "error") {
       message.error("Ошибка загрузки файла");
     }
@@ -79,24 +85,24 @@ const EditPromotionModal = ({ open, onClose, record, parks = [], queryClient, qu
     try {
       setLoading(true);
 
-      const updatedData = await axios.put(`${API_URL}/promotions/update/${record.id}`,
-        data,
+      const updatedData = await axios.put(
+        `${API_URL}/promotions/update/${record.id}`,
+        data
       );
 
       queryClient.setQueryData(["promotions", queryData], (oldData) => {
         if (!oldData || !oldData.data) return oldData;
         return {
           ...oldData,
-          data: oldData.data.map(item => {
+          data: oldData.data.map((item) => {
             if (item.id === record.id) {
-              setSelectedRecord(updatedData.data)
-              form.setFieldsValue(updatedData.data)
-              return updatedData.data
+              setSelectedRecord(updatedData.data);
+              form.setFieldsValue(updatedData.data);
+              return updatedData.data;
             } else {
-              return item
+              return item;
             }
-          }
-          ),
+          }),
         };
       });
 
@@ -107,7 +113,8 @@ const EditPromotionModal = ({ open, onClose, record, parks = [], queryClient, qu
     } catch (error) {
       console.error("❌ Ошибка при обновлении:", error);
       message.error(
-        `Ошибка при обновлении акции: ${error.response?.data?.message || "Неизвестная ошибка"
+        `Ошибка при обновлении акции: ${
+          error.response?.data?.message || "Неизвестная ошибка"
         }`
       );
     } finally {
@@ -115,8 +122,6 @@ const EditPromotionModal = ({ open, onClose, record, parks = [], queryClient, qu
       console.log("🔽 Завершение обновления.");
     }
   };
-
-  console.log("record?.imageUrl: ", record?.imageUrl)
 
   return (
     <Modal
@@ -203,7 +208,14 @@ const EditPromotionModal = ({ open, onClose, record, parks = [], queryClient, qu
                 showUploadList={true}
                 fileList={
                   record?.imageUrl
-                    ? [{ uid: "1", name: "image", status: "done", url: `${API_URL}/uploads/${record?.imageUrl}` }]
+                    ? [
+                        {
+                          uid: "1",
+                          name: "image",
+                          status: "done",
+                          url: `${API_URL}/uploads/${record?.imageUrl}`,
+                        },
+                      ]
                     : []
                 }
                 onPreview={() => {
@@ -223,24 +235,32 @@ const EditPromotionModal = ({ open, onClose, record, parks = [], queryClient, qu
                         .then((res) => res.json())
                         .then(() => {
                           message.success("Изображение удалено");
-                          queryClient.setQueryData(["promotions", queryData], (oldData) => {
-                            if (!oldData || !oldData.data) return oldData;
-                            return {
-                              ...oldData,
-                              data: oldData.data.map(item => {
-                                if (item.id === record.id) {
-                                  setSelectedRecord({ ...item, imageUrl: null })
-                                  return { ...item, imageUrl: null }
-                                } else {
-                                  return item
-                                }
-                              }
-                              ),
-                            };
-                          });
+                          queryClient.setQueryData(
+                            ["promotions", queryData],
+                            (oldData) => {
+                              if (!oldData || !oldData.data) return oldData;
+                              return {
+                                ...oldData,
+                                data: oldData.data.map((item) => {
+                                  if (item.id === record.id) {
+                                    setSelectedRecord({
+                                      ...item,
+                                      imageUrl: null,
+                                    });
+                                    return { ...item, imageUrl: null };
+                                  } else {
+                                    return item;
+                                  }
+                                }),
+                              };
+                            }
+                          );
                         })
                         .catch((error) => {
-                          console.error("Ошибка при удалении изображения:", error);
+                          console.error(
+                            "Ошибка при удалении изображения:",
+                            error
+                          );
                           message.error("Не удалось удалить изображение");
                         });
                     },
@@ -256,7 +276,8 @@ const EditPromotionModal = ({ open, onClose, record, parks = [], queryClient, qu
                   preview={{
                     visible: previewOpen,
                     onVisibleChange: (visible) => setPreviewOpen(visible),
-                    afterOpenChange: (visible) => !visible && setPreviewImage(""),
+                    afterOpenChange: (visible) =>
+                      !visible && setPreviewImage(""),
                   }}
                   src={previewImage}
                 />

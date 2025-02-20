@@ -75,7 +75,6 @@ const CarouselItem = memo(({ item, index, carouselItemWidth }) => {
                   {formatNumber(item.approximateIncome)} ₸
                 </div>
                 <div className="carousel-card-details">
-
                   <h3 className="carousel-card-title">{item.title}</h3>
                   <div className="carousel-card-rating">
                     <IoIosStar className="carousel-card-icon star" />

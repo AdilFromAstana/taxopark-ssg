@@ -3,7 +3,7 @@ import { useQuery } from "react-query";
 import Filters from "./components/Filters";
 import { Button, Drawer } from "antd";
 import "./ChooseTaxopark.css";
-import TestCarousel from "./components/TestCarousel/TestCarousel";
+import Carousel from "./components/Carousel/Carousel";
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -34,12 +34,15 @@ const ChooseTaxopark = () => {
         </span>
       </div>
       <div className="desktop-filters">
-        <Filters setItems={setItems} cities={cities} setIsLoading={setIsLoading} setItemsCount={setItemsCount} />
+        <Filters
+          setItems={setItems}
+          cities={cities}
+          setIsLoading={setIsLoading}
+          setItemsCount={setItemsCount}
+        />
       </div>
       <div className="carousel-header">
-        <h3 className="carousel-count">
-          Найдено таксопарков: {itemsCount}
-        </h3>
+        <h3 className="carousel-count">Найдено таксопарков: {itemsCount}</h3>
         <Button
           className="carousel-filters-button"
           onClick={() => setIsDrawerOpen(true)}
@@ -48,14 +51,19 @@ const ChooseTaxopark = () => {
           Расчитать доход
         </Button>
       </div>
-      <TestCarousel items={items} isLoading={isLoading || citiesLoading} />
+      <Carousel items={items} isLoading={isLoading || citiesLoading} />
       <Drawer
         open={isDrawerOpen}
         title="Расчитать доход"
         onClose={() => setIsDrawerOpen(false)}
         className="carousel-drawer"
       >
-        <Filters setItems={setItems} cities={cities} setIsLoading={setIsLoading} setItemsCount={setItemsCount} />
+        <Filters
+          setItems={setItems}
+          cities={cities}
+          setIsLoading={setIsLoading}
+          setItemsCount={setItemsCount}
+        />
         <Button
           className="drawer-apply-button"
           size="large"

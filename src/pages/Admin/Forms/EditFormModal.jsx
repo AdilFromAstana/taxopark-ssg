@@ -3,194 +3,69 @@ import { Modal, Form, Input, Button, Select, Timeline, message } from "antd";
 import axios from "axios";
 import { useState, useEffect, memo } from "react";
 import "./style.css";
+import { useQuery, useQueryClient } from "react-query";
 
-const statuses = {
-  consultation: [
-    {
-      code: "registered",
-      title: "Зарегистрирован",
-      next: [
-        {
-          code: "sent_to_other_park",
-          title: "Отправлен в другой парк",
-          requires_reason: true,
-        },
-        { code: "thinking", title: "Клиент думает", requires_reason: false },
-        {
-          code: "no_answer",
-          title: "Клиент не отвечает",
-          requires_reason: false,
-        },
-        {
-          code: "incorrect_data",
-          title: "Неверные данные",
-          requires_reason: true,
-        },
-        { code: "approved", title: "Подключен", requires_reason: false },
-        { code: "rejected", title: "Отклонен", requires_reason: true },
-      ],
-    },
-    {
-      code: "sent_to_other_park",
-      title: "Отправлен в другой парк",
-      next: [
-        { code: "approved", title: "Подключен", requires_reason: false },
-        { code: "rejected", title: "Отклонен", requires_reason: true },
-      ],
-    },
-    {
-      code: "thinking",
-      title: "Клиент думает",
-      next: [
-        { code: "approved", title: "Подключен", requires_reason: false },
-        { code: "rejected", title: "Отклонен", requires_reason: true },
-      ],
-    },
-    {
-      code: "no_answer",
-      title: "Клиент не отвечает",
-      next: [
-        {
-          code: "registered",
-          title: "Зарегистрирован",
-          requires_reason: false,
-        },
-        { code: "rejected", title: "Отклонен", requires_reason: true },
-      ],
-    },
-    {
-      code: "incorrect_data",
-      title: "Неверные данные",
-      next: [
-        {
-          code: "registered",
-          title: "Зарегистрирован",
-          requires_reason: false,
-        },
-        { code: "rejected", title: "Отклонен", requires_reason: true },
-      ],
-    },
-    {
-      code: "approved",
-      title: "Подключен",
-      next: [],
-    },
-    {
-      code: "rejected",
-      title: "Отклонен",
-      next: [],
-    },
-  ],
-  taxiPark: [
-    {
-      code: "registered",
-      title: "Ожидание обработки",
-      next: [
-        {
-          code: "sent_to_partner",
-          title: "Отправлен партнеру",
-          requires_reason: false,
-        },
-      ],
-    },
-    {
-      code: "sent_to_partner",
-      title: "Отправлен партнеру",
-      next: [
-        {
-          code: "partner_error",
-          title: "Ошибка при отправке партнеру",
-          requires_reason: true,
-        },
-        { code: "approved", title: "Подключен", requires_reason: false },
-        { code: "rejected", title: "Отклонен", requires_reason: true },
-      ],
-    },
-    {
-      code: "partner_error",
-      title: "Ошибка при отправке партнеру",
-      next: [
-        {
-          code: "registered",
-          title: "Зарегистрирован",
-          requires_reason: false,
-        },
-        { code: "rejected", title: "Отклонен", requires_reason: true },
-      ],
-    },
-    {
-      code: "approved",
-      title: "Подключен",
-      next: [],
-    },
-    {
-      code: "rejected",
-      title: "Отклонен",
-      next: [],
-    },
-  ],
+const fetchAvailableStatuses = async ({ queryKey }) => {
+  const [, formId] = queryKey;
+  if (!formId) return [];
+  const response = await axios.get(
+    `${API_URL}/forms/${formId}/getAvailableStatusesById`
+  );
+  return response.data;
 };
 
-const tagTitle = {
-  taxiPark: "Таксопарк",
-  consultation: "Консультация",
-};
+const fetchStatusHistory = async ({ queryKey }) => {
+  const [, formId] = queryKey;
+  if (!formId) return [];
 
-function formatPhoneNumber(phoneNumber) {
-  const cleaned = phoneNumber.replace(/\D/g, "");
-
-  if (cleaned.length !== 11 || cleaned[0] !== "7") {
-    throw new Error("Некорректный номер телефона. Убедитесь, что номер начинается с +7 и состоит из 11 цифр.");
+  try {
+    const response = await axios.get(
+      `${API_URL}/forms/${formId}/statusHistory`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Ошибка при загрузке истории статусов:", error);
+    throw new Error("Ошибка загрузки истории статусов");
   }
-
-  const formatted = `+7-(${cleaned.slice(1, 4)})-${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}-${cleaned.slice(9)}`;
-  return formatted;
-}
+};
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 const EditFormModal = memo(({ open, onClose, record }) => {
+  const queryClient = useQueryClient();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [statusOptions, setStatusOptions] = useState([]);
   const [requiresReason, setRequiresReason] = useState(false);
-  const [history, setHistory] = useState([]);
   const status = Form.useWatch("status", form);
   const reason = Form.useWatch("reason", form);
 
-  const fetchStatusHistory = async () => {
-    try {
-      const response = await axios.get(
-        `${API_URL}/forms/${record.id}/statusHistory`
-      );
-      setHistory(response.data);
-    } catch (error) {
-      console.error("Ошибка при загрузке истории статусов:", error);
+  const { data: statusOptions = [], isFetching: isFetchingStatuses } = useQuery(
+    {
+      queryKey: ["availableStatuses", record?.id],
+      queryFn: fetchAvailableStatuses,
+      enabled: !!record?.id,
+      staleTime: 1000 * 60 * 5,
+      cacheTime: 1000 * 60 * 10,
     }
-  };
+  );
+
+  const { data: history = [] } = useQuery({
+    queryKey: ["statusHistory", record?.id],
+    queryFn: fetchStatusHistory,
+    enabled: !!record?.id,
+    staleTime: 1000 * 60 * 5,
+    cacheTime: 1000 * 60 * 10,
+  });
 
   useEffect(() => {
     if (record?.id) {
-      form.setFieldValue('formType', tagTitle[record?.formType])
-      form.setFieldValue('phoneNumber', formatPhoneNumber(record?.phoneNumber))
-      fetchStatusHistory();
+      form.setFieldsValue(record);
     }
   }, [record?.id]);
 
-  useEffect(() => {
-    if (record?.statusCode) {
-      const currentStatus = statuses[record?.formType].find(
-        (s) => s.code === record.statusCode
-      );
-      if (currentStatus) {
-        setStatusOptions(currentStatus.next);
-      }
-    }
-  }, [record?.statusCode]);
-
   const handleStatusChange = (value) => {
-    const selectedStatus = statusOptions.find((s) => s.code === value);
+    const selectedStatus = statusOptions.find((s) => s.toStatus === value);
     setRequiresReason(selectedStatus?.requires_reason || false);
   };
 
@@ -213,11 +88,15 @@ const EditFormModal = memo(({ open, onClose, record }) => {
 
       console.log("✅ Статус успешно обновлен:", response.data);
       message.success("🎉 Статус успешно обновлен!");
+      queryClient.invalidateQueries(["statusHistory", record?.id]);
+      queryClient.invalidateQueries(["availableStatuses", record?.id]);
+      setRequiresReason(false);
 
       handleClose(); // Закрываем модальное окно
     } catch (error) {
       message.error(
-        `Ошибка обновления: ${error.response?.data?.message || "Неизвестная ошибка"
+        `Ошибка обновления: ${
+          error.response?.data?.message || "Неизвестная ошибка"
         }`
       );
     } finally {
@@ -250,8 +129,8 @@ const EditFormModal = memo(({ open, onClose, record }) => {
       <Form
         form={form}
         layout="vertical"
-        initialValues={record}
         onFinish={handleUpdate}
+        initialValues={record}
       >
         <Form.Item name="name" label="ФИО">
           <Input disabled />
@@ -268,41 +147,55 @@ const EditFormModal = memo(({ open, onClose, record }) => {
           </Form.Item>
         )}
         <Form.Item label="История изменений статуса">
-          <Timeline style={{ marginTop: 8 }}>
-            {history.map((item, index) => {
-              console.log("record?.formType: ", record?.formType)
-              const newStatus = statuses[record?.formType]?.find(
-                (s) => s.code === item.newStatusCode
-              );
+          <Timeline
+            style={{ marginTop: 8 }}
+            items={history?.map((item, index) => {
               const isLastItem = index === history.length - 1;
-              return (
-                <Timeline.Item
-                  key={item.id}
-                  className={isLastItem ? "blinking" : ""}
-                >
-                  {newStatus ? newStatus.title : item.newStatusCode} (
-                  {new Date(item.createdAt).toLocaleString()})
-                  {item.reason && (
-                    <div style={{ color: "#888" }}>Причина: {item.reason}</div>
-                  )}
-                </Timeline.Item>
-              );
+
+              return {
+                key: item.id,
+                className: isLastItem ? "blinking" : "",
+                children: (
+                  <div>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <span>
+                        {item?.statusDetail?.title
+                          ? item?.statusDetail?.title
+                          : item?.newStatusCode}
+                      </span>
+                      <span>({new Date(item.createdAt).toLocaleString()})</span>
+                    </div>
+                    <div>
+                      {item.reason && (
+                        <div style={{ color: "#888" }}>
+                          Причина: {item.reason}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ),
+              };
             })}
-          </Timeline>
+          />
         </Form.Item>
-        <Form.Item name="status" label="Сменить статус на">
-          <Select
-            disabled={!isEditMode}
-            onChange={handleStatusChange}
-            allowClear
-          >
-            {statusOptions.map((status) => (
-              <Select.Option key={status.code} value={status.code}>
-                {status.title}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
+        {statusOptions.length > 0 && (
+          <Form.Item name="status" label="Сменить статус на">
+            <Select
+              disabled={!isEditMode || isFetchingStatuses}
+              onChange={handleStatusChange}
+              loading={isFetchingStatuses}
+              allowClear
+            >
+              {statusOptions.map((status) => {
+                return (
+                  <Select.Option key={status.toStatus} value={status.toStatus}>
+                    {status.toStatusDetail.title}
+                  </Select.Option>
+                );
+              })}
+            </Select>
+          </Form.Item>
+        )}
         {requiresReason && (
           <Form.Item
             name="reason"
@@ -317,43 +210,47 @@ const EditFormModal = memo(({ open, onClose, record }) => {
           </Form.Item>
         )}
 
-        <div
-          style={{
-            marginTop: "16px",
-            display: "flex",
-            justifyContent: "space-between",
-          }}
-        >
-          {isEditMode ? (
-            <>
-              <Button
-                type="primary"
-                onClick={handleUpdate}
-                loading={loading}
-                disabled={isUpdateButtonDisabled}
-              >
-                Сохранить
+        {statusOptions.length > 0 && (
+          <div
+            style={{
+              marginTop: "16px",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            {isEditMode ? (
+              <>
+                <Button
+                  type="primary"
+                  onClick={handleUpdate}
+                  loading={loading}
+                  disabled={isUpdateButtonDisabled}
+                >
+                  Сохранить
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsEditMode(false);
+                    resetStatusAndReason();
+                    handleStatusChange(undefined);
+                  }}
+                  danger
+                >
+                  Отмена
+                </Button>
+              </>
+            ) : (
+              <Button type="primary" onClick={() => setIsEditMode(true)}>
+                Обновить статус
               </Button>
-              <Button
-                onClick={() => {
-                  setIsEditMode(false);
-                  resetStatusAndReason();
-                  handleStatusChange(undefined);
-                }}
-                danger
-              >
-                Отмена
-              </Button>
-            </>
-          ) : (
-            <Button type="primary" onClick={() => setIsEditMode(true)}>
-              Обновить статус
-            </Button>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </Form>
     </Modal>
   );
 });
+
+EditFormModal.displayName = "EditFormModal";
 
 export default EditFormModal;
