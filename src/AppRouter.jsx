@@ -19,8 +19,8 @@ const AppRouter = () => {
         {/* Главная страница с Header */}
         <Route path="/" element={<MainLayout />}>
           <Route path="/" index element={<HomePage />} />
-          <Route index element={<Navigate to="/" replace />} />
           <Route path="promotions" element={<PromotionsPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
 
         {/* Админка с Sidebar */}

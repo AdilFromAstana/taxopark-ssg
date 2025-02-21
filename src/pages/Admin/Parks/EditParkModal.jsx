@@ -40,6 +40,75 @@ const EditParkModal = memo(
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState(false);
 
+    const handleChangeStatus = async () => {
+      setLoading(true);
+      try {
+        const updatedData = await axios.put(
+          `${API_URL}/parks/update/${record.id}`,
+          { active: !record.active }
+        );
+        queryClient.setQueryData(["parks", queryData], (oldData) => {
+          if (!oldData || !oldData.data) return oldData;
+          return {
+            ...oldData,
+            data: oldData.data.map((item) => {
+              if (item.id === record.id) {
+                setSelectedRecord(updatedData.data);
+                form.setFieldsValue(updatedData.data);
+                return updatedData.data;
+              } else {
+                return item;
+              }
+            }),
+          };
+        });
+        message.success("Запись успешно обновлена!");
+        handleClose();
+      } catch (error) {
+        message.error(
+          `Ошибка: ${error?.response?.data?.message || "Неизвестная ошибка"}`
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const handleUpdate = async () => {
+      setLoading(true);
+      try {
+        await form.validateFields();
+        const data = form.getFieldsValue();
+        const updatedData = await axios.put(
+          `${API_URL}/parks/update/${record.id}`,
+          data
+        );
+        queryClient.setQueryData(["parks", queryData], (oldData) => {
+          if (!oldData || !oldData.data) return oldData;
+          return {
+            ...oldData,
+            data: oldData.data.map((item) => {
+              if (item.id === record.id) {
+                setSelectedRecord(updatedData.data);
+                form.setFieldsValue(updatedData.data);
+                return updatedData.data;
+              } else {
+                return item;
+              }
+            }),
+          };
+        });
+        message.success("Запись успешно обновлена!");
+        setIsEditMode((prev) => !prev);
+        handleClose();
+      } catch (error) {
+        message.error(
+          `Ошибка: ${error?.response?.data?.message || "Неизвестная ошибка"}`
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
     const handleImageUpload = async (info) => {
       if (info.file.status === "uploading") return;
 
@@ -103,41 +172,6 @@ const EditParkModal = memo(
       }
     }, [open, record]);
 
-    const handleUpdate = async () => {
-      const data = form.getFieldsValue();
-      try {
-        setLoading(true);
-        const updatedData = await axios.put(
-          `${API_URL}/parks/update/${record.id}`,
-          data
-        );
-        queryClient.setQueryData(["parks", queryData], (oldData) => {
-          if (!oldData || !oldData.data) return oldData;
-          return {
-            ...oldData,
-            data: oldData.data.map((item) => {
-              if (item.id === record.id) {
-                setSelectedRecord(updatedData.data);
-                form.setFieldsValue(updatedData.data);
-                return updatedData.data;
-              } else {
-                return item;
-              }
-            }),
-          };
-        });
-        message.success("Запись успешно обновлена!");
-        setIsEditMode((prev) => !prev);
-        handleClose();
-      } catch (error) {
-        message.error(
-          `Ошибка: ${error?.response?.data?.message || "Неизвестная ошибка"}`
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
     const toggleRadioValue = (name, value) => {
       setRadioValues((prev) => {
         const newValue = prev[name] === value ? null : value;
@@ -184,7 +218,7 @@ const EditParkModal = memo(
             <Col span={8}>
               <Form.Item
                 name="parkCommission"
-                label="Комиссия парка"
+                label="Комиссия парка %"
                 rules={[{ required: true }]}
               >
                 <InputNumber
@@ -198,7 +232,7 @@ const EditParkModal = memo(
           </Row>
           <Row gutter={16}>
             <Col span={8}>
-              <Form.Item name="commissionWithdraw" label="Комиссия за вывод">
+              <Form.Item name="commissionWithdraw" label="Комиссия за вывод %">
                 <InputNumber
                   min={0}
                   max={100}
@@ -210,7 +244,7 @@ const EditParkModal = memo(
             <Col span={8}>
               <Form.Item
                 name="transferPaymentCommission"
-                label="Комиссия за перевод"
+                label="Комиссия за перевод %"
               >
                 <InputNumber
                   min={0}
@@ -245,7 +279,22 @@ const EditParkModal = memo(
               <Form.Item
                 name="averageCheck"
                 label="Средний чек"
-                rules={[{ required: true }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Пожалуйста, укажите средний чек!",
+                  },
+                  () => ({
+                    validator(_, value) {
+                      if (value > 0) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(
+                        new Error("Средний чек должен быть больше 0!")
+                      );
+                    },
+                  }),
+                ]}
               >
                 <InputNumber
                   min={0}
@@ -365,6 +414,75 @@ const EditParkModal = memo(
           </Row>
           <Row gutter={16}>
             <Col span={8}>
+              <Form.Item name="carRentals" label="Аренда машин от парка">
+                <Radio.Group
+                  value={radioValues.carRentals}
+                  disabled={!isEditMode}
+                >
+                  <Radio
+                    onClick={() => toggleRadioValue("carRentals", true)}
+                    value={true}
+                  >
+                    Да
+                  </Radio>
+                  <Radio
+                    onClick={() => toggleRadioValue("carRentals", false)}
+                    value={false}
+                  >
+                    Нет
+                  </Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="supportAlwaysAvailable"
+                label="Круглосуточная поддержка"
+              >
+                <Radio.Group
+                  value={radioValues.supportAlwaysAvailable}
+                  disabled={!isEditMode}
+                >
+                  <Radio
+                    onClick={() =>
+                      toggleRadioValue("supportAlwaysAvailable", true)
+                    }
+                    value={true}
+                  >
+                    Да
+                  </Radio>
+                  <Radio
+                    onClick={() =>
+                      toggleRadioValue("supportAlwaysAvailable", false)
+                    }
+                    value={false}
+                  >
+                    Нет
+                  </Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Col>
+            {form.getFieldValue("supportAlwaysAvailable") === false && (
+              <Col span={8}>
+                <Form.Item
+                  name="supportWorkTime"
+                  label="Рабочее время поддержки"
+                  rules={[
+                    { required: true, message: "Выберите рабочее время!" },
+                  ]}
+                >
+                  <RangePicker
+                    format="HH:mm"
+                    minuteStep={15}
+                    placeholder={["Начало", "Конец"]}
+                    disabled={!isEditMode}
+                  />
+                </Form.Item>
+              </Col>
+            )}
+          </Row>
+          <Row gutter={16}>
+            <Col span={8}>
               <Form.Item
                 name="image"
                 label="Изображение парка"
@@ -457,55 +575,9 @@ const EditParkModal = memo(
                 )}
               </Form.Item>
             </Col>
-            <Col span={8}>
-              <Form.Item
-                name="supportAlwaysAvailable"
-                label="Круглосуточная поддержка"
-              >
-                <Radio.Group
-                  value={radioValues.supportAlwaysAvailable}
-                  disabled={!isEditMode}
-                >
-                  <Radio
-                    onClick={() =>
-                      toggleRadioValue("supportAlwaysAvailable", true)
-                    }
-                    value={true}
-                  >
-                    Да
-                  </Radio>
-                  <Radio
-                    onClick={() =>
-                      toggleRadioValue("supportAlwaysAvailable", false)
-                    }
-                    value={false}
-                  >
-                    Нет
-                  </Radio>
-                </Radio.Group>
-              </Form.Item>
-            </Col>
-            {form.getFieldValue("supportAlwaysAvailable") === false && (
-              <Col span={8}>
-                <Form.Item
-                  name="supportWorkTime"
-                  label="Рабочее время поддержки"
-                  rules={[
-                    { required: true, message: "Выберите рабочее время!" },
-                  ]}
-                >
-                  <RangePicker
-                    format="HH:mm"
-                    minuteStep={15}
-                    placeholder={["Начало", "Конец"]}
-                    disabled={!isEditMode}
-                  />
-                </Form.Item>
-              </Col>
-            )}
           </Row>
           {isEditMode ? (
-            <>
+            <div style={{ display: "flex" }}>
               <Button type="primary" onClick={handleUpdate} loading={loading}>
                 Сохранить
               </Button>
@@ -516,21 +588,27 @@ const EditParkModal = memo(
               >
                 Отмена
               </Button>
-            </>
+            </div>
           ) : (
-            <>
+            <div style={{ display: "flex", gap: 10 }}>
               <Button type="primary" onClick={() => setIsEditMode(true)}>
                 Редактировать
               </Button>
               <Button
                 type="primary"
+                style={{ backgroundColor: record.active ? "red" : "green" }}
+                onClick={handleChangeStatus}
+              >
+                {record.active ? "Архивировать" : "Активировать"}
+              </Button>
+              <Button
                 danger
                 onClick={handleClose}
-                style={{ marginLeft: 8 }}
+                style={{ marginLeft: "auto" }}
               >
                 Закрыть
               </Button>
-            </>
+            </div>
           )}
         </Form>
       </Modal>

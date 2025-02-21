@@ -67,7 +67,12 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
             <Form.Item
               name="title"
               label="Название парка"
-              rules={[{ required: true }]}
+              rules={[
+                {
+                  required: true,
+                  message: "Пожалуйста, укажите название парка!",
+                },
+              ]}
             >
               <Input />
             </Form.Item>
@@ -91,7 +96,22 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
             <Form.Item
               name="parkCommission"
               label="Комиссия парка %"
-              rules={[{ required: true }]}
+              rules={[
+                {
+                  required: true,
+                  message: "Пожалуйста, укажите комиссию парка!",
+                },
+                () => ({
+                  validator(_, value) {
+                    if (value > 0) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      new Error("Комиссию парка должна быть больше 0!")
+                    );
+                  },
+                }),
+              ]}
             >
               <InputNumber min={0} max={100} style={{ width: "100%" }} />
             </Form.Item>
@@ -134,7 +154,22 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
             <Form.Item
               name="averageCheck"
               label="Средний чек"
-              rules={[{ required: true }]}
+              rules={[
+                {
+                  required: true,
+                  message: "Пожалуйста, укажите средний чек!",
+                },
+                () => ({
+                  validator(_, value) {
+                    if (value > 0) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      new Error("Средний чек должен быть больше 0!")
+                    );
+                  },
+                }),
+              ]}
             >
               <InputNumber min={0} style={{ width: "100%" }} />
             </Form.Item>
@@ -231,6 +266,24 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
         </Row>
         <Row gutter={16}>
           <Col span={8}>
+            <Form.Item name="carRentals" label="Аренда машин от парка">
+              <Radio.Group value={radioValues.carRentals}>
+                <Radio
+                  onClick={() => toggleRadioValue("carRentals", true)}
+                  value={true}
+                >
+                  Да
+                </Radio>
+                <Radio
+                  onClick={() => toggleRadioValue("carRentals", false)}
+                  value={false}
+                >
+                  Нет
+                </Radio>
+              </Radio.Group>
+            </Form.Item>
+          </Col>
+          <Col span={8}>
             <Form.Item
               name="supportAlwaysAvailable"
               label="Круглосуточная поддержка"
@@ -257,7 +310,11 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
           </Col>
           {form && form?.getFieldValue("supportAlwaysAvailable") === false && (
             <Col span={8}>
-              <Form.Item name="supportWorkTime" label="Рабочее время поддержки">
+              <Form.Item
+                name="supportWorkTime"
+                label="Рабочее время поддержки"
+                rules={[{ required: true, message: "Выберите рабочее время!" }]}
+              >
                 <RangePicker
                   format={"HH:mm"}
                   minuteStep={15}

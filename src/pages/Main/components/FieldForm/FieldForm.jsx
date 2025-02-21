@@ -85,6 +85,7 @@ function FieldForm() {
       </div>
 
       <SupportModal
+        form={form}
         handleSendOtp={handleSendOtp}
         formId={formId}
         setOtpSent={setOtpSent}

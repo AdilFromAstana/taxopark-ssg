@@ -10,14 +10,13 @@ import {
 } from "react-icons/md";
 import { BiMoneyWithdraw } from "react-icons/bi";
 import { LuClock3, LuGift } from "react-icons/lu";
-import { FaLocationDot, FaGasPump } from "react-icons/fa6";
+import { FaLocationDot, FaGasPump, FaHandshake } from "react-icons/fa6";
 import { PiWallet } from "react-icons/pi";
-import { FaCheck, FaHandshake } from "react-icons/fa";
 import { TbCashRegister } from "react-icons/tb";
-import { TfiClose } from "react-icons/tfi";
 import { GoCreditCard } from "react-icons/go";
 import "./CarouselItem.css";
 import ApplicationModal from "../../ApplicationModal";
+import moment from "moment";
 
 function formatNumber(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -36,9 +35,26 @@ const getPromotionLabel = (id) => {
   return promotion ? promotion.label : "Неизвестная акция";
 };
 
+const formatTime = (time) => {
+  return time ? moment(time).format("HH:mm") : "Не указано"; // Если null, пишем "Не указано"
+};
+
 const CarouselItem = memo(({ item, index, carouselItemWidth }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [flipped, setFlipped] = useState(false);
+
+  const getSupportTime = () => {
+    if (typeof item.supportAlwaysAvailable === "boolean") {
+      return item.supportAlwaysAvailable
+        ? "24/7"
+        : `${formatTime(item.supportStartWorkTime)} - ${formatTime(
+            item.supportEndWorkTime
+          )}`;
+    }
+    return null;
+  };
+
+  const supportTime = getSupportTime();
 
   const openModal = (event) => {
     event.stopPropagation();
@@ -78,29 +94,32 @@ const CarouselItem = memo(({ item, index, carouselItemWidth }) => {
                   <h3 className="carousel-card-title">{item.title}</h3>
                   <div className="carousel-card-rating">
                     <IoIosStar className="carousel-card-icon star" />
-                    <span>4.8</span>
+                    <span>{item.rating}</span>
                   </div>
                   <div className="carousel-card-detail">
                     <MdPercent className="carousel-card-icon" />
-                    <span>Комиссия {item.commission}%</span>
+                    <span>Комиссия парка {item.parkCommission}%</span>
                   </div>
                   <div className="carousel-card-detail">
                     <LuClock3 className="carousel-card-icon" />
                     {/* <span>{item.paymentType}</span> */}
-                    <span>Моментальные выплаты</span>
+                    <span>Моментальные выплаты {item.commissionWithdraw}</span>
                   </div>
-                  <div className="carousel-card-detail">
-                    <MdHeadsetMic className="carousel-card-icon" />
-                    <span>{item.supportWorkTime}</span>
-                  </div>
-                  <div className="carousel-card-detail">
-                    <PiWallet className="carousel-card-icon" />
-                    {/* <span>{item.commissionWithdraw}</span> */}
-                    <span>Парковое ИП</span>
-                  </div>
+                  {supportTime && (
+                    <div className="carousel-card-detail">
+                      <MdHeadsetMic className="carousel-card-icon" />
+                      <span>{supportTime}</span>
+                    </div>
+                  )}
+                  {item.parkEntrepreneurSupport ? (
+                    <div className="carousel-card-detail">
+                      <PiWallet className="carousel-card-icon" />
+                      <span>Парковое ИП</span>
+                    </div>
+                  ) : null}
                   <div className="carousel-card-detail">
                     <FaLocationDot className="carousel-card-icon" />
-                    <span>{item.city}</span>
+                    <span>{item.City.title}</span>
                   </div>
                   <div className="carousel-card-bonuses">
                     <LuGift className="carousel-card-icon" />
@@ -140,88 +159,47 @@ const CarouselItem = memo(({ item, index, carouselItemWidth }) => {
                 <div className="carousel-card-details">
                   <div className="carousel-card-detail">
                     <MdPercent className="carousel-card-icon" />
-                    <span>Комиссия парка:</span> {item.commission}%
+                    <span>Комиссия парка:</span> {item.parkCommission}%
                   </div>
                   <div className="carousel-card-detail">
                     <GoCreditCard className="carousel-card-icon" />
                     <span>Моментальные выплаты:</span>{" "}
-                    {item.instantPayments ? (
-                      `Да (${item.instantPaymentCommission}%)`
-                    ) : (
-                      <TfiClose
-                        className="carousel-card-icon"
-                        style={{ fontSize: "16px" }}
-                      />
-                    )}
+                    {item.commissionWithdraw
+                      ? `Да (${item.commissionWithdraw}%)`
+                      : "Нет"}
                   </div>
                   <div className="carousel-card-detail">
                     <BiMoneyWithdraw className="carousel-card-icon" />
                     <span>Выплаты переводом:</span>{" "}
-                    {item.transferPayments ? (
-                      `Да (${item.transferPaymentCommission}%)`
-                    ) : (
-                      <TfiClose
-                        className="carousel-card-icon"
-                        style={{ fontSize: "16px" }}
-                      />
-                    )}
+                    {item.transferPaymentCommission
+                      ? `Да (${item.transferPaymentCommission}%)`
+                      : "Нет"}
                   </div>
                   <div className="carousel-card-detail">
                     <MdHeadsetMic className="carousel-card-icon" />
-                    <span>Техподдержка:</span>{" "}
-                    {item.supportWorkTime === "Круглосуточно"
-                      ? "Круглосуточно"
-                      : "Ограниченно"}
+                    <span>Техподдержка:</span> {getSupportTime() || "-"}
                   </div>
                   <div className="carousel-card-detail">
                     <MdBusinessCenter className="carousel-card-icon" />
                     <span>Парковое ИП:</span>
-                    {item.hasParkIP ? (
-                      <FaCheck className="carousel-card-icon" />
-                    ) : (
-                      <TfiClose
-                        className="carousel-card-icon"
-                        style={{ fontSize: "16px" }}
-                      />
-                    )}
+                    {item.parkEntrepreneurSupport ? "Да" : "Нет"}
                   </div>
                   <div className="carousel-card-detail">
                     <FaHandshake className="carousel-card-icon" />
                     <span style={{ whiteSpace: "nowrap" }}>
                       Поддержка регистрации ИП:
                     </span>
-                    {item.ipRegistrationSupport ? (
-                      <FaCheck className="carousel-card-icon" />
-                    ) : (
-                      <TfiClose
-                        className="carousel-card-icon"
-                        style={{ fontSize: "16px" }}
-                      />
-                    )}
+                    {item.entrepreneurSupport ? "Да" : "Нет"}
                   </div>
                   <div className="carousel-card-detail">
                     <TbCashRegister className="carousel-card-icon" />
-                    <span>Ведение бухгалтерии:</span>{" "}
-                    {item.accountingSupport ? (
-                      <FaCheck className="carousel-card-icon" />
-                    ) : (
-                      <TfiClose
-                        className="carousel-card-icon"
-                        style={{ fontSize: "16px" }}
-                      />
-                    )}
+                    <span>Ведение бухгалтерии:</span>
+                    {item.accountantSupport ? "Да" : "Нет"}
                   </div>
                   <div className="carousel-card-detail">
                     <FaGasPump className="carousel-card-icon" />
                     <span>Яндекс Заправка:</span>{" "}
-                    {item.yandexFuel ? (
-                      <FaCheck className="carousel-card-icon" />
-                    ) : (
-                      <TfiClose
-                        className="carousel-card-icon"
-                        style={{ fontSize: "16px" }}
-                      />
-                    )}
+                    {item.yandexGasStation ? "Да" : "Нет"}
                   </div>
                   <div
                     className="carousel-card-detail"
@@ -232,14 +210,7 @@ const CarouselItem = memo(({ item, index, carouselItemWidth }) => {
                       style={{ fontSize: "30px" }}
                     />
                     <span>Аренда машин от парка:</span>
-                    {item.carRentals ? (
-                      <FaCheck className="carousel-card-icon" />
-                    ) : (
-                      <TfiClose
-                        className="carousel-card-icon"
-                        style={{ fontSize: "16px" }}
-                      />
-                    )}
+                    {item.carRentals ? "Да" : "Нет"}
                   </div>
                   <div className="carousel-card-bonuses">
                     <LuGift className="carousel-card-icon" />

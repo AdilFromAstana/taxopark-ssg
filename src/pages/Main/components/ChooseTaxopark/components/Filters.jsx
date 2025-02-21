@@ -61,6 +61,7 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
         isPaymentWithCommission,
         supportAllDay: supportTimeFilters.allDay,
         supportLimited: supportTimeFilters.limited,
+        active: true,
       }),
     {
       keepPreviousData: true,
@@ -179,7 +180,7 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
             options={allParkPromotions}
             onChange={setParkPromotions}
             value={parkPromotions}
-            maxTagCount={2}
+            maxTagCount={1}
           />
         </Col>
       </Row>

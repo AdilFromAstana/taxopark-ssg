@@ -1,4 +1,4 @@
-import { Table, Input, Button, DatePicker, Select } from "antd";
+import { Table, Input, Button, DatePicker, Select, Tag } from "antd";
 import axios from "axios";
 import { useState, useCallback, memo } from "react";
 import CreateFormModal from "./CreateParkModal";
@@ -219,7 +219,7 @@ const Parks = memo(() => {
           parkCommission: parkData?.parkCommission || "-",
           parkPromotions: parkData?.parkPromotions,
           paymentType: parkData?.paymentType || "-",
-          active: parkData?.active ? "Активен" : "Неактивен",
+          active: parkData?.active ? "Активен" : "Архивирован",
           rating: parkData?.rating || "-",
           createdAt: moment(parkData?.createdAt).format("DD.MM.YYYY HH:mm"),
         };
@@ -318,6 +318,43 @@ const Parks = memo(() => {
         </div>
       ),
       onFilter: (value, record) => record.cityId === value,
+    },
+    {
+      title: "Статус",
+      dataIndex: "active",
+      key: "active",
+      render: (record) => {
+        return (
+          <Tag color={record ? "green" : "red"}>
+            {record ? "Активный" : "Архивирован"}
+          </Tag>
+        );
+      },
+      sorter: true,
+      filterDropdown: ({ selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Select
+            style={{ width: 200 }}
+            placeholder="Выберите статус"
+            value={selectedKeys[0] ?? undefined} // Устанавливаем выбранное значение
+            onChange={(value) => {
+              setSearchFilters((prev) => ({
+                ...prev,
+                active: value,
+              }));
+              confirm();
+            }}
+            allowClear
+            onClear={clearFilters}
+          >
+            <Select.Option value={true}>Да</Select.Option>
+            <Select.Option value={false}>Нет</Select.Option>
+          </Select>
+        </div>
+      ),
+      onFilter: (value, record) => {
+        return record.active === value;
+      },
     },
     {
       title: "Создано",

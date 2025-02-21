@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 /* eslint-disable react/prop-types */
-import { memo, useEffect } from "react";
+import { memo, useEffect, useState } from "react";
 import { Modal, Button, Input, message } from "antd";
 import "react-phone-input-2/lib/style.css";
 import axios from "axios";
@@ -20,9 +20,9 @@ const ApplicationModal = memo(
     setTimer,
     otpSent,
     setOtpSent,
+    form,
   }) => {
-
-    
+    const [inputOtp, setInputOtp] = useState("");
 
     useEffect(() => {
       document.body.style.overflow = isOpen ? "hidden" : "";
@@ -65,7 +65,7 @@ const ApplicationModal = memo(
 
     const handleClose = () => {
       form.resetFields();
-      setStep(1);
+      setStep(2);
       setInputOtp("");
       setOtpSent(false);
       setTimer(60);
@@ -83,7 +83,7 @@ const ApplicationModal = memo(
       >
         {step === 2 && (
           <StepTwo
-            inputOtp
+            inputOtp={inputOtp}
             phone={phone}
             setStep={setStep}
             onClose={onClose}
