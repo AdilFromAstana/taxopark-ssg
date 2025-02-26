@@ -1,4 +1,4 @@
-import { Table, Input, Button, Select, DatePicker } from "antd";
+import { Table, Input, Button, Select, DatePicker, Tag } from "antd";
 import axios from "axios";
 import { useState, useCallback, memo } from "react";
 import CreatePromotionModal from "./CreatePromotionModal";
@@ -98,8 +98,8 @@ const Promotions = memo(() => {
         sorter.order === "ascend"
           ? "asc"
           : sorter.order === "descend"
-          ? "desc"
-          : null,
+            ? "desc"
+            : null,
     });
     queryClient.invalidateQueries("promotions");
   };
@@ -175,8 +175,38 @@ const Promotions = memo(() => {
       title: "Статус",
       dataIndex: "active",
       key: "active",
-      render: (record) => (record ? "Активный" : "Неактивный"),
+      render: (record) => {
+        return (
+          <Tag color={record ? "green" : "red"}>
+            {record ? "Активный" : "Архивирован"}
+          </Tag>
+        );
+      },
       sorter: true,
+      filterDropdown: ({ selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Select
+            style={{ width: 200 }}
+            placeholder="Выберите статус"
+            value={selectedKeys[0] ?? undefined} // Устанавливаем выбранное значение
+            onChange={(value) => {
+              setSearchFilters((prev) => ({
+                ...prev,
+                active: value,
+              }));
+              confirm();
+            }}
+            allowClear
+            onClear={clearFilters}
+          >
+            <Select.Option value={true}>Активный</Select.Option>
+            <Select.Option value={false}>Архивирован</Select.Option>
+          </Select>
+        </div>
+      ),
+      onFilter: (value, record) => {
+        return record.active === value;
+      },
     },
     {
       title: "Создано",
@@ -201,11 +231,11 @@ const Promotions = memo(() => {
               setSelectedKeys(
                 dates
                   ? [
-                      [
-                        dates[0].format("YYYY-MM-DD"),
-                        dates[1].format("YYYY-MM-DD"),
-                      ],
-                    ]
+                    [
+                      dates[0].format("YYYY-MM-DD"),
+                      dates[1].format("YYYY-MM-DD"),
+                    ],
+                  ]
                   : []
               )
             }

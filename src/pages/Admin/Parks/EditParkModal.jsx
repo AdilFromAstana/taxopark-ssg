@@ -146,9 +146,9 @@ const EditParkModal = memo(
         supportWorkTime:
           record?.supportAlwaysAvailable === false
             ? [
-                moment(record?.supportStartWorkTime, "HH:mm"),
-                moment(record?.supportEndWorkTime, "HH:mm"),
-              ]
+              moment(record?.supportStartWorkTime, "HH:mm"),
+              moment(record?.supportEndWorkTime, "HH:mm"),
+            ]
             : [],
       });
     };
@@ -160,9 +160,9 @@ const EditParkModal = memo(
           supportWorkTime:
             record?.supportStartWorkTime && record?.supportEndWorkTime
               ? [
-                  moment(record.supportStartWorkTime, "HH:mm"),
-                  moment(record.supportEndWorkTime, "HH:mm"),
-                ]
+                moment(record.supportStartWorkTime, "HH:mm"),
+                moment(record.supportEndWorkTime, "HH:mm"),
+              ]
               : [],
         });
         setRadioValues({
@@ -217,16 +217,11 @@ const EditParkModal = memo(
             </Col>
             <Col span={8}>
               <Form.Item
-                name="parkCommission"
-                label="Комиссия парка %"
-                rules={[{ required: true }]}
+                name="email"
+                label="Email"
+                rules={[{ required: true, type: "email", message: "" }]}
               >
-                <InputNumber
-                  min={0}
-                  max={100}
-                  style={{ width: "100%" }}
-                  disabled={!isEditMode}
-                />
+                <Input disabled={!isEditMode} type="email" />
               </Form.Item>
             </Col>
           </Row>
@@ -389,26 +384,16 @@ const EditParkModal = memo(
             </Col>
             <Col span={8}>
               <Form.Item
-                name="accountantSupport"
-                label="Бухгалтерская поддержка"
+                name="parkCommission"
+                label="Комиссия парка %"
+                rules={[{ required: true }]}
               >
-                <Radio.Group
-                  value={radioValues.accountantSupport}
+                <InputNumber
+                  min={0}
+                  max={100}
+                  style={{ width: "100%" }}
                   disabled={!isEditMode}
-                >
-                  <Radio
-                    onClick={() => toggleRadioValue("accountantSupport", true)}
-                    value={true}
-                  >
-                    Да
-                  </Radio>
-                  <Radio
-                    onClick={() => toggleRadioValue("accountantSupport", false)}
-                    value={false}
-                  >
-                    Нет
-                  </Radio>
-                </Radio.Group>
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -462,6 +447,32 @@ const EditParkModal = memo(
                 </Radio.Group>
               </Form.Item>
             </Col>
+            <Col span={8}>
+              <Form.Item
+                name="accountantSupport"
+                label="Бухгалтерская поддержка"
+              >
+                <Radio.Group
+                  value={radioValues.accountantSupport}
+                  disabled={!isEditMode}
+                >
+                  <Radio
+                    onClick={() => toggleRadioValue("accountantSupport", true)}
+                    value={true}
+                  >
+                    Да
+                  </Radio>
+                  <Radio
+                    onClick={() => toggleRadioValue("accountantSupport", false)}
+                    value={false}
+                  >
+                    Нет
+                  </Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
             {form.getFieldValue("supportAlwaysAvailable") === false && (
               <Col span={8}>
                 <Form.Item
@@ -480,8 +491,6 @@ const EditParkModal = memo(
                 </Form.Item>
               </Col>
             )}
-          </Row>
-          <Row gutter={16}>
             <Col span={8}>
               <Form.Item
                 name="image"
@@ -500,13 +509,13 @@ const EditParkModal = memo(
                   fileList={
                     record?.imageUrl
                       ? [
-                          {
-                            uid: "1",
-                            name: "image",
-                            status: "done",
-                            url: `${API_URL}/uploads/${record?.imageUrl}`,
-                          },
-                        ]
+                        {
+                          uid: "1",
+                          name: "image",
+                          status: "done",
+                          url: `${API_URL}/uploads/${record?.imageUrl}`,
+                        },
+                      ]
                       : []
                   }
                   onPreview={() => {

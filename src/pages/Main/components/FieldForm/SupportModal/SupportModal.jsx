@@ -106,7 +106,7 @@ const StepTwo = ({
   timer,
 }) => {
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
       <p>Введите код из SMS для подтверждения заявки:</p>
       <Input.OTP
         type="text"
@@ -128,7 +128,7 @@ const StepTwo = ({
           ? `Запросить код повторно через ${timer} сек.`
           : "Запросить новый код"}
       </Button>
-    </>
+    </div>
   );
 };
 

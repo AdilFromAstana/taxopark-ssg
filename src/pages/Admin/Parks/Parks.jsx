@@ -347,8 +347,8 @@ const Parks = memo(() => {
             allowClear
             onClear={clearFilters}
           >
-            <Select.Option value={true}>Да</Select.Option>
-            <Select.Option value={false}>Нет</Select.Option>
+            <Select.Option value={true}>Активный</Select.Option>
+            <Select.Option value={false}>Архивирован</Select.Option>
           </Select>
         </div>
       ),

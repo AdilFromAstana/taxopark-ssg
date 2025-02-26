@@ -94,6 +94,17 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
           </Col>
           <Col span={8}>
             <Form.Item
+              name="email"
+              label="Email"
+              rules={[{ required: true, message: "Пожалуйста, введите почту!", type: "email" }]}
+            >
+              <Input type="email" />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={8}>
+            <Form.Item
               name="parkCommission"
               label="Комиссия парка %"
               rules={[
@@ -116,8 +127,6 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
               <InputNumber min={0} max={100} style={{ width: "100%" }} />
             </Form.Item>
           </Col>
-        </Row>
-        <Row gutter={16}>
           <Col span={8}>
             <Form.Item name="commissionWithdraw" label="Комиссия за вывод %">
               <InputNumber min={0} max={100} style={{ width: "100%" }} />
@@ -129,23 +138,6 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
               label="Комиссия за перевод %"
             >
               <InputNumber min={0} max={100} style={{ width: "100%" }} />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item name="parkPromotions" label="Акции и бонусы">
-              <Select
-                maxTagCount={1}
-                mode="multiple"
-                options={[
-                  { label: "Гарантированные бонусы", value: 1 },
-                  { label: "Приветственные бонусы", value: 2 },
-                  { label: "Розыгрыш", value: 3 },
-                  { label: "Бонус за активность", value: 4 },
-                  { label: "Приведи друга", value: 5 },
-                ]}
-                min={0}
-                style={{ width: "100%" }}
-              />
             </Form.Item>
           </Col>
         </Row>
@@ -266,24 +258,6 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
         </Row>
         <Row gutter={16}>
           <Col span={8}>
-            <Form.Item name="carRentals" label="Аренда машин от парка">
-              <Radio.Group value={radioValues.carRentals}>
-                <Radio
-                  onClick={() => toggleRadioValue("carRentals", true)}
-                  value={true}
-                >
-                  Да
-                </Radio>
-                <Radio
-                  onClick={() => toggleRadioValue("carRentals", false)}
-                  value={false}
-                >
-                  Нет
-                </Radio>
-              </Radio.Group>
-            </Form.Item>
-          </Col>
-          <Col span={8}>
             <Form.Item
               name="supportAlwaysAvailable"
               label="Круглосуточная поддержка"
@@ -308,6 +282,43 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
               </Radio.Group>
             </Form.Item>
           </Col>
+          <Col span={8}>
+            <Form.Item name="parkPromotions" label="Акции и бонусы">
+              <Select
+                maxTagCount={1}
+                mode="multiple"
+                options={[
+                  { label: "Гарантированные бонусы", value: 1 },
+                  { label: "Приветственные бонусы", value: 2 },
+                  { label: "Розыгрыш", value: 3 },
+                  { label: "Бонус за активность", value: 4 },
+                  { label: "Приведи друга", value: 5 },
+                ]}
+                min={0}
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item name="carRentals" label="Аренда машин от парка">
+              <Radio.Group value={radioValues.carRentals}>
+                <Radio
+                  onClick={() => toggleRadioValue("carRentals", true)}
+                  value={true}
+                >
+                  Да
+                </Radio>
+                <Radio
+                  onClick={() => toggleRadioValue("carRentals", false)}
+                  value={false}
+                >
+                  Нет
+                </Radio>
+              </Radio.Group>
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16}>
           {form && form?.getFieldValue("supportAlwaysAvailable") === false && (
             <Col span={8}>
               <Form.Item
