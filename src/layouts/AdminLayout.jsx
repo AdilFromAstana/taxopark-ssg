@@ -17,6 +17,10 @@ const AdminLayout = () => {
       key: "promotions",
       label: "Акции",
     },
+    {
+      key: "cities",
+      label: "Города",
+    },
   ];
 
   const onClick = (e) => {

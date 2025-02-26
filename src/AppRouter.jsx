@@ -11,6 +11,7 @@ import AdminLayout from "./layouts/AdminLayout";
 import Forms from "./pages/Admin/Forms/Forms";
 import Parks from "./pages/Admin/Parks/Parks";
 import Promotions from "./pages/Admin/Promotions/Promotions";
+import Cities from "./pages/Admin/Cities/Cities";
 
 const AppRouter = () => {
   return (
@@ -27,6 +28,7 @@ const AppRouter = () => {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="parks" replace />} />
           <Route path="parks" element={<Parks />} />
+          <Route path="cities" element={<Cities />} />
           <Route path="forms" element={<Forms />} />
           <Route path="promotions" element={<Promotions />} />
         </Route>
