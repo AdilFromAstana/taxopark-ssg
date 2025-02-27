@@ -3,7 +3,7 @@ import axios from "axios";
 import { useState, useCallback } from "react";
 import EditFormModal from "./EditFormModal";
 import moment from "moment";
-import { useQuery, useQueryClient } from "react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ExcelJS from "exceljs";
 
 const { RangePicker } = DatePicker;

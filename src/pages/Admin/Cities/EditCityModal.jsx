@@ -81,7 +81,6 @@ const EditCityModal = ({
       onCancel={onClose}
       title={isEditMode ? "Редактировать город" : "Просмотр города"}
       footer={null}
-      width="50vw"
       maskClosable={false}
     >
       <Form form={form} layout="vertical" onFinish={handleUpdate}>

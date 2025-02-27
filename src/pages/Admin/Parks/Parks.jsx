@@ -5,7 +5,7 @@ import CreateFormModal from "./CreateParkModal";
 import EditParkModal from "./EditParkModal";
 import moment from "moment";
 import ExcelJS from "exceljs";
-import { useQuery, useQueryClient } from "react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const { RangePicker } = DatePicker;
@@ -291,13 +291,24 @@ const Parks = memo(() => {
     },
     {
       title: "Город",
-      dataIndex: "cityId",
-      key: "cityId",
-      render: (_, record) => record.City?.title || "—",
+      dataIndex: "cityIds",
+      key: "cityIds",
+      render: (_, record) => {
+        if (!record.cityIds?.length) return "—";
+
+        const cityTitles = record.cityIds
+          .map((id) => cities.find((city) => city.id === id)?.title)
+          .filter(Boolean); // Убираем undefined, если город не найден
+
+        return cityTitles.length
+          ? cityTitles.map((title) => <Tag color="blue" key={title}>{title}</Tag>)
+          : "—";
+      },
       sorter: true,
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
         <div style={{ padding: 8 }}>
           <Select
+            mode="multiple"
             allowClear
             showSearch
             style={{ width: 200 }}
@@ -317,7 +328,7 @@ const Parks = memo(() => {
           </Select>
         </div>
       ),
-      onFilter: (value, record) => record.cityId === value,
+      onFilter: (value, record) => record.cityIds?.includes(value),
     },
     {
       title: "Статус",

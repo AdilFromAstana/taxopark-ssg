@@ -1,7 +1,7 @@
 import { HelmetProvider } from "react-helmet-async";
 import "./App.css";
 import AppRouter from "./AppRouter";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 function App() {
   const queryClient = new QueryClient();

@@ -39,9 +39,8 @@ const CreateCityModal = ({ open, onClose, refreshData }) => {
     <Modal
       open={open}
       onCancel={onClose}
-      title="Создать промо-акцию"
+      title="Создать город"
       footer={null}
-      width="50vw"
       maskClosable={false}
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit}>

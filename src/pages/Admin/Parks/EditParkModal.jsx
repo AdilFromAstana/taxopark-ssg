@@ -202,11 +202,11 @@ const EditParkModal = memo(
             </Col>
             <Col span={8}>
               <Form.Item
-                name="cityId"
-                label="Город"
+                name="cityIds"
+                label="Города"
                 rules={[{ required: true, message: "Выберите город!" }]}
               >
-                <Select disabled={!isEditMode} placeholder="Выберите город">
+                <Select mode="multiple" disabled={!isEditMode} placeholder="Выберите город">
                   {cities.map((city) => (
                     <Select.Option key={city.id} value={city.id}>
                       {city.title}

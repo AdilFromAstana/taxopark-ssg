@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Input, Card, Button, Modal } from "antd";
 import "./style.css";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import moment from "moment";
 

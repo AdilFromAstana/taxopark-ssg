@@ -4,7 +4,7 @@ import { useState, useCallback, memo } from "react";
 import CreatePromotionModal from "./CreatePromotionModal";
 import EditPromotionModal from "./EditPromotionModal";
 import moment from "moment";
-import { useQuery, useQueryClient } from "react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const { RangePicker } = DatePicker;
 
@@ -40,6 +40,7 @@ const fetchParks = async () => {
 
 const Promotions = memo(() => {
   const queryClient = useQueryClient();
+
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -57,7 +58,7 @@ const Promotions = memo(() => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const { data: promotionsData, isLoading } = useQuery({
+  const { data: promotionsData, isLoading, refetch } = useQuery({
     queryKey: [
       "promotions",
       {
@@ -83,6 +84,15 @@ const Promotions = memo(() => {
     cacheTime: 10 * 60 * 1000,
   });
 
+  const invalidatePromotionsQuery = async () => {
+    console.log("invalidatePromotionsQuery")
+    queryClient.invalidateQueries({
+      queryKey: ["promotions"],
+      exact: false, // Позволяет обновлять любые варианты ключа "promotions" с разными параметрами
+    });
+    refetch()
+  };
+
   const { data: parks = [] } = useQuery({
     queryKey: ["parks"],
     queryFn: fetchParks,
@@ -98,20 +108,20 @@ const Promotions = memo(() => {
         sorter.order === "ascend"
           ? "asc"
           : sorter.order === "descend"
-            ? "desc"
-            : null,
+          ? "desc"
+          : null,
     });
-    queryClient.invalidateQueries("promotions");
+    invalidatePromotionsQuery();
   };
 
   const handleParkFilterChange = (value) => {
     setSearchFilters((prev) => ({ ...prev, parkId: value }));
-    queryClient.invalidateQueries("promotions");
+    invalidatePromotionsQuery();
   };
 
   const handleDateRangeChange = (value) => {
     setSearchFilters((prev) => ({ ...prev, dateRange: value || [] }));
-    queryClient.invalidateQueries("promotions");
+    invalidatePromotionsQuery();
   };
 
   const handleSearchDebounced = useCallback(
@@ -231,11 +241,11 @@ const Promotions = memo(() => {
               setSelectedKeys(
                 dates
                   ? [
-                    [
-                      dates[0].format("YYYY-MM-DD"),
-                      dates[1].format("YYYY-MM-DD"),
-                    ],
-                  ]
+                      [
+                        dates[0].format("YYYY-MM-DD"),
+                        dates[1].format("YYYY-MM-DD"),
+                      ],
+                    ]
                   : []
               )
             }
@@ -305,6 +315,7 @@ const Promotions = memo(() => {
       />
 
       <CreatePromotionModal
+        invalidatePromotionsQuery={invalidatePromotionsQuery}
         parks={parks}
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}

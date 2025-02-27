@@ -3,7 +3,7 @@ import { Modal, Form, Input, Button, Select, Timeline, message } from "antd";
 import axios from "axios";
 import { useState, useEffect, memo } from "react";
 import "./style.css";
-import { useQuery, useQueryClient } from "react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const fetchAvailableStatuses = async ({ queryKey }) => {
   const [, formId] = queryKey;

@@ -79,11 +79,11 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
           </Col>
           <Col span={8}>
             <Form.Item
-              name="cityId"
-              label="Город"
+              name="cityIds"
+              label="Города"
               rules={[{ required: true, message: "Выберите город!" }]}
             >
-              <Select placeholder="Выберите город">
+              <Select placeholder="Выберите город" mode="multiple">
                 {cities.map((city) => (
                   <Select.Option key={city.id} value={city.id}>
                     {city.title}
@@ -96,7 +96,7 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
             <Form.Item
               name="email"
               label="Email"
-              rules={[{ required: true, message: "Пожалуйста, введите почту!", type: "email" }]}
+              rules={[{ required: false, type: "email" }]}
             >
               <Input type="email" />
             </Form.Item>

@@ -1,38 +1,63 @@
 /* eslint-disable react/prop-types */
-import { Modal, Form, Input, Button, Row, Col, Select, DatePicker, message } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  Button,
+  Row,
+  Col,
+  Select,
+  DatePicker,
+  message,
+} from "antd";
 import axios from "axios";
-import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const CreatePromotionModal = ({ open, onClose, refreshData, parks = [] }) => {
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
+const useCreatePromotion = ({ form, onClose, invalidatePromotionsQuery }) => {
+  const queryClient = useQueryClient();
 
-  const handleSubmit = async (values) => {
-    try {
-      setLoading(true);
-      console.log("🔄 Начало создания промо-акции...", values);
-
-      const response = await axios.post(`${API_URL}/promotions`, values);
-
+  return useMutation({
+    mutationFn: (values) => axios.post(`${API_URL}/promotions`, values),
+    onSuccess: (response) => {
       console.log("✅ Успешный ответ сервера:", response.data);
       message.success("🎉 Промо-акция успешно создана!");
 
-      refreshData(); // Обновление данных после создания
+      // Инвалидация запроса
+      queryClient.invalidateQueries({ queryKey: ['promotions'] })
+      invalidatePromotionsQuery();
       onClose();
       form.resetFields(); // Очистка формы
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("❌ Ошибка при создании записи:", error);
       message.error(
         `Ошибка при создании акции: ${
           error.response?.data?.message || "Неизвестная ошибка"
         }`
       );
-    } finally {
-      setLoading(false);
-      console.log("🔽 Завершение создания.");
-    }
+    },
+  });
+};
+
+const CreatePromotionModal = ({
+  open,
+  onClose,
+  parks = [],
+  invalidatePromotionsQuery,
+}) => {
+  const [form] = Form.useForm();
+
+  const { mutate: handleCreatePromotion, isLoading } = useCreatePromotion({
+    form,
+    onClose,
+    invalidatePromotionsQuery,
+  });
+
+  const handleSubmit = async (values) => {
+    console.log("🔄 Начало создания промо-акции...", values);
+    handleCreatePromotion(values);
   };
 
   return (
@@ -92,23 +117,11 @@ const CreatePromotionModal = ({ open, onClose, refreshData, parks = [] }) => {
           </Col>
         </Row>
 
-        {/* <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item name="imageUrl" label="Загрузить изображение">
-              <Upload
-                fileList={fileList}
-                beforeUpload={() => false} // Отключаем автоматическую загрузку
-                onChange={({ fileList }) => setFileList(fileList)}
-                maxCount={1}
-              >
-                <Button icon={<UploadOutlined />}>Выбрать файл</Button>
-              </Upload>
-            </Form.Item>
-          </Col>
-        </Row> */}
-
         <div style={{ display: "flex", gap: 10 }}>
-          <Button type="primary" htmlType="submit" loading={loading}>
+          <Button type="primary" onClick={() => invalidatePromotionsQuery()}>
+            Обновить
+          </Button>
+          <Button type="primary" htmlType="submit" loading={isLoading}>
             Создать
           </Button>
           <Button type="default" danger onClick={onClose}>
