@@ -200,7 +200,7 @@ const CarouselItem = memo(({ item, index, carouselItemWidth, cities }) => {
               <BiMoneyWithdraw className="carousel-card-icon" />
               <span>Выплаты переводом:</span>{" "}
               {item.transferPaymentCommission
-                ? `Да (${item.transferPaymentCommission}%)`
+                ? item.transferPaymentCommission
                 : "Нет"}
             </div>
             <div className="carousel-card-detail">

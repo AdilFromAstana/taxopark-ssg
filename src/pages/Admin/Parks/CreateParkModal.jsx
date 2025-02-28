@@ -92,22 +92,20 @@ const CreateParkModal = ({
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item
-              name="cityIds"
-              label="Города"
-              rules={[{ required: true, message: "Выберите город!" }]}
-            >
+            <Form.Item name="parkPromotions" label="Акции и бонусы">
               <Select
-                placeholder="Выберите город"
-                mode="multiple"
                 maxTagCount={1}
-              >
-                {cities.map((city) => (
-                  <Select.Option key={city.id} value={city.id}>
-                    {city.title}
-                  </Select.Option>
-                ))}
-              </Select>
+                mode="multiple"
+                options={[
+                  { label: "Гарантированные бонусы", value: 1 },
+                  { label: "Приветственные бонусы", value: 2 },
+                  { label: "Розыгрыш", value: 3 },
+                  { label: "Бонус за активность", value: 4 },
+                  { label: "Приведи друга", value: 5 },
+                ]}
+                min={0}
+                style={{ width: "100%" }}
+              />
             </Form.Item>
           </Col>
           <Col span={8}>
@@ -152,26 +150,24 @@ const CreateParkModal = ({
           </Col>
           <Col span={8}>
             <Form.Item
-              name="averageCheck"
-              label="Средний чек"
-              rules={[
-                {
-                  required: true,
-                  message: "Пожалуйста, укажите средний чек!",
-                },
-                () => ({
-                  validator(_, value) {
-                    if (value > 0) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(
-                      new Error("Средний чек должен быть больше 0!")
-                    );
-                  },
-                }),
-              ]}
+              name="isPartner"
+              label="Партнер"
+              rules={[{ required: true }]}
             >
-              <InputNumber min={0} style={{ width: "100%" }} />
+              <Radio.Group value={radioValues.isPartner}>
+                <Radio
+                  onClick={() => toggleRadioValue("isPartner", true)}
+                  value={true}
+                >
+                  Да
+                </Radio>
+                <Radio
+                  onClick={() => toggleRadioValue("isPartner", false)}
+                  value={false}
+                >
+                  Нет
+                </Radio>
+              </Radio.Group>
             </Form.Item>
           </Col>
         </Row>
@@ -200,20 +196,16 @@ const CreateParkModal = ({
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item
-              name="isPartner"
-              label="Партнер"
-              rules={[{ required: true }]}
-            >
-              <Radio.Group value={radioValues.isPartner}>
+            <Form.Item name="accountantSupport" label="Бухгалтерская поддержка">
+              <Radio.Group value={radioValues.accountantSupport}>
                 <Radio
-                  onClick={() => toggleRadioValue("isPartner", true)}
+                  onClick={() => toggleRadioValue("accountantSupport", true)}
                   value={true}
                 >
                   Да
                 </Radio>
                 <Radio
-                  onClick={() => toggleRadioValue("isPartner", false)}
+                  onClick={() => toggleRadioValue("accountantSupport", false)}
                   value={false}
                 >
                   Нет
@@ -267,16 +259,16 @@ const CreateParkModal = ({
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item name="accountantSupport" label="Бухгалтерская поддержка">
-              <Radio.Group value={radioValues.accountantSupport}>
+            <Form.Item name="carRentals" label="Аренда машин от парка">
+              <Radio.Group value={radioValues.carRentals}>
                 <Radio
-                  onClick={() => toggleRadioValue("accountantSupport", true)}
+                  onClick={() => toggleRadioValue("carRentals", true)}
                   value={true}
                 >
                   Да
                 </Radio>
                 <Radio
-                  onClick={() => toggleRadioValue("accountantSupport", false)}
+                  onClick={() => toggleRadioValue("carRentals", false)}
                   value={false}
                 >
                   Нет
@@ -311,43 +303,6 @@ const CreateParkModal = ({
               </Radio.Group>
             </Form.Item>
           </Col>
-          <Col span={8}>
-            <Form.Item name="parkPromotions" label="Акции и бонусы">
-              <Select
-                maxTagCount={1}
-                mode="multiple"
-                options={[
-                  { label: "Гарантированные бонусы", value: 1 },
-                  { label: "Приветственные бонусы", value: 2 },
-                  { label: "Розыгрыш", value: 3 },
-                  { label: "Бонус за активность", value: 4 },
-                  { label: "Приведи друга", value: 5 },
-                ]}
-                min={0}
-                style={{ width: "100%" }}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item name="carRentals" label="Аренда машин от парка">
-              <Radio.Group value={radioValues.carRentals}>
-                <Radio
-                  onClick={() => toggleRadioValue("carRentals", true)}
-                  value={true}
-                >
-                  Да
-                </Radio>
-                <Radio
-                  onClick={() => toggleRadioValue("carRentals", false)}
-                  value={false}
-                >
-                  Нет
-                </Radio>
-              </Radio.Group>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
           {form && form?.getFieldValue("supportAlwaysAvailable") === false && (
             <Col span={8}>
               <Form.Item
@@ -363,6 +318,8 @@ const CreateParkModal = ({
               </Form.Item>
             </Col>
           )}
+        </Row>
+        <Row gutter={16}>
           <Col span={8}>
             <Form.Item name="additionalInfo" label="Доп. информация">
               <TextArea
@@ -378,14 +335,14 @@ const CreateParkModal = ({
           </Col>
         </Row>
         <Row gutter={16}>
-          <Col span={24}>
+          <Col span={12}>
             <Form.Item label="Коммисия за перевод">
               <Form.List name="commissionRates">
                 {(fields, { add, remove }) => (
                   <>
                     {fields.map(({ key, name, ...restField }, index) => (
                       <Row gutter={16} key={key} align="middle">
-                        <Col span={10}>
+                        <Col span={11}>
                           <Form.Item
                             {...restField}
                             name={[name, "amount"]}
@@ -407,7 +364,7 @@ const CreateParkModal = ({
                             />
                           </Form.Item>
                         </Col>
-                        <Col span={8}>
+                        <Col span={11}>
                           <Form.Item
                             {...restField}
                             name={[name, "percent"]}
@@ -421,6 +378,73 @@ const CreateParkModal = ({
                               min={0}
                               max={100}
                               placeholder="%"
+                            />
+                          </Form.Item>
+                        </Col>
+                        {index > 0 && ( // Кнопка удаления только для "От" записей
+                          <Col>
+                            <MinusCircleOutlined
+                              onClick={() => remove(name)}
+                              style={{ color: "red", marginTop: 8 }}
+                            />
+                          </Col>
+                        )}
+                      </Row>
+                    ))}
+                    <Form.Item>
+                      <Button
+                        type="dashed"
+                        onClick={() => add()}
+                        block
+                        icon={<PlusOutlined />}
+                      >
+                        Добавить уровень комиссии
+                      </Button>
+                    </Form.Item>
+                  </>
+                )}
+              </Form.List>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label="Средний чек по городам">
+              <Form.List name="averageCheckPerCity">
+                {(fields, { add, remove }) => (
+                  <>
+                    {fields.map(({ key, name, ...restField }, index) => (
+                      <Row gutter={16} key={key} align="middle">
+                        <Col span={11}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, "cityId"]}
+                            label={"Город"}
+                            rules={[
+                              { required: true, message: "Выберите город!" },
+                            ]}
+                          >
+                            <Select placeholder="Выберите город!" allowClear>
+                              {cities.map((city) => (
+                                <Select.Option key={city.id} value={city.id}>
+                                  {city.title}
+                                </Select.Option>
+                              ))}
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                        <Col span={11}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, "averageCheck"]}
+                            label="Средний чек"
+                            rules={[
+                              { required: true, message: "Введите сумму чека" },
+                            ]}
+                          >
+                            <InputNumber
+                              style={{ width: "100%" }}
+                              min={0}
+                              max={100000}
+                              placeholder="тг."
                             />
                           </Form.Item>
                         </Col>

@@ -202,47 +202,6 @@ const EditParkModal = memo(
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item
-                name="cityIds"
-                label="Города"
-                rules={[{ required: true, message: "Выберите город!" }]}
-              >
-                <Select
-                  maxTagCount={1}
-                  mode="multiple"
-                  disabled={!isEditMode}
-                  placeholder="Выберите города!"
-                >
-                  {cities.map((city) => (
-                    <Select.Option key={city.id} value={city.id}>
-                      {city.title}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item
-                name="email"
-                label="Email"
-                rules={[{ required: false, type: "email" }]}
-              >
-                <Input disabled={!isEditMode} type="email" />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item name="commissionWithdraw" label="Комиссия за вывод %">
-                <InputNumber
-                  min={0}
-                  max={100}
-                  style={{ width: "100%" }}
-                  disabled={!isEditMode}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
               <Form.Item name="parkPromotions" label="Акции и бонусы">
                 <Select
                   maxTagCount={1}
@@ -263,30 +222,61 @@ const EditParkModal = memo(
             </Col>
             <Col span={8}>
               <Form.Item
-                name="averageCheck"
-                label="Средний чек"
-                rules={[
-                  {
-                    required: true,
-                    message: "Пожалуйста, укажите средний чек!",
-                  },
-                  () => ({
-                    validator(_, value) {
-                      if (value > 0) {
-                        return Promise.resolve();
-                      }
-                      return Promise.reject(
-                        new Error("Средний чек должен быть больше 0!")
-                      );
-                    },
-                  }),
-                ]}
+                name="email"
+                label="Email"
+                rules={[{ required: false, type: "email" }]}
+              >
+                <Input disabled={!isEditMode} type="email" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item
+                name="parkCommission"
+                label="Комиссия парка %"
+                rules={[{ required: true }]}
               >
                 <InputNumber
                   min={0}
+                  max={100}
                   style={{ width: "100%" }}
                   disabled={!isEditMode}
                 />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item name="commissionWithdraw" label="Комиссия за вывод %">
+                <InputNumber
+                  min={0}
+                  max={100}
+                  style={{ width: "100%" }}
+                  disabled={!isEditMode}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="isPartner"
+                label="Партнер"
+                rules={[{ required: true }]}
+              >
+                <Radio.Group value={radioValues.isPartner}>
+                  <Radio
+                    onClick={() => toggleRadioValue("isPartner", true)}
+                    disabled={!isEditMode}
+                    value={true}
+                  >
+                    Да
+                  </Radio>
+                  <Radio
+                    onClick={() => toggleRadioValue("isPartner", false)}
+                    disabled={!isEditMode}
+                    value={false}
+                  >
+                    Нет
+                  </Radio>
+                </Radio.Group>
               </Form.Item>
             </Col>
           </Row>
@@ -319,21 +309,21 @@ const EditParkModal = memo(
             </Col>
             <Col span={8}>
               <Form.Item
-                name="isPartner"
-                label="Партнер"
-                rules={[{ required: true }]}
+                name="accountantSupport"
+                label="Бухгалтерская поддержка"
               >
-                <Radio.Group value={radioValues.isPartner}>
+                <Radio.Group
+                  value={radioValues.accountantSupport}
+                  disabled={!isEditMode}
+                >
                   <Radio
-                    onClick={() => toggleRadioValue("isPartner", true)}
-                    disabled={!isEditMode}
+                    onClick={() => toggleRadioValue("accountantSupport", true)}
                     value={true}
                   >
                     Да
                   </Radio>
                   <Radio
-                    onClick={() => toggleRadioValue("isPartner", false)}
-                    disabled={!isEditMode}
+                    onClick={() => toggleRadioValue("accountantSupport", false)}
                     value={false}
                   >
                     Нет
@@ -398,43 +388,6 @@ const EditParkModal = memo(
             </Col>
             <Col span={8}>
               <Form.Item
-                name="parkCommission"
-                label="Комиссия парка %"
-                rules={[{ required: true }]}
-              >
-                <InputNumber
-                  min={0}
-                  max={100}
-                  style={{ width: "100%" }}
-                  disabled={!isEditMode}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item name="carRentals" label="Аренда машин от парка">
-                <Radio.Group
-                  value={radioValues.carRentals}
-                  disabled={!isEditMode}
-                >
-                  <Radio
-                    onClick={() => toggleRadioValue("carRentals", true)}
-                    value={true}
-                  >
-                    Да
-                  </Radio>
-                  <Radio
-                    onClick={() => toggleRadioValue("carRentals", false)}
-                    value={false}
-                  >
-                    Нет
-                  </Radio>
-                </Radio.Group>
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item
                 name="supportAlwaysAvailable"
                 label="Круглосуточная поддержка"
               >
@@ -461,23 +414,22 @@ const EditParkModal = memo(
                 </Radio.Group>
               </Form.Item>
             </Col>
+          </Row>
+          <Row gutter={16}>
             <Col span={8}>
-              <Form.Item
-                name="accountantSupport"
-                label="Бухгалтерская поддержка"
-              >
+              <Form.Item name="carRentals" label="Аренда машин от парка">
                 <Radio.Group
-                  value={radioValues.accountantSupport}
+                  value={radioValues.carRentals}
                   disabled={!isEditMode}
                 >
                   <Radio
-                    onClick={() => toggleRadioValue("accountantSupport", true)}
+                    onClick={() => toggleRadioValue("carRentals", true)}
                     value={true}
                   >
                     Да
                   </Radio>
                   <Radio
-                    onClick={() => toggleRadioValue("accountantSupport", false)}
+                    onClick={() => toggleRadioValue("carRentals", false)}
                     value={false}
                   >
                     Нет
@@ -485,6 +437,7 @@ const EditParkModal = memo(
                 </Radio.Group>
               </Form.Item>
             </Col>
+
           </Row>
           <Row gutter={16}>
             {form.getFieldValue("supportAlwaysAvailable") === false && (
