@@ -58,10 +58,7 @@ const Promotions = memo(() => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const {
-    data: promotionsData,
-    isLoading,
-  } = useQuery({
+  const { data: promotionsData, isLoading } = useQuery({
     queryKey: [
       "promotions",
       {
@@ -105,17 +102,14 @@ const Promotions = memo(() => {
           ? "desc"
           : null,
     });
-    invalidatePromotionsQuery();
   };
 
   const handleParkFilterChange = (value) => {
     setSearchFilters((prev) => ({ ...prev, parkId: value }));
-    invalidatePromotionsQuery();
   };
 
   const handleDateRangeChange = (value) => {
     setSearchFilters((prev) => ({ ...prev, dateRange: value || [] }));
-    invalidatePromotionsQuery();
   };
 
   const handleSearchDebounced = useCallback(
@@ -137,7 +131,7 @@ const Promotions = memo(() => {
       filterDropdown: () => (
         <div style={{ padding: 8 }}>
           <Input
-            placeholder="Поиск по ФИО"
+            placeholder="Поиск по названию"
             defaultValue={searchFilters.name}
             onChange={(e) => handleSearchDebounced("title", e.target.value)}
             style={{ width: 188, marginBottom: 8, display: "block" }}

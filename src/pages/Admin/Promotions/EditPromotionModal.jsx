@@ -134,7 +134,7 @@ const EditPromotionModal = ({
     >
       <Form form={form} layout="vertical" onFinish={handleUpdate}>
         <Row gutter={16}>
-          <Col span={12}>
+          <Col span={8}>
             <Form.Item
               name="title"
               label="Название акции"
@@ -143,7 +143,7 @@ const EditPromotionModal = ({
               <Input disabled={!isEditMode} />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col span={8}>
             <Form.Item
               name="parkId"
               label="Таксопарк"
@@ -155,6 +155,14 @@ const EditPromotionModal = ({
                     {park.title}
                   </Select.Option>
                 ))}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item name="highPriority" label="Закрепить">
+              <Select disabled={!isEditMode} placeholder="Выберите значение" allowClear>
+                <Select.Option value={true}>Да</Select.Option>
+                <Select.Option value={false}>Нет</Select.Option>
               </Select>
             </Form.Item>
           </Col>

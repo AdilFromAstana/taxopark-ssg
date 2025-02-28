@@ -1,89 +1,87 @@
 /* Основные стили для шапки */
 .header-container {
-    background: linear-gradient(to right, #3b82f6, #2563eb);
-    color: white;
-    padding: 16px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 50;
+  background: linear-gradient(to right, #3b82f6, #2563eb);
+  color: white;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 
 .header-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .header-logo-container {
-    flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .header-logo {
-    font-size: 24px;
-    font-weight: bold;
-    text-decoration: none;
-    color: white;
+  filter: invert(1);
 }
 
 .header-nav-desktop {
-    display: flex;
-    gap: 20px;
-    font-size: 14px;
-    font-weight: 500;
+  display: flex;
+  gap: 20px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .header-nav-link {
-    text-decoration: none;
-    color: white;
-    transition: color 0.3s;
+  text-decoration: none;
+  color: white;
+  transition: color 0.3s;
 }
 
 .header-nav-link:hover {
-    color: #dbeafe;
+  color: #dbeafe;
 }
 
 .header-phone-link {
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
 }
 
 .header-burger-menu {
-    display: none;
+  display: none;
 }
 
 .header-burger-button {
-    font-size: 24px;
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
+  font-size: 24px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
 }
 
 /* Стили мобильного меню */
 .header-mobile-nav {
-    display: flex;
-    flex-direction: column;
-    margin-top: 20px;
-    gap: 15px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  gap: 15px;
 }
 
 .header-mobile-link {
-    text-decoration: none;
-    color: black;
-    font-size: 16px;
+  text-decoration: none;
+  color: black;
+  font-size: 16px;
 }
 
 /* Адаптивные стили */
 @media (max-width: 768px) {
-    .header-nav-desktop {
-        display: none;
-    }
+  .header-nav-desktop {
+    display: none;
+  }
 
-    .header-burger-menu {
-        display: block;
-    }
+  .header-burger-menu {
+    display: block;
+  }
 }

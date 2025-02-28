@@ -70,14 +70,13 @@
 }
 
 .carousel-card {
+  height: 100%;
   overflow: hidden;
   border-radius: 20px;
   align-items: center;
   display: flex !important;
   flex-direction: column;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
-  height: 650px;
-  position: relative;
 }
 
 .carousel-card-image {

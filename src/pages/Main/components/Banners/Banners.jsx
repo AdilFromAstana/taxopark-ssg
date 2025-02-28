@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Carousel, Spin } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -55,13 +55,7 @@ const Banners = () => {
 
   return (
     <div style={{ width: bannerWidth, margin: "0 auto" }}>
-      <Carousel
-        autoplay
-        dots
-        slidesToShow={1}
-        slidesToScroll={1}
-        draggable
-      >
+      <Carousel autoplay dots slidesToShow={1} slidesToScroll={1} draggable>
         {items?.data?.map((item) => (
           <div key={item.id} style={{ position: "relative", width: "100%" }}>
             <div

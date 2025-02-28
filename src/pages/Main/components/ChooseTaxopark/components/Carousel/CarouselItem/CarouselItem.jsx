@@ -77,191 +77,203 @@ const CarouselItem = memo(({ item, index, carouselItemWidth, cities }) => {
 
   return (
     <div
-      className="related-carousel-item"
+      className={`flip-card-inner ${flipped ? "flipped" : ""}`}
       style={{ width: `${carouselItemWidth}px` }}
     >
-      <div className="flip-card">
-        <div className={`flip-card-inner ${flipped ? "flipped" : ""}`}>
-          <div className="flip-card-front">
-            <Card className="carousel-card" key={index} onClick={toggleFlip}>
-              <img
-                className="carousel-card-image"
-                src={parkImage}
-                alt={item.title}
-              />
-              <div className="carousel-card-info">
-                <div
-                  className="approximate-income-value"
-                  style={{ alignSelf: "center", fontWeight: 700 }}
-                >
-                  {formatNumber(item.approximateIncome)} ₸
-                </div>
-                <div className="carousel-card-details">
-                  <h3 className="carousel-card-title">{item.title}</h3>
-                  <div className="carousel-card-rating">
-                    <IoIosStar className="carousel-card-icon star" />
-                    <span>{item.rating}</span>
-                  </div>
-                  <div className="carousel-card-detail">
-                    <MdPercent className="carousel-card-icon" />
-                    <span>Комиссия парка: {item.parkCommission}%</span>
-                  </div>
-                  {item.commissionWithdraw && (
-                    <div className="carousel-card-detail">
-                      <LuClock3 className="carousel-card-icon" />
-                      {/* <span>{item.paymentType}</span> */}
-                      <span>
-                        Моментальные выплаты: {item.commissionWithdraw}%
-                      </span>
-                    </div>
-                  )}
-                  {supportTime && (
-                    <div className="carousel-card-detail">
-                      <MdHeadsetMic className="carousel-card-icon" />
-                      <span>{supportTime}</span>
-                    </div>
-                  )}
-                  {item.parkEntrepreneurSupport ? (
-                    <div className="carousel-card-detail">
-                      <PiWallet className="carousel-card-icon" />
-                      <span>Парковое ИП</span>
-                    </div>
-                  ) : null}
-                  <div className="carousel-card-detail">
-                    <FaLocationDot className="carousel-card-icon" />
-                    {item?.cityIds?.map((cityId) => {
-                      const cityTitle = cities?.find(
-                        (city) => city.id === cityId
-                      );
-                      return (
-                        <Tag
-                          color="yellow-inverse"
-                          style={{ color: "black" }}
-                          key={cityId}
-                        >
-                          {cityTitle?.title}
-                        </Tag>
-                      );
-                    })}
-                  </div>
-                  <div className="carousel-card-bonuses">
-                    <LuGift className="carousel-card-icon" />
-                    <div className="carousel-card-bonus-list">
-                      {item.parkPromotions.map((bonus, idx) => (
-                        <Tag
-                          color="yellow-inverse"
-                          style={{ color: "black" }}
-                          key={idx}
-                        >
-                          {getPromotionLabel(bonus)}
-                        </Tag>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  className="carousel-card-button"
-                  size="large"
-                  onClick={openModal}
-                >
-                  Оставить заявку
-                </Button>
-              </div>
-            </Card>
+      <Card
+        className="carousel-card flip-card-front"
+        key={index}
+        onClick={toggleFlip}
+      >
+        <img className="carousel-card-image" src={parkImage} alt={item.title} />
+        <div className="carousel-card-info">
+          <div
+            className="approximate-income-value"
+            style={{ alignSelf: "center", fontWeight: 700 }}
+          >
+            {formatNumber(item.approximateIncome)} ₸
           </div>
-
-          <div className="flip-card-back">
-            <Card
-              className="carousel-card"
-              key={`${index}-back`}
-              onClick={toggleFlip}
-            >
-              <div className="carousel-card-info-backside carousel-card-info">
-                <h3
-                  className="carousel-card-title"
-                  style={{ textAlign: "center", width: "100%" }}
-                >
-                  {item.title}
-                </h3>
-                <div className="carousel-card-details">
-                  <div className="carousel-card-detail">
-                    <MdPercent className="carousel-card-icon" />
-                    <span>Комиссия парка:</span> {item.parkCommission}%
-                  </div>
-                  <div className="carousel-card-detail">
-                    <GoCreditCard className="carousel-card-icon" />
-                    <span>Моментальные выплаты:</span>{" "}
-                    {item.commissionWithdraw
-                      ? `Да (${item.commissionWithdraw}%)`
-                      : "Нет"}
-                  </div>
-                  <div className="carousel-card-detail">
-                    <BiMoneyWithdraw className="carousel-card-icon" />
-                    <span>Выплаты переводом:</span>{" "}
-                    {item.transferPaymentCommission
-                      ? `Да (${item.transferPaymentCommission}%)`
-                      : "Нет"}
-                  </div>
-                  <div className="carousel-card-detail">
-                    <MdHeadsetMic className="carousel-card-icon" />
-                    <span>Техподдержка:</span> {getSupportTime() || "-"}
-                  </div>
-                  <div className="carousel-card-detail">
-                    <MdBusinessCenter className="carousel-card-icon" />
-                    <span>Парковое ИП:</span>
-                    {item.parkEntrepreneurSupport ? "Да" : "Нет"}
-                  </div>
-                  <div className="carousel-card-detail">
-                    <FaHandshake className="carousel-card-icon" />
-                    <span style={{ whiteSpace: "nowrap" }}>
-                      Поддержка регистрации ИП:
-                    </span>
-                    {item.entrepreneurSupport ? "Да" : "Нет"}
-                  </div>
-                  <div className="carousel-card-detail">
-                    <TbCashRegister className="carousel-card-icon" />
-                    <span>Ведение бухгалтерии:</span>
-                    {item.accountantSupport ? "Да" : "Нет"}
-                  </div>
-                  <div className="carousel-card-detail">
-                    <FaGasPump className="carousel-card-icon" />
-                    <span>Яндекс Заправка:</span>{" "}
-                    {item.yandexGasStation ? "Да" : "Нет"}
-                  </div>
-                  <div
-                    className="carousel-card-detail"
-                    style={{ marginLeft: "-4px", gap: "6px" }}
+          <div className="carousel-card-details">
+            <h3 className="carousel-card-title">{item.title}</h3>
+            <div className="carousel-card-rating">
+              <IoIosStar className="carousel-card-icon star" />
+              <span>{item.rating}</span>
+            </div>
+            <div className="carousel-card-detail">
+              <MdPercent className="carousel-card-icon" />
+              <span>Комиссия парка: {item.parkCommission}%</span>
+            </div>
+            {item.commissionWithdraw && (
+              <div className="carousel-card-detail">
+                <LuClock3 className="carousel-card-icon" />
+                {/* <span>{item.paymentType}</span> */}
+                <span>Моментальные выплаты: {item.commissionWithdraw}%</span>
+              </div>
+            )}
+            {supportTime && (
+              <div className="carousel-card-detail">
+                <MdHeadsetMic className="carousel-card-icon" />
+                <span>{supportTime}</span>
+              </div>
+            )}
+            {item.parkEntrepreneurSupport ? (
+              <div className="carousel-card-detail">
+                <PiWallet className="carousel-card-icon" />
+                <span>Парковое ИП</span>
+              </div>
+            ) : null}
+            <div className="carousel-card-detail">
+              <FaLocationDot className="carousel-card-icon" />
+              {item?.cityIds?.map((cityId) => {
+                const cityTitle = cities?.find((city) => city.id === cityId);
+                return (
+                  <Tag
+                    color="yellow-inverse"
+                    style={{ color: "black" }}
+                    key={cityId}
                   >
-                    <MdCarRental
-                      className="carousel-card-icon"
-                      style={{ fontSize: "30px" }}
-                    />
-                    <span>Аренда машин от парка:</span>
-                    {item.carRentals ? "Да" : "Нет"}
-                  </div>
-                  <div className="carousel-card-bonuses">
-                    <LuGift className="carousel-card-icon" />
-                    <div className="carousel-card-bonus-list">
-                      {item.parkPromotions.map((bonus, idx) => (
-                        <span className="carousel-card-bonus" key={idx}>
-                          {getPromotionLabel(bonus)}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  className="carousel-card-button"
-                  size="large"
-                  onClick={openModal}
-                >
-                  Оставить заявку
-                </Button>
+                    {cityTitle?.title}
+                  </Tag>
+                );
+              })}
+            </div>
+            <div className="carousel-card-bonuses">
+              <LuGift className="carousel-card-icon" />
+              <div className="carousel-card-bonus-list">
+                {item.parkPromotions.map((bonus, idx) => (
+                  <Tag
+                    color="yellow-inverse"
+                    style={{ color: "black" }}
+                    key={idx}
+                  >
+                    {getPromotionLabel(bonus)}
+                  </Tag>
+                ))}
               </div>
-            </Card>
+            </div>
           </div>
+          <div
+            style={{
+              textAlign: "center",
+              width: "100%",
+              cursor: "pointer",
+              textDecoration: "underline",
+            }}
+          >
+            Подробнее...
+          </div>
+          <Button
+            className="carousel-card-button"
+            size="large"
+            onClick={openModal}
+          >
+            Оставить заявку
+          </Button>
         </div>
-      </div>
+      </Card>
+
+      <Card
+        className="carousel-card flip-card-back"
+        key={`${index}-back`}
+        onClick={toggleFlip}
+      >
+        <div className="carousel-card-info-backside carousel-card-info">
+          <h3
+            className="carousel-card-title"
+            style={{ textAlign: "center", width: "100%" }}
+          >
+            {item.title}
+          </h3>
+          <div className="carousel-card-details">
+            <div className="carousel-card-detail">
+              <MdPercent className="carousel-card-icon" />
+              <span>Комиссия парка:</span> {item.parkCommission}%
+            </div>
+            <div className="carousel-card-detail">
+              <GoCreditCard className="carousel-card-icon" />
+              <span>Моментальные выплаты:</span>{" "}
+              {item.commissionWithdraw
+                ? `Да (${item.commissionWithdraw}%)`
+                : "Нет"}
+            </div>
+            <div className="carousel-card-detail">
+              <BiMoneyWithdraw className="carousel-card-icon" />
+              <span>Выплаты переводом:</span>{" "}
+              {item.transferPaymentCommission
+                ? `Да (${item.transferPaymentCommission}%)`
+                : "Нет"}
+            </div>
+            <div className="carousel-card-detail">
+              <MdHeadsetMic className="carousel-card-icon" />
+              <span>Техподдержка:</span> {getSupportTime() || "-"}
+            </div>
+            <div className="carousel-card-detail">
+              <MdBusinessCenter className="carousel-card-icon" />
+              <span>Парковое ИП:</span>
+              {item.parkEntrepreneurSupport ? "Да" : "Нет"}
+            </div>
+            <div className="carousel-card-detail">
+              <FaHandshake className="carousel-card-icon" />
+              <span style={{ whiteSpace: "nowrap" }}>
+                Поддержка регистрации ИП:
+              </span>
+              {item.entrepreneurSupport ? "Да" : "Нет"}
+            </div>
+            <div className="carousel-card-detail">
+              <TbCashRegister className="carousel-card-icon" />
+              <span>Ведение бухгалтерии:</span>
+              {item.accountantSupport ? "Да" : "Нет"}
+            </div>
+            <div className="carousel-card-detail">
+              <FaGasPump className="carousel-card-icon" />
+              <span>Яндекс Заправка:</span>{" "}
+              {item.yandexGasStation ? "Да" : "Нет"}
+            </div>
+            <div
+              className="carousel-card-detail"
+              style={{ marginLeft: "-4px", gap: "6px" }}
+            >
+              <MdCarRental
+                className="carousel-card-icon"
+                style={{ fontSize: "30px" }}
+              />
+              <span>Аренда машин от парка:</span>
+              {item.carRentals ? "Да" : "Нет"}
+            </div>
+            <div className="carousel-card-bonuses">
+              <LuGift className="carousel-card-icon" />
+              <div className="carousel-card-bonus-list">
+                {item.parkPromotions.map((bonus, idx) => (
+                  <Tag
+                    color="yellow-inverse"
+                    style={{ color: "black" }}
+                    key={idx}
+                  >
+                    {getPromotionLabel(bonus)}
+                  </Tag>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div
+            style={{
+              textAlign: "center",
+              width: "100%",
+              cursor: "pointer",
+              textDecoration: "underline",
+            }}
+          >
+            Подробнее...
+          </div>
+          <Button
+            className="carousel-card-button"
+            size="large"
+            onClick={openModal}
+          >
+            Оставить заявку
+          </Button>
+        </div>
+      </Card>
       <ApplicationModal
         isOpen={isModalOpen}
         onClose={closeModal}
