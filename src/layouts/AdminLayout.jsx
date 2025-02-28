@@ -6,6 +6,10 @@ const AdminLayout = () => {
   const nav = useNavigate();
   const items = [
     {
+      key: "website",
+      label: "Веб-сайт",
+    },
+    {
       key: "parks",
       label: "Таксопарки",
     },

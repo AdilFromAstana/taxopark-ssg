@@ -40,35 +40,33 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
   const [orderPerDay, setOrderPerDay] = useState(10);
   const yandexCommission = 7;
   const [parkPromotions, setParkPromotions] = useState([]);
-  const [selectedCityId, setSelectedCityId] = useState(null);
+  const [selectedCityIds, setSelectedCityIds] = useState([]);
   const [isPaymentWithCommission, setIsPaymentWithCommission] = useState(false);
 
-  const { data, isLoading } = useQuery(
-    [
+  const { data, isLoading } = useQuery({
+    queryKey: [
       "parks",
       {
-        selectedCityId,
+        selectedCityIds,
         parkPromotions,
         isPaymentWithCommission,
         supportTimeFilters,
       },
     ],
-    () =>
+    queryFn: () =>
       fetchParks({
         limit: 1000,
-        cityId: selectedCityId,
+        cityIds: selectedCityIds,
         parkPromotions: parkPromotions.join(","),
         isPaymentWithCommission,
         supportAllDay: supportTimeFilters.allDay,
         supportLimited: supportTimeFilters.limited,
         active: true,
       }),
-    {
-      keepPreviousData: true,
-      staleTime: 5 * 60 * 1000,
-      cacheTime: 10 * 60 * 1000,
-    }
-  );
+    keepPreviousData: true,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+  });
 
   useEffect(() => {
     if (data) {
@@ -156,6 +154,7 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
           </h4>
           <Select
             style={{ width: "100%" }}
+            mode="multiple"
             allowClear
             placeholder="Выберите город"
             options={cities.map((city) => ({
@@ -163,8 +162,8 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
               label: city.title,
               key: city.id,
             }))}
-            onChange={setSelectedCityId}
-            value={selectedCityId}
+            onChange={setSelectedCityIds}
+            value={selectedCityIds}
           />
         </Col>
 

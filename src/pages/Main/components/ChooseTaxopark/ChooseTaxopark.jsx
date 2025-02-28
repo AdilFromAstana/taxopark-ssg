@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Filters from "./components/Filters";
 import { Button, Drawer } from "antd";
 import "./ChooseTaxopark.css";
@@ -14,16 +14,28 @@ const fetchCities = async () => {
 };
 
 const ChooseTaxopark = () => {
+  const queryClient = useQueryClient();
   const [items, setItems] = useState([]);
   const [itemsCount, setItemsCount] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { data: cities = [], isLoading: citiesLoading } = useQuery(
-    "cities",
-    fetchCities,
-    { staleTime: 5 * 60 * 1000, cacheTime: 10 * 60 * 1000 }
-  );
+  const { data: cities = [], isLoading: citiesLoading } = useQuery({
+    queryKey: ["cities", {}],
+    queryFn: async ({ queryKey }) => {
+      const [, params] = queryKey;
+
+      const cachedData = queryClient.getQueryData(["cities", params]);
+      if (cachedData) {
+        return cachedData;
+      }
+
+      return fetchCities(params);
+    },
+    keepPreviousData: true,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+  });
 
   return (
     <div className="carousel-wrapper">
@@ -51,7 +63,11 @@ const ChooseTaxopark = () => {
           Расчитать доход
         </Button>
       </div>
-      <Carousel items={items} isLoading={isLoading || citiesLoading} />
+      <Carousel
+        items={items}
+        isLoading={isLoading || citiesLoading}
+        cities={cities}
+      />
       <Drawer
         open={isDrawerOpen}
         title="Расчитать доход"

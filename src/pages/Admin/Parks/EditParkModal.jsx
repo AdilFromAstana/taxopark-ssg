@@ -15,6 +15,7 @@ import {
   Upload,
   Image,
 } from "antd";
+import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import axios from "axios";
 import moment from "moment";
 import { memo, useEffect, useState } from "react";
@@ -146,9 +147,9 @@ const EditParkModal = memo(
         supportWorkTime:
           record?.supportAlwaysAvailable === false
             ? [
-              moment(record?.supportStartWorkTime, "HH:mm"),
-              moment(record?.supportEndWorkTime, "HH:mm"),
-            ]
+                moment(record?.supportStartWorkTime, "HH:mm"),
+                moment(record?.supportEndWorkTime, "HH:mm"),
+              ]
             : [],
       });
     };
@@ -160,9 +161,9 @@ const EditParkModal = memo(
           supportWorkTime:
             record?.supportStartWorkTime && record?.supportEndWorkTime
               ? [
-                moment(record.supportStartWorkTime, "HH:mm"),
-                moment(record.supportEndWorkTime, "HH:mm"),
-              ]
+                  moment(record.supportStartWorkTime, "HH:mm"),
+                  moment(record.supportEndWorkTime, "HH:mm"),
+                ]
               : [],
         });
         setRadioValues({
@@ -206,7 +207,12 @@ const EditParkModal = memo(
                 label="Города"
                 rules={[{ required: true, message: "Выберите город!" }]}
               >
-                <Select mode="multiple" disabled={!isEditMode} placeholder="Выберите город">
+                <Select
+                  maxTagCount={1}
+                  mode="multiple"
+                  disabled={!isEditMode}
+                  placeholder="Выберите города!"
+                >
                   {cities.map((city) => (
                     <Select.Option key={city.id} value={city.id}>
                       {city.title}
@@ -219,7 +225,7 @@ const EditParkModal = memo(
               <Form.Item
                 name="email"
                 label="Email"
-                rules={[{ required: true, type: "email", message: "" }]}
+                rules={[{ required: false, type: "email" }]}
               >
                 <Input disabled={!isEditMode} type="email" />
               </Form.Item>
@@ -228,19 +234,6 @@ const EditParkModal = memo(
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item name="commissionWithdraw" label="Комиссия за вывод %">
-                <InputNumber
-                  min={0}
-                  max={100}
-                  style={{ width: "100%" }}
-                  disabled={!isEditMode}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item
-                name="transferPaymentCommission"
-                label="Комиссия за перевод %"
-              >
                 <InputNumber
                   min={0}
                   max={100}
@@ -268,8 +261,6 @@ const EditParkModal = memo(
                 />
               </Form.Item>
             </Col>
-          </Row>
-          <Row gutter={16}>
             <Col span={8}>
               <Form.Item
                 name="averageCheck"
@@ -298,6 +289,8 @@ const EditParkModal = memo(
                 />
               </Form.Item>
             </Col>
+          </Row>
+          <Row gutter={16}>
             <Col span={8}>
               <Form.Item name="rating" label="Рейтинг">
                 <Rate allowHalf disabled={!isEditMode} />
@@ -317,6 +310,30 @@ const EditParkModal = memo(
                   </Radio>
                   <Radio
                     onClick={() => toggleRadioValue("yandexGasStation", false)}
+                    value={false}
+                  >
+                    Нет
+                  </Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="isPartner"
+                label="Партнер"
+                rules={[{ required: true }]}
+              >
+                <Radio.Group value={radioValues.isPartner}>
+                  <Radio
+                    onClick={() => toggleRadioValue("isPartner", true)}
+                    disabled={!isEditMode}
+                    value={true}
+                  >
+                    Да
+                  </Radio>
+                  <Radio
+                    onClick={() => toggleRadioValue("isPartner", false)}
+                    disabled={!isEditMode}
                     value={false}
                   >
                     Нет
@@ -355,10 +372,7 @@ const EditParkModal = memo(
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item
-                name="entrepreneurSupport"
-                label="Общая поддержка предпринимателей"
-              >
+              <Form.Item name="entrepreneurSupport" label="Парковое ИП">
                 <Radio.Group
                   value={radioValues.entrepreneurSupport}
                   disabled={!isEditMode}
@@ -491,6 +505,90 @@ const EditParkModal = memo(
                 </Form.Item>
               </Col>
             )}
+          </Row>
+          <Row gutter={16}>
+            <Col span={16}>
+              <Form.Item label="Коммисия за перевод">
+                <Form.List name="commissionRates">
+                  {(fields, { add, remove }) => (
+                    <>
+                      {fields.map(({ key, name, ...restField }, index) => (
+                        <Row gutter={16} key={key} align="middle">
+                          <Col span={11}>
+                            <Form.Item
+                              {...restField}
+                              name={[name, "amount"]}
+                              label={
+                                index === 0 ? "До суммы (тг)" : "От суммы (тг)"
+                              }
+                              rules={[
+                                { required: true, message: "Введите сумму" },
+                              ]}
+                            >
+                              <InputNumber
+                                style={{ width: "100%" }}
+                                min={0}
+                                placeholder={
+                                  index === 0
+                                    ? "До какой суммы"
+                                    : "От какой суммы"
+                                }
+                                disabled={
+                                  !isEditMode ||
+                                  (index > 0 &&
+                                    form.getFieldValue([
+                                      "commissionRates",
+                                      index - 1,
+                                      "amount",
+                                    ]) < 10000)
+                                } // Условие блокировки
+                              />
+                            </Form.Item>
+                          </Col>
+                          <Col span={11}>
+                            <Form.Item
+                              {...restField}
+                              name={[name, "percent"]}
+                              label="Процент (%)"
+                              rules={[
+                                { required: true, message: "Введите процент" },
+                              ]}
+                            >
+                              <InputNumber
+                                style={{ width: "100%" }}
+                                min={0}
+                                max={100}
+                                placeholder="%"
+                                disabled={!isEditMode} // Заблокировать при редактировании, если нужно
+                              />
+                            </Form.Item>
+                          </Col>
+                          {isEditMode && (
+                            <Col>
+                              <MinusCircleOutlined
+                                onClick={() => remove(name)}
+                                style={{ color: "red", marginTop: 8 }}
+                              />
+                            </Col>
+                          )}
+                        </Row>
+                      ))}
+                      <Form.Item>
+                        <Button
+                          type="dashed"
+                          onClick={() => add()}
+                          block
+                          icon={<PlusOutlined />}
+                          disabled={!isEditMode}
+                        >
+                          Добавить уровень комиссии
+                        </Button>
+                      </Form.Item>
+                    </>
+                  )}
+                </Form.List>
+              </Form.Item>
+            </Col>
             <Col span={8}>
               <Form.Item
                 name="image"
@@ -509,13 +607,13 @@ const EditParkModal = memo(
                   fileList={
                     record?.imageUrl
                       ? [
-                        {
-                          uid: "1",
-                          name: "image",
-                          status: "done",
-                          url: `${API_URL}/uploads/${record?.imageUrl}`,
-                        },
-                      ]
+                          {
+                            uid: "1",
+                            name: "image",
+                            status: "done",
+                            url: `${API_URL}/uploads/${record?.imageUrl}`,
+                          },
+                        ]
                       : []
                   }
                   onPreview={() => {

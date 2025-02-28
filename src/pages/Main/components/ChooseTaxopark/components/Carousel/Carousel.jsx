@@ -5,7 +5,7 @@ import { memo, useEffect, useRef, useState } from "react";
 import "./Carousel.css";
 import CarouselItem from "./CarouselItem/CarouselItem";
 
-const Carousel = memo(({ items, isLoading = true }) => {
+const Carousel = memo(({ items, isLoading = true, cities }) => {
   const [carouselItemWidth, setCarouselItemWidth] = useState(0);
   const carouselWrapperRef = useRef(null);
   const carouselListRef = useRef(null);
@@ -101,6 +101,7 @@ const Carousel = memo(({ items, isLoading = true }) => {
             {items.map((item) => {
               return (
                 <CarouselItem
+                  cities={cities}
                   key={item.id}
                   index={item.id}
                   item={item}

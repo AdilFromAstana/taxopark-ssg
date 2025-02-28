@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { memo, useState } from "react";
-import { Card, Button } from "antd";
+import { Card, Button, Tag } from "antd";
 import { IoIosStar } from "react-icons/io";
 import {
   MdPercent,
@@ -17,6 +17,8 @@ import { GoCreditCard } from "react-icons/go";
 import "./CarouselItem.css";
 import ApplicationModal from "../../ApplicationModal";
 import moment from "moment";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 function formatNumber(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -39,9 +41,13 @@ const formatTime = (time) => {
   return time ? moment(time).format("HH:mm") : "Не указано"; // Если null, пишем "Не указано"
 };
 
-const CarouselItem = memo(({ item, index, carouselItemWidth }) => {
+const CarouselItem = memo(({ item, index, carouselItemWidth, cities }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [flipped, setFlipped] = useState(false);
+
+  const parkImage = item?.imageUrl
+    ? `${API_URL}/uploads/${item?.imageUrl}`
+    : "https://www.shbarcelona.ru/blog/ru/wp-content/uploads/2020/01/oli-woodman-fwYZ3B_QQco-unsplash.jpg";
 
   const getSupportTime = () => {
     if (typeof item.supportAlwaysAvailable === "boolean") {
@@ -80,7 +86,7 @@ const CarouselItem = memo(({ item, index, carouselItemWidth }) => {
             <Card className="carousel-card" key={index} onClick={toggleFlip}>
               <img
                 className="carousel-card-image"
-                src="https://www.shbarcelona.ru/blog/ru/wp-content/uploads/2020/01/oli-woodman-fwYZ3B_QQco-unsplash.jpg"
+                src={parkImage}
                 alt={item.title}
               />
               <div className="carousel-card-info">
@@ -98,13 +104,17 @@ const CarouselItem = memo(({ item, index, carouselItemWidth }) => {
                   </div>
                   <div className="carousel-card-detail">
                     <MdPercent className="carousel-card-icon" />
-                    <span>Комиссия парка {item.parkCommission}%</span>
+                    <span>Комиссия парка: {item.parkCommission}%</span>
                   </div>
-                  <div className="carousel-card-detail">
-                    <LuClock3 className="carousel-card-icon" />
-                    {/* <span>{item.paymentType}</span> */}
-                    <span>Моментальные выплаты {item.commissionWithdraw}</span>
-                  </div>
+                  {item.commissionWithdraw && (
+                    <div className="carousel-card-detail">
+                      <LuClock3 className="carousel-card-icon" />
+                      {/* <span>{item.paymentType}</span> */}
+                      <span>
+                        Моментальные выплаты: {item.commissionWithdraw}%
+                      </span>
+                    </div>
+                  )}
                   {supportTime && (
                     <div className="carousel-card-detail">
                       <MdHeadsetMic className="carousel-card-icon" />
@@ -119,15 +129,32 @@ const CarouselItem = memo(({ item, index, carouselItemWidth }) => {
                   ) : null}
                   <div className="carousel-card-detail">
                     <FaLocationDot className="carousel-card-icon" />
-                    <span>{item.City.title}</span>
+                    {item?.cityIds?.map((cityId) => {
+                      const cityTitle = cities?.find(
+                        (city) => city.id === cityId
+                      );
+                      return (
+                        <Tag
+                          color="yellow-inverse"
+                          style={{ color: "black" }}
+                          key={cityId}
+                        >
+                          {cityTitle?.title}
+                        </Tag>
+                      );
+                    })}
                   </div>
                   <div className="carousel-card-bonuses">
                     <LuGift className="carousel-card-icon" />
                     <div className="carousel-card-bonus-list">
                       {item.parkPromotions.map((bonus, idx) => (
-                        <span className="carousel-card-bonus" key={idx}>
+                        <Tag
+                          color="yellow-inverse"
+                          style={{ color: "black" }}
+                          key={idx}
+                        >
                           {getPromotionLabel(bonus)}
-                        </span>
+                        </Tag>
                       ))}
                     </div>
                   </div>

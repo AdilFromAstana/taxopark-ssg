@@ -58,7 +58,10 @@ const Promotions = memo(() => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const { data: promotionsData, isLoading, refetch } = useQuery({
+  const {
+    data: promotionsData,
+    isLoading,
+  } = useQuery({
     queryKey: [
       "promotions",
       {
@@ -83,15 +86,6 @@ const Promotions = memo(() => {
     staleTime: 5 * 60 * 1000,
     cacheTime: 10 * 60 * 1000,
   });
-
-  const invalidatePromotionsQuery = async () => {
-    console.log("invalidatePromotionsQuery")
-    queryClient.invalidateQueries({
-      queryKey: ["promotions"],
-      exact: false, // Позволяет обновлять любые варианты ключа "promotions" с разными параметрами
-    });
-    refetch()
-  };
 
   const { data: parks = [] } = useQuery({
     queryKey: ["parks"],
@@ -302,7 +296,7 @@ const Promotions = memo(() => {
         pagination={{
           current: pagination.current,
           pageSize: pagination.pageSize,
-          total: pagination.total,
+          total: promotionsData?.total,
           showSizeChanger: true,
         }}
         onRow={(record) => ({
@@ -315,7 +309,6 @@ const Promotions = memo(() => {
       />
 
       <CreatePromotionModal
-        invalidatePromotionsQuery={invalidatePromotionsQuery}
         parks={parks}
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}

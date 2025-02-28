@@ -12,6 +12,7 @@ import Forms from "./pages/Admin/Forms/Forms";
 import Parks from "./pages/Admin/Parks/Parks";
 import Promotions from "./pages/Admin/Promotions/Promotions";
 import Cities from "./pages/Admin/Cities/Cities";
+import WebsiteInfo from "./pages/Admin/WebsiteInfo/WebsiteInfo";
 
 const AppRouter = () => {
   return (
@@ -26,7 +27,8 @@ const AppRouter = () => {
 
         {/* Админка с Sidebar */}
         <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="parks" replace />} />
+          <Route index element={<Navigate to="website" replace />} />
+          <Route path="website" element={<WebsiteInfo />}/>
           <Route path="parks" element={<Parks />} />
           <Route path="cities" element={<Cities />} />
           <Route path="forms" element={<Forms />} />

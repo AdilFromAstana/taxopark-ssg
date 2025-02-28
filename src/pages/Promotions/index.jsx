@@ -19,15 +19,16 @@ export default function PromotionsPage() {
   const [sortField, setSortField] = useState(null);
   const [sortOrder, setSortOrder] = useState(null);
 
-  const { data: promotionsData } = useQuery(
-    ["promotions", { searchQuery, sortField, sortOrder, active: true }],
-    fetchPromotions,
-    {
-      keepPreviousData: true,
-      staleTime: 5 * 60 * 1000,
-      cacheTime: 10 * 60 * 1000,
-    }
-  );
+  const { data: promotionsData } = useQuery({
+    queryFn: fetchPromotions,
+    queryKey: [
+      "promotions",
+      { searchQuery, sortField, sortOrder, active: true },
+    ],
+    keepPreviousData: true,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+  });
 
   return (
     <div className="promotions-container">

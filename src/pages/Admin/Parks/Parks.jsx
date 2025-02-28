@@ -38,6 +38,120 @@ const debounce = (func, delay) => {
   };
 };
 
+const handleDownloadExcel = async () => {
+  const { data: allParksData } = await fetchParks({
+    page: 1,
+    pageSize: 1000,
+    sortField: sorter.field,
+    sortOrder: sorter.order,
+    filters: searchFilters,
+  });
+
+  if (!allParksData || allParksData.length === 0) {
+    return;
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Parks");
+
+  const col = [
+    { key: "title", width: 50, header: "Название" },
+    { key: "City", width: 50, header: "Город" },
+    { key: "averageCheck", width: 50, header: "Средний чек" },
+    { key: "parkEntrepreneurSupport", width: 50, header: "ИП таксопарка" },
+    { key: "entrepreneurSupport", width: 50, header: "Поддержка ИП" },
+    { key: "commissionWithdraw", width: 50, header: "Комиссия за снятия" },
+    {
+      key: "transferPaymentCommission",
+      width: 50,
+      header: "Комиссия за перевод",
+    },
+    { key: "accountantSupport", width: 50, header: "Поддержка Бухгалтерии" },
+    { key: "yandexGasStation", width: 50, header: "Яндекс Заправки" },
+    {
+      key: "supportAlwaysAvailable",
+      width: 50,
+      header: "Тех.Поддержка 24/7",
+    },
+    {
+      key: "supportStartWorkTime",
+      width: 50,
+      header: "Начала работы тех.под",
+    },
+    { key: "supportEndWorkTime", width: 50, header: "Конец работы тех.под" },
+    { key: "parkCommission", width: 50, header: "Комиссия парка" },
+    { key: "parkPromotions", width: 50, header: "Акции" },
+    { key: "paymentType", width: 50, header: "Тип оплаты" },
+    { key: "active", width: 50, header: "Статус" },
+    { key: "rating", width: 50, header: "Рейтинг" },
+    { key: "createdAt", width: 50, header: "Создано" },
+  ];
+
+  worksheet.columns = col;
+  worksheet.addRows(
+    allParksData.map((parkData) => {
+      return {
+        title: parkData?.title,
+        City: parkData?.City?.title || "-",
+        averageCheck: parkData?.averageCheck || "-",
+        parkEntrepreneurSupport:
+          typeof parkData?.parkEntrepreneurSupport === "boolean"
+            ? parkData?.parkEntrepreneurSupport
+              ? "Да"
+              : "Нет"
+            : "-",
+        entrepreneurSupport:
+          typeof parkData?.entrepreneurSupport === "boolean"
+            ? parkData?.entrepreneurSupport
+              ? "Да"
+              : "Нет"
+            : "-",
+        commissionWithdraw: parkData?.commissionWithdraw || "-",
+        transferPaymentCommission: parkData?.transferPaymentCommission || "-",
+        accountantSupport:
+          typeof parkData?.accountantSupport === "boolean"
+            ? parkData?.accountantSupport
+              ? "Да"
+              : "Нет"
+            : "-",
+        yandexGasStation:
+          typeof parkData?.yandexGasStation === "boolean"
+            ? parkData?.yandexGasStation
+              ? "Да"
+              : "Нет"
+            : "-",
+        supportAlwaysAvailable:
+          typeof parkData?.supportAlwaysAvailable === "boolean"
+            ? parkData?.supportAlwaysAvailable
+              ? "Да"
+              : "Нет"
+            : "-",
+        supportStartWorkTime: parkData?.supportStartWorkTime
+          ? moment(parkData?.supportStartWorkTime).format("HH:mm")
+          : "-",
+        supportEndWorkTime: parkData?.supportEndWorkTime
+          ? moment(parkData?.supportEndWorkTime).format("HH:mm")
+          : "-",
+        parkCommission: parkData?.parkCommission || "-",
+        parkPromotions: parkData?.parkPromotions,
+        paymentType: parkData?.paymentType || "-",
+        active: parkData?.active ? "Активен" : "Архивирован",
+        rating: parkData?.rating || "-",
+        createdAt: moment(parkData?.createdAt).format("DD.MM.YYYY HH:mm"),
+      };
+    })
+  );
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "parks_data.xlsx";
+  link.click();
+};
+
 const Parks = memo(() => {
   const queryClient = useQueryClient();
   const [pagination, setPagination] = useState({
@@ -51,7 +165,7 @@ const Parks = memo(() => {
   });
   const [searchFilters, setSearchFilters] = useState({
     title: "",
-    cityId: null,
+    cityIds: [],
   });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -83,11 +197,21 @@ const Parks = memo(() => {
     cacheTime: 10 * 60 * 1000,
   });
 
-  const { data: cities = [] } = useQuery({
-    queryKey: ["cities"],
-    queryFn: fetchCities,
-    staleTime: 60 * 1000,
-    cacheTime: 5 * 60 * 1000,
+  const { data: citiesData = [] } = useQuery({
+    queryKey: ["cities", {}],
+    queryFn: async ({ queryKey }) => {
+      const [, params] = queryKey;
+
+      const cachedData = queryClient.getQueryData(["cities", params]);
+      if (cachedData) {
+        return cachedData;
+      }
+
+      return fetchCities(params);
+    },
+    keepPreviousData: true,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
   });
 
   const handleTableChange = (pagination, _filters, sorter) => {
@@ -113,127 +237,19 @@ const Parks = memo(() => {
   );
 
   const handleCityFilterChange = (value) => {
-    setSearchFilters((prev) => ({ ...prev, cityId: value }));
-    queryClient.invalidateQueries(["parks"]);
+    setSearchFilters((prev) => ({
+      ...prev,
+      cityIds: Array.isArray(value) ? value : [value], // Всегда массив
+    }));
+
+    queryClient.invalidateQueries(["parks"], {
+      filters: searchFilters,
+    });
   };
 
   const handleDateRangeChange = (value) => {
     setSearchFilters((prev) => ({ ...prev, dateRange: value || [] }));
     queryClient.invalidateQueries(["parks"]);
-  };
-
-  const handleDownloadExcel = async () => {
-    const { data: allParksData } = await fetchParks({
-      page: 1,
-      pageSize: 1000,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      filters: searchFilters,
-    });
-
-    if (!allParksData || allParksData.length === 0) {
-      return;
-    }
-
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Parks");
-
-    const col = [
-      { key: "title", width: 50, header: "Название" },
-      { key: "City", width: 50, header: "Город" },
-      { key: "averageCheck", width: 50, header: "Средний чек" },
-      { key: "parkEntrepreneurSupport", width: 50, header: "ИП таксопарка" },
-      { key: "entrepreneurSupport", width: 50, header: "Поддержка ИП" },
-      { key: "commissionWithdraw", width: 50, header: "Комиссия за снятия" },
-      {
-        key: "transferPaymentCommission",
-        width: 50,
-        header: "Комиссия за перевод",
-      },
-      { key: "accountantSupport", width: 50, header: "Поддержка Бухгалтерии" },
-      { key: "yandexGasStation", width: 50, header: "Яндекс Заправки" },
-      {
-        key: "supportAlwaysAvailable",
-        width: 50,
-        header: "Тех.Поддержка 24/7",
-      },
-      {
-        key: "supportStartWorkTime",
-        width: 50,
-        header: "Начала работы тех.под",
-      },
-      { key: "supportEndWorkTime", width: 50, header: "Конец работы тех.под" },
-      { key: "parkCommission", width: 50, header: "Комиссия парка" },
-      { key: "parkPromotions", width: 50, header: "Акции" },
-      { key: "paymentType", width: 50, header: "Тип оплаты" },
-      { key: "active", width: 50, header: "Статус" },
-      { key: "rating", width: 50, header: "Рейтинг" },
-      { key: "createdAt", width: 50, header: "Создано" },
-    ];
-
-    worksheet.columns = col;
-    worksheet.addRows(
-      allParksData.map((parkData) => {
-        return {
-          title: parkData?.title,
-          City: parkData?.City?.title || "-",
-          averageCheck: parkData?.averageCheck || "-",
-          parkEntrepreneurSupport:
-            typeof parkData?.parkEntrepreneurSupport === "boolean"
-              ? parkData?.parkEntrepreneurSupport
-                ? "Да"
-                : "Нет"
-              : "-",
-          entrepreneurSupport:
-            typeof parkData?.entrepreneurSupport === "boolean"
-              ? parkData?.entrepreneurSupport
-                ? "Да"
-                : "Нет"
-              : "-",
-          commissionWithdraw: parkData?.commissionWithdraw || "-",
-          transferPaymentCommission: parkData?.transferPaymentCommission || "-",
-          accountantSupport:
-            typeof parkData?.accountantSupport === "boolean"
-              ? parkData?.accountantSupport
-                ? "Да"
-                : "Нет"
-              : "-",
-          yandexGasStation:
-            typeof parkData?.yandexGasStation === "boolean"
-              ? parkData?.yandexGasStation
-                ? "Да"
-                : "Нет"
-              : "-",
-          supportAlwaysAvailable:
-            typeof parkData?.supportAlwaysAvailable === "boolean"
-              ? parkData?.supportAlwaysAvailable
-                ? "Да"
-                : "Нет"
-              : "-",
-          supportStartWorkTime: parkData?.supportStartWorkTime
-            ? moment(parkData?.supportStartWorkTime).format("HH:mm")
-            : "-",
-          supportEndWorkTime: parkData?.supportEndWorkTime
-            ? moment(parkData?.supportEndWorkTime).format("HH:mm")
-            : "-",
-          parkCommission: parkData?.parkCommission || "-",
-          parkPromotions: parkData?.parkPromotions,
-          paymentType: parkData?.paymentType || "-",
-          active: parkData?.active ? "Активен" : "Архивирован",
-          rating: parkData?.rating || "-",
-          createdAt: moment(parkData?.createdAt).format("DD.MM.YYYY HH:mm"),
-        };
-      })
-    );
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "parks_data.xlsx";
-    link.click();
   };
 
   const columns = [
@@ -293,42 +309,68 @@ const Parks = memo(() => {
       title: "Город",
       dataIndex: "cityIds",
       key: "cityIds",
-      render: (_, record) => {
-        if (!record.cityIds?.length) return "—";
-
-        const cityTitles = record.cityIds
-          .map((id) => cities.find((city) => city.id === id)?.title)
-          .filter(Boolean); // Убираем undefined, если город не найден
-
-        return cityTitles.length
-          ? cityTitles.map((title) => <Tag color="blue" key={title}>{title}</Tag>)
-          : "—";
-      },
-      sorter: true,
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) => (
         <div style={{ padding: 8 }}>
           <Select
-            mode="multiple"
             allowClear
             showSearch
-            style={{ width: 200 }}
-            placeholder="Выберите город"
-            value={selectedKeys[0]}
-            onChange={(value) => {
-              setSelectedKeys(value ? [value] : []);
-              handleCityFilterChange(value);
-              confirm();
-            }}
+            mode="multiple"
+            style={{ width: 200, marginBottom: 8 }}
+            placeholder="Выберите таксопарк"
+            value={selectedKeys} // Теперь привязано к Ant Design API
+            onChange={(value) => setSelectedKeys(value)} // Сохраняем выбранные значения
           >
-            {cities?.map((city) => (
+            {citiesData?.map((city) => (
               <Select.Option key={city.id} value={city.id}>
                 {city.title}
               </Select.Option>
             ))}
           </Select>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <Button
+              type="primary"
+              onClick={() => {
+                handleCityFilterChange(selectedKeys); // Обновляем `searchFilters` и отправляем запрос
+                confirm(); // Закрываем фильтр и применяем
+              }}
+              size="small"
+            >
+              Применить
+            </Button>
+            <Button
+              onClick={() => {
+                clearFilters(); // Сбрасываем фильтры в Ant Design
+                handleCityFilterChange([]); // Очищаем `searchFilters` и отправляем запрос
+                confirm(); // Закрываем фильтр
+              }}
+              size="small"
+            >
+              Сбросить
+            </Button>
+          </div>
         </div>
       ),
-      onFilter: (value, record) => record.cityIds?.includes(value),
+
+      render: (_, record) => {
+        if (!record.cityIds?.length) return "—";
+
+        const cityTitles = record.cityIds
+          .map((id) => citiesData.find((city) => city.id === id)?.title)
+          .filter(Boolean); // Убираем undefined, если город не найден
+
+        return cityTitles.length
+          ? cityTitles.map((title) => (
+              <Tag color="blue" key={title}>
+                {title}
+              </Tag>
+            ))
+          : "—";
+      },
     },
     {
       title: "Статус",
@@ -483,7 +525,15 @@ const Parks = memo(() => {
       <CreateFormModal
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        cities={cities}
+        cities={citiesData}
+        queryData={{
+          page: pagination.current,
+          pageSize: pagination.pageSize,
+          sortField: sorter.field,
+          sortOrder: sorter.order,
+          filters: searchFilters,
+        }}
+        queryClient={queryClient}
       />
       {selectedRecord && (
         <EditParkModal
@@ -494,12 +544,12 @@ const Parks = memo(() => {
             sortOrder: sorter.order,
             filters: searchFilters,
           }}
-          setSelectedRecord={setSelectedRecord}
           queryClient={queryClient}
+          setSelectedRecord={setSelectedRecord}
           open={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           record={selectedRecord}
-          cities={cities}
+          cities={citiesData}
         />
       )}
     </div>

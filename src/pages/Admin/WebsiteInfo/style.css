@@ -1,0 +1,21 @@
+.ant-carousel .slick-prev,
+.ant-carousel .slick-next,
+.ant-carousel .slick-prev:hover,
+.ant-carousel .slick-next:hover {
+  color: black !important;
+}
+
+.slick-next::after,
+.slick-prev::after {
+  height: 24px !important;
+  width: 24px !important;
+  border-top: 4px solid black !important;
+  border-left: 4px solid black !important;
+}
+
+.ant-upload-wrapper .ant-upload-drag{
+    background: transparent;
+    border: transparent;
+    display: flex !important;
+    flex: 1;
+}

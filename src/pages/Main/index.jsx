@@ -4,6 +4,7 @@ import HowItWorks from "./components/HowItWorks/HowItWorks";
 import Advantages from "./components/Advantages/Advantages";
 import FieldForm from "./components/FieldForm/FieldForm";
 import { Helmet } from "react-helmet-async";
+import Banners from "./components/Banners/Banners";
 
 const Main = () => {
   return (
@@ -47,6 +48,7 @@ const Main = () => {
         {/* Canonical ссылка */}
         <link rel="canonical" href="https://example.com" />
       </Helmet>
+      <Banners />
       <ChooseTaxopark />
       <Reviews />
       <HowItWorks />

@@ -15,7 +15,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const useCreatePromotion = ({ form, onClose, invalidatePromotionsQuery }) => {
+const useCreatePromotion = ({ form, onClose }) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -24,9 +24,12 @@ const useCreatePromotion = ({ form, onClose, invalidatePromotionsQuery }) => {
       console.log("✅ Успешный ответ сервера:", response.data);
       message.success("🎉 Промо-акция успешно создана!");
 
-      // Инвалидация запроса
-      queryClient.invalidateQueries({ queryKey: ['promotions'] })
-      invalidatePromotionsQuery();
+      queryClient.setQueryData(["parks", queryData], (oldData) => {
+        console.log("oldData: ", oldData);
+        console.log("oldData.data: ", oldData.data);
+        if (!oldData || !oldData.data) return oldData;
+        return { ...oldData, data: [...oldData.data, data.data.dataValues] };
+      });
       onClose();
       form.resetFields(); // Очистка формы
     },
@@ -41,18 +44,12 @@ const useCreatePromotion = ({ form, onClose, invalidatePromotionsQuery }) => {
   });
 };
 
-const CreatePromotionModal = ({
-  open,
-  onClose,
-  parks = [],
-  invalidatePromotionsQuery,
-}) => {
+const CreatePromotionModal = ({ open, onClose, parks = [] }) => {
   const [form] = Form.useForm();
 
   const { mutate: handleCreatePromotion, isLoading } = useCreatePromotion({
     form,
     onClose,
-    invalidatePromotionsQuery,
   });
 
   const handleSubmit = async (values) => {

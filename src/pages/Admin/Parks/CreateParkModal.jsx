@@ -14,12 +14,21 @@ import {
   Flex,
   message,
 } from "antd";
+import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useState } from "react";
 const { RangePicker } = TimePicker;
 const API_URL = import.meta.env.VITE_API_URL;
 
-const CreateParkModal = ({ open, onClose, cities = [] }) => {
+const { TextArea } = Input;
+
+const CreateParkModal = ({
+  open,
+  onClose,
+  cities = [],
+  queryClient,
+  queryData,
+}) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [radioValues, setRadioValues] = useState({});
@@ -27,10 +36,15 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
   const handleSubmit = async (values) => {
     try {
       setLoading(true);
-      await axios.post(`${API_URL}/parks/create`, values);
+      const data = await axios.post(`${API_URL}/parks/create`, values);
 
-      message.success("Запись успешно создана!"); // Уведомление об успехе
-
+      message.success("Запись успешно создана!");
+      queryClient.setQueryData(["parks", queryData], (oldData) => {
+        console.log("oldData: ", oldData);
+        console.log("oldData.data: ", oldData.data);
+        if (!oldData || !oldData.data) return oldData;
+        return { ...oldData, data: [...oldData.data, data.data.dataValues] };
+      });
       onClose();
       form.resetFields();
       setRadioValues({});
@@ -83,7 +97,11 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
               label="Города"
               rules={[{ required: true, message: "Выберите город!" }]}
             >
-              <Select placeholder="Выберите город" mode="multiple">
+              <Select
+                placeholder="Выберите город"
+                mode="multiple"
+                maxTagCount={1}
+              >
                 {cities.map((city) => (
                   <Select.Option key={city.id} value={city.id}>
                     {city.title}
@@ -134,16 +152,6 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
           </Col>
           <Col span={8}>
             <Form.Item
-              name="transferPaymentCommission"
-              label="Комиссия за перевод %"
-            >
-              <InputNumber min={0} max={100} style={{ width: "100%" }} />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col span={8}>
-            <Form.Item
               name="averageCheck"
               label="Средний чек"
               rules={[
@@ -166,6 +174,8 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
               <InputNumber min={0} style={{ width: "100%" }} />
             </Form.Item>
           </Col>
+        </Row>
+        <Row gutter={16}>
           <Col span={8}>
             <Form.Item name="rating" label="Рейтинг">
               <Rate allowHalf />
@@ -182,6 +192,28 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
                 </Radio>
                 <Radio
                   onClick={() => toggleRadioValue("yandexGasStation", false)}
+                  value={false}
+                >
+                  Нет
+                </Radio>
+              </Radio.Group>
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item
+              name="isPartner"
+              label="Партнер"
+              rules={[{ required: true }]}
+            >
+              <Radio.Group value={radioValues.isPartner}>
+                <Radio
+                  onClick={() => toggleRadioValue("isPartner", true)}
+                  value={true}
+                >
+                  Да
+                </Radio>
+                <Radio
+                  onClick={() => toggleRadioValue("isPartner", false)}
                   value={false}
                 >
                   Нет
@@ -217,10 +249,7 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item
-              name="entrepreneurSupport"
-              label="Общая поддержка предпринимателей"
-            >
+            <Form.Item name="entrepreneurSupport" label="Парковое ИП">
               <Radio.Group value={radioValues.entrepreneurSupport}>
                 <Radio
                   onClick={() => toggleRadioValue("entrepreneurSupport", true)}
@@ -334,6 +363,92 @@ const CreateParkModal = ({ open, onClose, cities = [] }) => {
               </Form.Item>
             </Col>
           )}
+          <Col span={8}>
+            <Form.Item name="additionalInfo" label="Доп. информация">
+              <TextArea
+                placeholder="Дополнительна информация"
+                autoSize={{
+                  minRows: 2,
+                  maxRows: 6,
+                }}
+                showCount
+                maxLength={500}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item label="Коммисия за перевод">
+              <Form.List name="commissionRates">
+                {(fields, { add, remove }) => (
+                  <>
+                    {fields.map(({ key, name, ...restField }, index) => (
+                      <Row gutter={16} key={key} align="middle">
+                        <Col span={10}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, "amount"]}
+                            label={
+                              index === 0 ? "До суммы (тг)" : "От суммы (тг)"
+                            }
+                            rules={[
+                              { required: true, message: "Введите сумму" },
+                            ]}
+                          >
+                            <InputNumber
+                              style={{ width: "100%" }}
+                              min={0}
+                              placeholder={
+                                index === 0
+                                  ? "До какой суммы"
+                                  : "От какой суммы"
+                              }
+                            />
+                          </Form.Item>
+                        </Col>
+                        <Col span={8}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, "percent"]}
+                            label="Процент (%)"
+                            rules={[
+                              { required: true, message: "Введите процент" },
+                            ]}
+                          >
+                            <InputNumber
+                              style={{ width: "100%" }}
+                              min={0}
+                              max={100}
+                              placeholder="%"
+                            />
+                          </Form.Item>
+                        </Col>
+                        {index > 0 && ( // Кнопка удаления только для "От" записей
+                          <Col>
+                            <MinusCircleOutlined
+                              onClick={() => remove(name)}
+                              style={{ color: "red", marginTop: 8 }}
+                            />
+                          </Col>
+                        )}
+                      </Row>
+                    ))}
+                    <Form.Item>
+                      <Button
+                        type="dashed"
+                        onClick={() => add()}
+                        block
+                        icon={<PlusOutlined />}
+                      >
+                        Добавить уровень комиссии
+                      </Button>
+                    </Form.Item>
+                  </>
+                )}
+              </Form.List>
+            </Form.Item>
+          </Col>
         </Row>
         <Flex gap={12}>
           <Button type="primary" htmlType="submit" loading={loading}>
