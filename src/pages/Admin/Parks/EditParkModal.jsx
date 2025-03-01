@@ -437,9 +437,6 @@ const EditParkModal = memo(
                 </Radio.Group>
               </Form.Item>
             </Col>
-
-          </Row>
-          <Row gutter={16}>
             {form.getFieldValue("supportAlwaysAvailable") === false && (
               <Col span={8}>
                 <Form.Item
@@ -460,7 +457,7 @@ const EditParkModal = memo(
             )}
           </Row>
           <Row gutter={16}>
-            <Col span={16}>
+            <Col span={12}>
               <Form.Item label="Коммисия за перевод">
                 <Form.List name="commissionRates">
                   {(fields, { add, remove }) => (
@@ -542,6 +539,84 @@ const EditParkModal = memo(
                 </Form.List>
               </Form.Item>
             </Col>
+            <Col span={12}>
+              <Form.Item label="Средний чек по городам">
+                <Form.List name="averageCheckPerCity">
+                  {(fields, { add, remove }) => (
+                    <>
+                      {fields.map(({ key, name, ...restField }, index) => (
+                        <Row gutter={16} key={key} align="middle">
+                          <Col span={11}>
+                            <Form.Item
+                              {...restField}
+                              name={[name, "cityId"]}
+                              label={"Город"}
+                              rules={[
+                                { required: true, message: "Выберите город!" },
+                              ]}
+                            >
+                              <Select
+                                placeholder="Выберите город!"
+                                allowClear
+                                disabled={!isEditMode}
+                              >
+                                {cities.map((city) => (
+                                  <Select.Option key={city.id} value={city.id}>
+                                    {city.title}
+                                  </Select.Option>
+                                ))}
+                              </Select>
+                            </Form.Item>
+                          </Col>
+                          <Col span={11}>
+                            <Form.Item
+                              {...restField}
+                              name={[name, "averageCheck"]}
+                              label="Средний чек"
+                              rules={[
+                                {
+                                  required: true,
+                                  message: "Введите сумму чека",
+                                },
+                              ]}
+                            >
+                              <InputNumber
+                                disabled={!isEditMode}
+                                style={{ width: "100%" }}
+                                min={0}
+                                max={100000}
+                                placeholder="тг."
+                              />
+                            </Form.Item>
+                          </Col>
+                          {index > 0 && ( // Кнопка удаления только для "От" записей
+                            <Col>
+                              <MinusCircleOutlined
+                                onClick={() => remove(name)}
+                                style={{ color: "red", marginTop: 8 }}
+                              />
+                            </Col>
+                          )}
+                        </Row>
+                      ))}
+                      <Form.Item>
+                        <Button
+                          type="dashed"
+                          onClick={() => add()}
+                          block
+                          disabled={!isEditMode}
+                          icon={<PlusOutlined />}
+                        >
+                          Добавить уровень комиссии
+                        </Button>
+                      </Form.Item>
+                    </>
+                  )}
+                </Form.List>
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
             <Col span={8}>
               <Form.Item
                 name="image"

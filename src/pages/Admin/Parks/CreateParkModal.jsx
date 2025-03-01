@@ -152,7 +152,7 @@ const CreateParkModal = ({
             <Form.Item
               name="isPartner"
               label="Партнер"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: "Укажите пожалуйста, явлиется ли патрнерам!" }]}
             >
               <Radio.Group value={radioValues.isPartner}>
                 <Radio

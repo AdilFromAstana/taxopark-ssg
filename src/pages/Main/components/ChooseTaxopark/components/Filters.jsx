@@ -40,14 +40,14 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
   const [orderPerDay, setOrderPerDay] = useState(10);
   const yandexCommission = 7;
   const [parkPromotions, setParkPromotions] = useState([]);
-  const [selectedCityIds, setSelectedCityIds] = useState([]);
+  const [selectedCityId, setSelectedCityId] = useState([]);
   const [isPaymentWithCommission, setIsPaymentWithCommission] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: [
       "parks",
       {
-        selectedCityIds,
+        selectedCityId,
         parkPromotions,
         isPaymentWithCommission,
         supportTimeFilters,
@@ -56,7 +56,7 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
     queryFn: () =>
       fetchParks({
         limit: 1000,
-        cityIds: selectedCityIds,
+        cityIds: selectedCityId,
         parkPromotions: parkPromotions.join(","),
         isPaymentWithCommission,
         supportAllDay: supportTimeFilters.allDay,
@@ -70,18 +70,39 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
 
   useEffect(() => {
     if (data) {
-      const updatedParks = data.data.map((park) => ({
-        ...park,
-        approximateIncome:
-          workDays * orderPerDay * Number(park.averageCheck) -
+      const updatedParks = data.data.map((park) => {
+        const cityAverageCheck =
+          park.averageCheckPerCity?.find(
+            (item) => item.cityId === selectedCityId
+          )?.averageCheck || 0;
+
+        console.log(`${park.title} ${cityAverageCheck}`);
+
+        const approximateIncome =
+          workDays * orderPerDay * Number(cityAverageCheck) -
           (yandexCommission + Number(park.parkCommission)) *
-            ((workDays * orderPerDay * Number(park.averageCheck)) / 100),
-      }));
+            ((workDays * orderPerDay * Number(cityAverageCheck)) / 100);
+
+        return {
+          ...park,
+          approximateIncome,
+        };
+      });
+
       setItemsCount(data?.total);
       setItems(updatedParks);
     }
     setIsLoading(isLoading);
-  }, [workDays, orderPerDay, data]);
+  }, [workDays, orderPerDay, data, selectedCityId]);
+
+  useEffect(() => {
+    if (selectedCityId.length === 0 && cities.length > 0) {
+      const almatyCity = cities.find((city) => city.title === "Алматы");
+      if (almatyCity) {
+        setSelectedCityId([almatyCity.id]); // Устанавливаем ID "Алматы"
+      }
+    }
+  }, [cities]);
 
   return (
     <Card className="filters-card">
@@ -154,16 +175,14 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
           </h4>
           <Select
             style={{ width: "100%" }}
-            mode="multiple"
-            allowClear
             placeholder="Выберите город"
             options={cities.map((city) => ({
               value: city.id,
               label: city.title,
               key: city.id,
             }))}
-            onChange={setSelectedCityIds}
-            value={selectedCityIds}
+            onChange={setSelectedCityId}
+            value={selectedCityId}
           />
         </Col>
 
