@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const EditCityModal = ({
+const EditReviewModal = ({
   open,
   onClose,
   record,
@@ -20,8 +20,42 @@ const EditCityModal = ({
   const handleCancel = () => {
     setIsEditMode(false);
     form.setFieldsValue({
-      title: record.title,
+      name: record.name,
+      description: record.description,
     });
+  };
+
+  const handleChangeStatus = async () => {
+    setLoading(true);
+    try {
+      const updatedData = await axios.put(
+        `${API_URL}/reviews/update/${record.id}`,
+        { active: !record.active }
+      );
+      queryClient.setQueryData(["reviews", queryData], (oldData) => {
+        if (!oldData || !oldData.data) return oldData;
+        return {
+          ...oldData,
+          data: oldData.data.map((item) => {
+            if (item.id === record.id) {
+              setSelectedRecord(updatedData.data);
+              form.setFieldsValue(updatedData.data);
+              return updatedData.data;
+            } else {
+              return item;
+            }
+          }),
+        };
+      });
+      message.success("Запись успешно обновлена!");
+      handleCancel();
+    } catch (error) {
+      message.error(
+        `Ошибка: ${error?.response?.data?.message || "Неизвестная ошибка"}`
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleUpdate = async () => {
@@ -30,11 +64,11 @@ const EditCityModal = ({
       setLoading(true);
 
       const updatedData = await axios.put(
-        `${API_URL}/cities/update/${record.id}`,
+        `${API_URL}/reviews/update/${record.id}`,
         data
       );
 
-      queryClient.setQueryData(["cities", queryData], (oldData) => {
+      queryClient.setQueryData(["reviews", queryData], (oldData) => {
         if (!oldData || !oldData.data) return oldData;
         return {
           ...oldData,
@@ -79,17 +113,28 @@ const EditCityModal = ({
     <Modal
       open={open}
       onCancel={onClose}
-      title={isEditMode ? "Редактировать город" : "Просмотр города"}
+      title={isEditMode ? "Редактировать отзыв" : "Просмотр отзыва"}
       footer={null}
       maskClosable={false}
     >
       <Form form={form} layout="vertical" onFinish={handleUpdate}>
-        <Row gutter={10}>
+        <Row gutter={12}>
           <Col span={24}>
             <Form.Item
-              name="title"
-              label="Город"
-              rules={[{ required: true, message: "Введите название" }]}
+              name="name"
+              label="ФИО"
+              rules={[{ required: true, message: "Введите ФИО" }]}
+            >
+              <Input disabled={!isEditMode} />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={12}>
+          <Col span={24}>
+            <Form.Item
+              name="description"
+              label="Описание"
+              rules={[{ required: true, message: "Введите описание" }]}
             >
               <Input disabled={!isEditMode} />
             </Form.Item>
@@ -111,8 +156,12 @@ const EditCityModal = ({
               <Button type="primary" onClick={() => setIsEditMode(true)}>
                 Редактировать
               </Button>
-              <Button type="default" danger onClick={onClose}>
-                Закрыть
+              <Button
+                type="primary"
+                style={{ backgroundColor: record.active ? "red" : "green" }}
+                onClick={handleChangeStatus}
+              >
+                {record.active ? "Архивировать" : "Активировать"}
               </Button>
             </>
           )}
@@ -122,4 +171,4 @@ const EditCityModal = ({
   );
 };
 
-export default EditCityModal;
+export default EditReviewModal;

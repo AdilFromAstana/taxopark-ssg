@@ -1,35 +1,32 @@
 import { Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
 import { Outlet, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const AdminLayout = () => {
   const nav = useNavigate();
+  const [selectedKey, setSelectedKey] = useState(
+    localStorage.getItem("selectedMenuKey") || "website"
+  );
+
   const items = [
-    {
-      key: "website",
-      label: "Веб-сайт",
-    },
-    {
-      key: "parks",
-      label: "Таксопарки",
-    },
-    {
-      key: "forms",
-      label: "Заявки",
-    },
-    {
-      key: "promotions",
-      label: "Акции",
-    },
-    {
-      key: "cities",
-      label: "Города",
-    },
+    { key: "website", label: "Веб-сайт" },
+    { key: "parks", label: "Таксопарки" },
+    { key: "forms", label: "Заявки" },
+    { key: "promotions", label: "Акции" },
+    { key: "cities", label: "Города" },
+    { key: "reviews", label: "Отзывы" },
   ];
 
+  useEffect(() => {
+    localStorage.setItem("selectedMenuKey", selectedKey);
+  }, [selectedKey]);
+
   const onClick = (e) => {
+    setSelectedKey(e.key);
     nav(e.key);
   };
+
   return (
     <div
       style={{
@@ -42,8 +39,7 @@ const AdminLayout = () => {
       <Sider>
         <Menu
           onClick={onClick}
-          defaultSelectedKeys={["1"]}
-          defaultOpenKeys={["sub1"]}
+          selectedKeys={[selectedKey]}
           mode="inline"
           items={items}
         />

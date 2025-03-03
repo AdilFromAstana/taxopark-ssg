@@ -40,8 +40,6 @@ const CreateParkModal = ({
 
       message.success("Запись успешно создана!");
       queryClient.setQueryData(["parks", queryData], (oldData) => {
-        console.log("oldData: ", oldData);
-        console.log("oldData.data: ", oldData.data);
         if (!oldData || !oldData.data) return oldData;
         return { ...oldData, data: [...oldData.data, data.data.dataValues] };
       });
@@ -152,7 +150,12 @@ const CreateParkModal = ({
             <Form.Item
               name="isPartner"
               label="Партнер"
-              rules={[{ required: true, message: "Укажите пожалуйста, явлиется ли патрнерам!" }]}
+              rules={[
+                {
+                  required: true,
+                  message: "Укажите пожалуйста, явлиется ли патрнерам!",
+                },
+              ]}
             >
               <Radio.Group value={radioValues.isPartner}>
                 <Radio

@@ -1,10 +1,11 @@
-import { Table, Input, Button, DatePicker } from "antd";
+import { Table, Input, Button, DatePicker, Tag, Select, Modal } from "antd";
 import axios from "axios";
 import { useState, useCallback, memo } from "react";
 import CreateReviewModal from "./CreateReviewModal";
 import EditReviewModal from "./EditReviewModal";
 import moment from "moment";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import SortableList from "../../../components/SortableList/SortableList";
 
 const { RangePicker } = DatePicker;
 
@@ -108,6 +109,7 @@ const Reviews = memo(() => {
 
   const columns = [
     {
+      width: 200,
       title: "ФИО",
       dataIndex: "name",
       key: "name",
@@ -125,6 +127,45 @@ const Reviews = memo(() => {
       width: 200,
     },
     {
+      width: 200,
+      title: "Статус",
+      dataIndex: "active",
+      key: "active",
+      render: (record) => {
+        return (
+          <Tag color={record ? "green" : "red"}>
+            {record ? "Активный" : "Архивирован"}
+          </Tag>
+        );
+      },
+      sorter: true,
+      filterDropdown: ({ selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Select
+            style={{ width: 200 }}
+            placeholder="Выберите статус"
+            value={selectedKeys[0] ?? undefined} // Устанавливаем выбранное значение
+            onChange={(value) => {
+              setSearchFilters((prev) => ({
+                ...prev,
+                active: value,
+              }));
+              confirm();
+            }}
+            allowClear
+            onClear={clearFilters}
+          >
+            <Select.Option value={true}>Активный</Select.Option>
+            <Select.Option value={false}>Архивирован</Select.Option>
+          </Select>
+        </div>
+      ),
+      onFilter: (value, record) => {
+        return record.active === value;
+      },
+    },
+    {
+      width: 200,
       title: "Создано",
       dataIndex: "createdAt",
       key: "createdAt",
@@ -204,12 +245,12 @@ const Reviews = memo(() => {
       </div>
       <Table
         columns={columns}
-        dataSource={reviewsData || []}
+        dataSource={reviewsData?.data || []}
         loading={isLoading}
         pagination={{
           current: pagination.current,
           pageSize: pagination.pageSize,
-          total: pagination.total,
+          total: reviewsData?.total,
           showSizeChanger: true,
         }}
         onRow={(record) => ({
@@ -222,6 +263,14 @@ const Reviews = memo(() => {
       />
 
       <CreateReviewModal
+        queryClient={queryClient}
+        queryData={{
+          page: pagination.current,
+          pageSize: pagination.pageSize,
+          sortField: sorter.field,
+          sortOrder: sorter.order,
+          filters: searchFilters,
+        }}
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
       />
@@ -241,6 +290,9 @@ const Reviews = memo(() => {
           record={selectedRecord}
         />
       )}
+      <Modal open={true} width="75vw">
+        <SortableList />
+      </Modal>
     </div>
   );
 });

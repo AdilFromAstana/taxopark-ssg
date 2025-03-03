@@ -13,6 +13,7 @@ import Parks from "./pages/Admin/Parks/Parks";
 import Promotions from "./pages/Admin/Promotions/Promotions";
 import Cities from "./pages/Admin/Cities/Cities";
 import WebsiteInfo from "./pages/Admin/WebsiteInfo/WebsiteInfo";
+import Reviews from "./pages/Admin/Reviews/Reviews";
 
 const AppRouter = () => {
   return (
@@ -28,11 +29,12 @@ const AppRouter = () => {
         {/* Админка с Sidebar */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="website" replace />} />
-          <Route path="website" element={<WebsiteInfo />}/>
+          <Route path="website" element={<WebsiteInfo />} />
           <Route path="parks" element={<Parks />} />
           <Route path="cities" element={<Cities />} />
           <Route path="forms" element={<Forms />} />
           <Route path="promotions" element={<Promotions />} />
+          <Route path="reviews" element={<Reviews />} />
         </Route>
       </Routes>
     </Router>

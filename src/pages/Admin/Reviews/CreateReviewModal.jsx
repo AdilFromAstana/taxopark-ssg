@@ -5,21 +5,25 @@ import { useState } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const CreateCityModal = ({ open, onClose, refreshData }) => {
+const CreateReviewModal = ({ open, onClose, queryClient, queryData }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (values) => {
     try {
       setLoading(true);
-      console.log("🔄 Начало создания города...", values);
 
-      const response = await axios.post(`${API_URL}/cities`, values);
+      const data = await axios.post(`${API_URL}/reviews`, values);
+      console.log("data: ", data);
+      queryClient.setQueryData(["reviews", queryData], (oldData) => {
+        if (!oldData || !oldData.data) return oldData;
+        console.log("oldData.data: ", oldData.data);
+        console.log("[...oldData.data, data]: ", [...oldData.data, data.data]);
+        return { ...oldData, data: [...oldData.data, data.data] };
+      });
 
-      console.log("✅ Успешный ответ сервера:", response.data);
-      message.success("🎉 Город успешно создан!");
+      message.success("🎉 Отзыв успешно создан!");
 
-      refreshData(); // Обновление данных после создания
       onClose();
       form.resetFields(); // Очистка формы
     } catch (error) {
@@ -39,7 +43,7 @@ const CreateCityModal = ({ open, onClose, refreshData }) => {
     <Modal
       open={open}
       onCancel={onClose}
-      title="Создать город"
+      title="Создать отзыв"
       footer={null}
       maskClosable={false}
     >
@@ -47,9 +51,20 @@ const CreateCityModal = ({ open, onClose, refreshData }) => {
         <Row gutter={16}>
           <Col span={24}>
             <Form.Item
-              name="title"
-              label="Город"
-              rules={[{ required: true, message: "Введите название" }]}
+              name="name"
+              label="ФИО"
+              rules={[{ required: true, message: "Введите ФИО" }]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="description"
+              label="Описание"
+              rules={[{ required: true, message: "Введите описание" }]}
             >
               <Input />
             </Form.Item>
@@ -69,4 +84,4 @@ const CreateCityModal = ({ open, onClose, refreshData }) => {
   );
 };
 
-export default CreateCityModal;
+export default CreateReviewModal;
