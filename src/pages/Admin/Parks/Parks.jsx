@@ -1,4 +1,4 @@
-import { Table, Input, Button, DatePicker, Select, Tag } from "antd";
+import { Table, Input, Button, DatePicker, Select, Tag, Modal } from "antd";
 import axios from "axios";
 import { useState, useCallback, memo } from "react";
 import CreateFormModal from "./CreateParkModal";
@@ -6,6 +6,7 @@ import EditParkModal from "./EditParkModal";
 import moment from "moment";
 import ExcelJS from "exceljs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import SortableList from "../../../components/SortableList/SortableList";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const { RangePicker } = DatePicker;
@@ -170,6 +171,7 @@ const Parks = memo(() => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPriorityModalOpen, setIsPriorityModalOpen] = useState(false);
 
   const { data: parksData, isLoading } = useQuery({
     queryKey: [
@@ -498,6 +500,9 @@ const Parks = memo(() => {
           <Button type="primary" onClick={() => setIsCreateModalOpen(true)}>
             Добавить запись
           </Button>
+          <Button onClick={() => setIsPriorityModalOpen(true)}>
+            Указать приоритет
+          </Button>
         </div>
         <Button type="primary" onClick={handleDownloadExcel}>
           Скачать в Excel
@@ -552,6 +557,19 @@ const Parks = memo(() => {
           cities={citiesData}
         />
       )}
+      <Modal
+        width="75vw"
+        open={isPriorityModalOpen}
+        footer={null}
+        onCancel={() => setIsPriorityModalOpen(false)}
+        maskClosable={false}
+      >
+        <SortableList
+          fetchKey="allParks"
+          fetchMethod={fetchParks}
+          readKey="title"
+        />
+      </Modal>
     </div>
   );
 });

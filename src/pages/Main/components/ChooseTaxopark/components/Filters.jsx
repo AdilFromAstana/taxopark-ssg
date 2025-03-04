@@ -62,6 +62,8 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
         supportAllDay: supportTimeFilters.allDay,
         supportLimited: supportTimeFilters.limited,
         active: true,
+        sortField: "priority",
+        sortOrder: "desc",
       }),
     keepPreviousData: true,
     staleTime: 5 * 60 * 1000,

@@ -1,10 +1,11 @@
-import { Table, Input, Button, Select, DatePicker, Tag } from "antd";
+import { Table, Input, Button, Select, DatePicker, Tag, Modal } from "antd";
 import axios from "axios";
 import { useState, useCallback, memo } from "react";
 import CreatePromotionModal from "./CreatePromotionModal";
 import EditPromotionModal from "./EditPromotionModal";
 import moment from "moment";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import SortableList from "../../../components/SortableList/SortableList";
 
 const { RangePicker } = DatePicker;
 
@@ -57,6 +58,7 @@ const Promotions = memo(() => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPriorityModalOpen, setIsPriorityModalOpen] = useState(false);
 
   const { data: promotionsData, isLoading } = useQuery({
     queryKey: [
@@ -282,6 +284,9 @@ const Promotions = memo(() => {
         <Button type="primary" onClick={() => setIsCreateModalOpen(true)}>
           Добавить запись
         </Button>
+        <Button onClick={() => setIsPriorityModalOpen(true)}>
+          Указать приоритет
+        </Button>
       </div>
       <Table
         columns={columns}
@@ -324,6 +329,20 @@ const Promotions = memo(() => {
           parks={parks}
         />
       )}
+      <Modal
+        width="75vw"
+        open={isPriorityModalOpen}
+        footer={null}
+        onCancel={() => setIsPriorityModalOpen(false)}
+        maskClosable={false}
+      >
+        <SortableList
+          setIsPriorityModalOpen={setIsPriorityModalOpen}
+          fetchKey="allPromotions"
+          fetchMethod={fetchPromotions}
+          readKey="title"
+        />
+      </Modal>
     </div>
   );
 });

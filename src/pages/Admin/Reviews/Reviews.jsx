@@ -1,6 +1,6 @@
 import { Table, Input, Button, DatePicker, Tag, Select, Modal } from "antd";
 import axios from "axios";
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback, memo, useEffect } from "react";
 import CreateReviewModal from "./CreateReviewModal";
 import EditReviewModal from "./EditReviewModal";
 import moment from "moment";
@@ -51,6 +51,7 @@ const Reviews = memo(() => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPriorityModalOpen, setIsPriorityModalOpen] = useState(false);
 
   const { data: reviewsData, isLoading } = useQuery({
     queryKey: [
@@ -237,10 +238,13 @@ const Reviews = memo(() => {
 
   return (
     <div style={{ padding: "16px" }}>
-      <div style={{ display: "flex", gap: "10px" }}>
+      <div style={{ display: "flex", gap: "10px", marginBottom: 10 }}>
         <h2 style={{ margin: 0 }}>Отзыв</h2>
         <Button type="primary" onClick={() => setIsCreateModalOpen(true)}>
           Добавить запись
+        </Button>
+        <Button onClick={() => setIsPriorityModalOpen(true)}>
+          Указать приоритет
         </Button>
       </div>
       <Table
@@ -290,8 +294,18 @@ const Reviews = memo(() => {
           record={selectedRecord}
         />
       )}
-      <Modal open={true} width="75vw">
-        <SortableList />
+      <Modal
+        width="75vw"
+        open={isPriorityModalOpen}
+        footer={null}
+        onCancel={() => setIsPriorityModalOpen(false)}
+        maskClosable={false}
+      >
+        <SortableList
+          fetchKey="allReviews"
+          fetchMethod={fetchReviews}
+          readKey="name"
+        />
       </Modal>
     </div>
   );

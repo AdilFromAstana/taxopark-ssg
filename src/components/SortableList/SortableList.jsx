@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { PlusOutlined, CloseOutlined } from "@ant-design/icons";
 import {
   DndContext,
@@ -14,8 +14,26 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Button } from "antd";
+import { Button, message } from "antd";
 import axios from "axios";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+const API_URL = import.meta.env.VITE_API_URL;
+
+const useSavePriorities = () => {
+  return useMutation({
+    mutationFn: ({ updateEndpoint, priorityItems }) => {
+      const payload = priorityItems.map((item, index) => ({
+        id: item.id,
+        priority: index + 1,
+      }));
+      const response = axios.put(`${API_URL}/${updateEndpoint}`, payload);
+      return response.data;
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
 
 const SortableItem = ({
   item,
@@ -24,6 +42,7 @@ const SortableItem = ({
   onAdd,
   isPriority,
   isEditing,
+  readKey,
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: item.id, disabled: !isEditing });
@@ -50,9 +69,10 @@ const SortableItem = ({
       {...(isEditing ? listeners : {})}
     >
       <span>
-        {index + 1}. {item.label}
+        {index + 1}. {item[readKey]}
       </span>
       <Button
+        disabled={!isEditing}
         type={isPriority ? "primary" : "default"}
         danger={isPriority}
         icon={isPriority ? <CloseOutlined /> : <PlusOutlined />}
@@ -66,17 +86,58 @@ const SortableItem = ({
 };
 
 const SortableList = ({
-  data = [
-    { id: "1", label: "Элемент 1" },
-    { id: "2", label: "Элемент 2" },
-    { id: "3", label: "Элемент 3" },
-    { id: "4", label: "Элемент 4" },
-  ],
-  endpoint = "/",
+  setIsPriorityModalOpen,
+  fetchKey = "reviews",
+  fetchMethod,
+  readKey = "label",
+  updateEndpoint = "parks/updatePriorities",
 }) => {
-  const [allItems, setAllItems] = useState(data);
+  const queryClient = useQueryClient();
+  const [allItems, setAllItems] = useState([]);
   const [priorityItems, setPriorityItems] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
+  const { mutate } = useSavePriorities();
+
+  const { data } = useQuery({
+    queryKey: [
+      fetchKey,
+      {
+        pageSize: 1000,
+      },
+    ],
+    queryFn: async ({ queryKey }) => {
+      const [, params] = queryKey;
+
+      const cachedData = queryClient.getQueryData([fetchKey, params]);
+      if (cachedData) {
+        return cachedData;
+      }
+
+      return fetchMethod(params);
+    },
+    keepPreviousData: true,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (data?.data) {
+      const sortedData = data.data.reduce(
+        (acc, item) => {
+          if (item.priority && item.priority > 0) {
+            acc.priorityItems.push(item);
+          } else {
+            acc.allItems.push(item);
+          }
+          return acc;
+        },
+        { priorityItems: [], allItems: [] }
+      );
+
+      setPriorityItems(sortedData.priorityItems);
+      setAllItems(sortedData.allItems);
+    }
+  }, [data]);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -112,87 +173,89 @@ const SortableList = ({
     }
   };
 
-  const savePriorities = async () => {
-    const payload = priorityItems.map((item, index) => ({
-      id: item.id,
-      priority: index + 1,
-    }));
-
-    try {
-      await axios.post(endpoint, { priorities: payload });
-      alert("Приоритеты успешно сохранены!");
-      setIsEditing(false);
-    } catch (error) {
-      alert("Ошибка при сохранении приоритетов");
-      console.error(error);
-    }
+  const savePriorityChanges = () => {
+    mutate({ updateEndpoint, priorityItems });
+    setIsPriorityModalOpen(false);
   };
 
   return (
     <div
       style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "30px",
-        padding: "20px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 20,
       }}
     >
-      <div style={{ gridColumn: "span 2", textAlign: "center" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "30px",
+        }}
+      >
+        <div>
+          <h3>Приоритетные элементы</h3>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={(event) => onDragEnd(event, setPriorityItems)}
+          >
+            <SortableContext
+              items={priorityItems}
+              strategy={verticalListSortingStrategy}
+            >
+              {priorityItems.map((item, index) => (
+                <SortableItem
+                  readKey={readKey}
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  onRemove={moveToAll}
+                  isPriority
+                  isEditing={isEditing}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+        </div>
+
+        <div>
+          <h3>Все элементы</h3>
+          <DndContext sensors={sensors} collisionDetection={closestCenter}>
+            <SortableContext
+              items={allItems}
+              strategy={verticalListSortingStrategy}
+            >
+              {allItems.map((item, index) => (
+                <SortableItem
+                  readKey={readKey}
+                  isEditing={isEditing}
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  onAdd={moveToPriority}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+        </div>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          gap: 10,
+        }}
+      >
+        {isEditing && (
+          <Button type="primary" onClick={savePriorityChanges}>
+            Сохранить изменения
+          </Button>
+        )}
         <Button type="default" onClick={() => setIsEditing(!isEditing)}>
-          {isEditing ? "Завершить редактирование" : "Изменить приоритет"}
+          {isEditing ? "Отмена" : "Изменить приоритет"}
         </Button>
       </div>
-      <div>
-        <h3>Приоритетные элементы</h3>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={(event) => onDragEnd(event, setPriorityItems)}
-        >
-          <SortableContext
-            items={priorityItems}
-            strategy={verticalListSortingStrategy}
-          >
-            {priorityItems.map((item, index) => (
-              <SortableItem
-                key={item.id}
-                item={item}
-                index={index}
-                onRemove={moveToAll}
-                isPriority
-                isEditing={isEditing}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
-      </div>
-
-      <div>
-        <h3>Все элементы</h3>
-        <DndContext sensors={sensors} collisionDetection={closestCenter}>
-          <SortableContext
-            items={allItems}
-            strategy={verticalListSortingStrategy}
-          >
-            {allItems.map((item, index) => (
-              <SortableItem
-                key={item.id}
-                item={item}
-                index={index}
-                onAdd={moveToPriority}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
-      </div>
-
-      {isEditing && (
-        <div style={{ gridColumn: "span 2", textAlign: "center" }}>
-          <Button type="primary" onClick={savePriorities}>
-            Сохранить приоритеты
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
