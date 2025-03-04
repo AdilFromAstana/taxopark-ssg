@@ -21,6 +21,7 @@ import moment from "moment";
 import { memo, useEffect, useState } from "react";
 const { RangePicker } = TimePicker;
 import { UploadOutlined } from "@ant-design/icons";
+import TextArea from "antd/es/input/TextArea";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -387,6 +388,34 @@ const EditParkModal = memo(
               </Form.Item>
             </Col>
             <Col span={8}>
+              <Form.Item name="carRentals" label="Аренда машин от парка">
+                <Radio.Group
+                  value={radioValues.carRentals}
+                  disabled={!isEditMode}
+                >
+                  <Radio
+                    onClick={() => toggleRadioValue("carRentals", true)}
+                    value={true}
+                  >
+                    Да
+                  </Radio>
+                  <Radio
+                    onClick={() => toggleRadioValue("carRentals", false)}
+                    value={false}
+                  >
+                    Нет
+                  </Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item name="transferPaymentCommission" label="Выплаты">
+                <Input type="text" disabled={!isEditMode} />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
               <Form.Item
                 name="supportAlwaysAvailable"
                 label="Круглосуточная поддержка"
@@ -414,29 +443,6 @@ const EditParkModal = memo(
                 </Radio.Group>
               </Form.Item>
             </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item name="carRentals" label="Аренда машин от парка">
-                <Radio.Group
-                  value={radioValues.carRentals}
-                  disabled={!isEditMode}
-                >
-                  <Radio
-                    onClick={() => toggleRadioValue("carRentals", true)}
-                    value={true}
-                  >
-                    Да
-                  </Radio>
-                  <Radio
-                    onClick={() => toggleRadioValue("carRentals", false)}
-                    value={false}
-                  >
-                    Нет
-                  </Radio>
-                </Radio.Group>
-              </Form.Item>
-            </Col>
             {form.getFieldValue("supportAlwaysAvailable") === false && (
               <Col span={8}>
                 <Form.Item
@@ -455,6 +461,21 @@ const EditParkModal = memo(
                 </Form.Item>
               </Col>
             )}
+          </Row>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item name="additionalInfo" label="Доп. информация">
+                <TextArea
+                  placeholder="Дополнительна информация"
+                  autoSize={{
+                    minRows: 2,
+                    maxRows: 6,
+                  }}
+                  showCount
+                  maxLength={500}
+                />
+              </Form.Item>
+            </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
@@ -589,11 +610,17 @@ const EditParkModal = memo(
                               />
                             </Form.Item>
                           </Col>
-                          {index > 0 && ( // Кнопка удаления только для "От" записей
+                          {index > 0 && (
                             <Col>
                               <MinusCircleOutlined
-                                onClick={() => remove(name)}
-                                style={{ color: "red", marginTop: 8 }}
+                                onClick={() => isEditMode && remove(name)}
+                                style={{
+                                  color: isEditMode ? "red" : "gray",
+                                  cursor: isEditMode
+                                    ? "pointer"
+                                    : "not-allowed",
+                                  marginTop: 8,
+                                }}
                               />
                             </Col>
                           )}

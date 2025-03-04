@@ -282,6 +282,11 @@ const CreateParkModal = ({
         </Row>
         <Row gutter={16}>
           <Col span={8}>
+            <Form.Item name="transferPaymentCommission" label="Выплаты">
+              <Input type="text" />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
             <Form.Item
               name="supportAlwaysAvailable"
               label="Круглосуточная поддержка"

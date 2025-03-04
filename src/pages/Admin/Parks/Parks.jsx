@@ -256,6 +256,14 @@ const Parks = memo(() => {
 
   const columns = [
     {
+      title: "Приоритет",
+      dataIndex: "priority",
+      key: "priority",
+      sorter: true,
+      width: 10,
+      render: (record) => record || "Не указан",
+    },
+    {
       title: "Название",
       dataIndex: "title",
       key: "title",
@@ -270,6 +278,7 @@ const Parks = memo(() => {
           />
         </div>
       ),
+      width: 200,
     },
     {
       title: "Тех.поддержка 24/7",
@@ -306,6 +315,7 @@ const Parks = memo(() => {
         if (value === false) return "Нет";
         return "Не указано"; // Отображение в таблице
       },
+      width: 200,
     },
     {
       title: "Город",
@@ -357,22 +367,34 @@ const Parks = memo(() => {
           </div>
         </div>
       ),
-
       render: (_, record) => {
         if (!record.cityIds?.length) return "—";
 
         const cityTitles = record.cityIds
           .map((id) => citiesData.find((city) => city.id === id)?.title)
-          .filter(Boolean); // Убираем undefined, если город не найден
+          .filter(Boolean);
 
-        return cityTitles.length
-          ? cityTitles.map((title) => (
+        if (!cityTitles.length) return "—";
+
+        const visibleCities = cityTitles.slice(0, 3);
+        const remainingCount = cityTitles.length - visibleCities.length;
+
+        return (
+          <>
+            {visibleCities.map((title) => (
               <Tag color="blue" key={title}>
                 {title}
               </Tag>
-            ))
-          : "—";
+            ))}
+            {remainingCount > 0 && (
+              <Tag color="blue" key="remaining">
+                +{remainingCount}
+              </Tag>
+            )}
+          </>
+        );
       },
+      width: 200,
     },
     {
       title: "Статус",
@@ -410,6 +432,7 @@ const Parks = memo(() => {
       onFilter: (value, record) => {
         return record.active === value;
       },
+      width: 200,
     },
     {
       title: "Создано",
@@ -476,6 +499,7 @@ const Parks = memo(() => {
           "[]"
         );
       },
+      width: 200,
     },
   ];
 

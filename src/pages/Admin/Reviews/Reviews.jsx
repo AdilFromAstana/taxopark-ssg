@@ -110,6 +110,14 @@ const Reviews = memo(() => {
 
   const columns = [
     {
+      title: "Приоритет",
+      dataIndex: "priority",
+      key: "priority",
+      sorter: true,
+      width: 10,
+      render: (record) => record || "Не указан",
+    },
+    {
       width: 200,
       title: "ФИО",
       dataIndex: "name",

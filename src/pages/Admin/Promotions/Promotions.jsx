@@ -126,6 +126,14 @@ const Promotions = memo(() => {
 
   const columns = [
     {
+      title: "Приоритет",
+      dataIndex: "priority",
+      key: "priority",
+      sorter: true,
+      width: 10,
+      render: (record) => record || "Не указан",
+    },
+    {
       title: "Название",
       dataIndex: "title",
       key: "title",
@@ -140,12 +148,15 @@ const Promotions = memo(() => {
           />
         </div>
       ),
+      width: 200,
     },
     {
       title: "Таксопарк",
       dataIndex: "parkId",
       key: "parkId",
-      render: (_, record) => record.Park?.title || "—",
+      render: (record) => {
+        return parks.find((park) => park?.id === record)?.title;
+      },
       sorter: true,
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
         <div style={{ padding: 8 }}>
@@ -170,6 +181,7 @@ const Promotions = memo(() => {
         </div>
       ),
       onFilter: (value, record) => record.parkId === value,
+      width: 200,
     },
     {
       title: "Статус",
@@ -207,6 +219,7 @@ const Promotions = memo(() => {
       onFilter: (value, record) => {
         return record.active === value;
       },
+      width: 200,
     },
     {
       title: "Создано",
@@ -274,6 +287,7 @@ const Promotions = memo(() => {
           "[]"
         );
       },
+      width: 200,
     },
   ];
 
@@ -311,6 +325,13 @@ const Promotions = memo(() => {
         parks={parks}
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
+        queryData={{
+          page: pagination.current,
+          pageSize: pagination.pageSize,
+          sortField: sorter.field,
+          sortOrder: sorter.order,
+          filters: searchFilters,
+        }}
       />
       {selectedRecord && (
         <EditPromotionModal
