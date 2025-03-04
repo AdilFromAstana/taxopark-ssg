@@ -335,12 +335,14 @@ const Promotions = memo(() => {
         footer={null}
         onCancel={() => setIsPriorityModalOpen(false)}
         maskClosable={false}
+        closeIcon={false}
       >
         <SortableList
           setIsPriorityModalOpen={setIsPriorityModalOpen}
           fetchKey="allPromotions"
           fetchMethod={fetchPromotions}
           readKey="title"
+          updateEndpoint="promotions/updatePriorities"
         />
       </Modal>
     </div>

@@ -563,11 +563,14 @@ const Parks = memo(() => {
         footer={null}
         onCancel={() => setIsPriorityModalOpen(false)}
         maskClosable={false}
+        closeIcon={false}
       >
         <SortableList
+          setIsPriorityModalOpen={setIsPriorityModalOpen}
           fetchKey="allParks"
           fetchMethod={fetchParks}
           readKey="title"
+          updateEndpoint="parks/updatePriorities"
         />
       </Modal>
     </div>

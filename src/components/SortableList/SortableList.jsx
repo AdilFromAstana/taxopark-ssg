@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+/* eslint-disable no-useless-catch */
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from "react";
 import { PlusOutlined, CloseOutlined } from "@ant-design/icons";
 import {
   DndContext,
@@ -22,15 +24,23 @@ const API_URL = import.meta.env.VITE_API_URL;
 const useSavePriorities = () => {
   return useMutation({
     mutationFn: ({ updateEndpoint, priorityItems }) => {
-      const payload = priorityItems.map((item, index) => ({
-        id: item.id,
-        priority: index + 1,
-      }));
-      const response = axios.put(`${API_URL}/${updateEndpoint}`, payload);
-      return response.data;
+      try {
+        const payload = priorityItems.map((item, index) => ({
+          id: item.id,
+          priority: index + 1,
+        }));
+        const response = axios.put(`${API_URL}/${updateEndpoint}`, payload);
+        return response.data;
+      } catch (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      message.success("Priorities saved successfully.");
     },
     onError: (error) => {
       console.error(error);
+      message.error("Failed to save priorities. Please try again.");
     },
   });
 };
@@ -87,9 +97,9 @@ const SortableItem = ({
 
 const SortableList = ({
   setIsPriorityModalOpen,
-  fetchKey = "reviews",
+  fetchKey,
   fetchMethod,
-  readKey = "label",
+  readKey,
   updateEndpoint = "parks/updatePriorities",
 }) => {
   const queryClient = useQueryClient();
@@ -176,6 +186,7 @@ const SortableList = ({
   const savePriorityChanges = () => {
     mutate({ updateEndpoint, priorityItems });
     setIsPriorityModalOpen(false);
+    setIsEditing(false);
   };
 
   return (
@@ -191,6 +202,8 @@ const SortableList = ({
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
           gap: "30px",
+          maxHeight: "65vh",
+          overflowY: "scroll",
         }}
       >
         <div>
@@ -247,14 +260,25 @@ const SortableList = ({
           gap: 10,
         }}
       >
-        {isEditing && (
-          <Button type="primary" onClick={savePriorityChanges}>
-            Сохранить изменения
-          </Button>
+        {isEditing ? (
+          <>
+            <Button type="primary" onClick={savePriorityChanges}>
+              Сохранить
+            </Button>
+            <Button type="default" onClick={() => setIsEditing(false)}>
+              Отмена
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button type="primary" onClick={() => setIsEditing(true)}>
+              Изменить приоритет
+            </Button>
+            <Button type="default" onClick={() => setIsPriorityModalOpen(false)}>
+              Закрыть
+            </Button>
+          </>
         )}
-        <Button type="default" onClick={() => setIsEditing(!isEditing)}>
-          {isEditing ? "Отмена" : "Изменить приоритет"}
-        </Button>
       </div>
     </div>
   );

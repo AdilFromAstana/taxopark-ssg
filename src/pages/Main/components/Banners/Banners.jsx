@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Carousel, Spin } from "antd";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -12,7 +12,8 @@ const fetchBanners = async ({ page, pageSize, filters }) => {
   return response.data;
 };
 
-const Banners = () => {
+const Banners = memo(() => {
+  const queryClient = useQueryClient();
   const [bannerWidth, setBannerWidth] = useState("75vw");
 
   useEffect(() => {
@@ -33,8 +34,17 @@ const Banners = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["banners"],
-    queryFn: fetchBanners,
+    queryKey: ["banners", {}],
+    queryFn: async ({ queryKey }) => {
+      const [, params] = queryKey;
+
+      const cachedData = queryClient.getQueryData(["banners", params]);
+      if (cachedData) {
+        return cachedData;
+      }
+
+      return fetchBanners(params);
+    },
   });
 
   if (isLoading) {
@@ -82,6 +92,8 @@ const Banners = () => {
       </Carousel>
     </div>
   );
-};
+});
+
+Banners.displayName = "Banners";
 
 export default Banners;

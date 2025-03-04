@@ -1,6 +1,6 @@
 import { Table, Input, Button, DatePicker, Tag, Select, Modal } from "antd";
 import axios from "axios";
-import { useState, useCallback, memo, useEffect } from "react";
+import { useState, useCallback, memo } from "react";
 import CreateReviewModal from "./CreateReviewModal";
 import EditReviewModal from "./EditReviewModal";
 import moment from "moment";
@@ -125,7 +125,6 @@ const Reviews = memo(() => {
           />
         </div>
       ),
-      width: 200,
     },
     {
       width: 200,
@@ -232,7 +231,6 @@ const Reviews = memo(() => {
           "[]"
         );
       },
-      width: 200,
     },
   ];
 
@@ -302,9 +300,11 @@ const Reviews = memo(() => {
         maskClosable={false}
       >
         <SortableList
+          setIsPriorityModalOpen={setIsPriorityModalOpen}
           fetchKey="allReviews"
           fetchMethod={fetchReviews}
           readKey="name"
+          updateEndpoint="reviews/updatePriorities"
         />
       </Modal>
     </div>
