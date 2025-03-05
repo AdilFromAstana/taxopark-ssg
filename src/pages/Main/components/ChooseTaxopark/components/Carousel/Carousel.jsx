@@ -89,14 +89,23 @@ const Carousel = memo(({ items, isLoading = true, cities }) => {
         </>
       )}
       <div ref={listRef} className="horizontal-scroll-container">
-        {isLoading && (
-          <div ref={carouselListRef} className="ant-list-items">
-            {Array.from({ length: 3 }, (_, index) => (
-              <Skeleton key={index} active className="flip-card" />
-            ))}
-          </div>
-        )}
-        {items.length > 0 && (
+        {/* {isLoading && ( */}
+        <div
+          ref={carouselListRef}
+          className="ant-list-items"
+          style={{ gap: 20 }}
+        >
+          {Array.from({ length: 3 }, (_, index) => (
+            <Skeleton
+              key={index}
+              active
+              className="flip-card"
+              style={{ height: 650 }}
+            />
+          ))}
+        </div>
+        {/* )} */}
+        {/* {items.length > 0 && (
           <div ref={carouselListRef} className="ant-list-items">
             {items.map((item) => {
               return (
@@ -110,7 +119,7 @@ const Carousel = memo(({ items, isLoading = true, cities }) => {
               );
             })}
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

@@ -25,8 +25,6 @@ const useCreatePromotion = ({ form, onClose, queryData = {} }) => {
       message.success("🎉 Промо-акция успешно создана!");
 
       queryClient.setQueryData(["promotions", queryData], (oldData) => {
-        console.log("oldData: ", oldData);
-        console.log("oldData.data: ", oldData.data);
         if (!oldData || !oldData.data) return oldData;
         return { ...oldData, data: [...oldData.data, response.data] };
       });

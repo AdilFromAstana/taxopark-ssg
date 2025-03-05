@@ -71,15 +71,21 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
   });
 
   useEffect(() => {
+    if (selectedCityId.length === 0 && cities.length > 0) {
+      const almatyCity = cities.find((city) => city.title === "Алматы");
+      if (almatyCity) {
+        setSelectedCityId(almatyCity.id); // Устанавливаем ID "Алматы"
+      }
+    }
+  }, [cities]);
+
+  useEffect(() => {
     if (data) {
-      const updatedParks = data.data.map((park) => {
+      const updatedParks = data?.data.map((park) => {
         const cityAverageCheck =
           park.averageCheckPerCity?.find(
             (item) => item.cityId === selectedCityId
           )?.averageCheck || 0;
-
-        console.log(`${park.title} ${cityAverageCheck}`);
-
         const approximateIncome =
           workDays * orderPerDay * Number(cityAverageCheck) -
           (yandexCommission + Number(park.parkCommission)) *
@@ -95,16 +101,7 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
       setItems(updatedParks);
     }
     setIsLoading(isLoading);
-  }, [workDays, orderPerDay, data, selectedCityId]);
-
-  useEffect(() => {
-    if (selectedCityId.length === 0 && cities.length > 0) {
-      const almatyCity = cities.find((city) => city.title === "Алматы");
-      if (almatyCity) {
-        setSelectedCityId([almatyCity.id]); // Устанавливаем ID "Алматы"
-      }
-    }
-  }, [cities]);
+  }, [workDays, orderPerDay, data, selectedCityId, cities]);
 
   return (
     <Card className="filters-card">

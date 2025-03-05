@@ -14,11 +14,8 @@ const CreateReviewModal = ({ open, onClose, queryClient, queryData }) => {
       setLoading(true);
 
       const data = await axios.post(`${API_URL}/reviews`, values);
-      console.log("data: ", data);
       queryClient.setQueryData(["reviews", queryData], (oldData) => {
         if (!oldData || !oldData.data) return oldData;
-        console.log("oldData.data: ", oldData.data);
-        console.log("[...oldData.data, data]: ", [...oldData.data, data.data]);
         return { ...oldData, data: [...oldData.data, data.data] };
       });
 
