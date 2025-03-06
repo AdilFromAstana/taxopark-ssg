@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { memo, useState } from "react";
-import { Card, Button, Tag } from "antd";
+import { Card, Button, Tag, Modal } from "antd";
 import { IoIosStar } from "react-icons/io";
 import {
   MdPercent,
@@ -43,6 +43,7 @@ const formatTime = (time) => {
 
 const CarouselItem = memo(({ item, index, carouselItemWidth, cities }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCitiesModalOpen, setIsCitiesModalOpen] = useState(false);
   const [flipped, setFlipped] = useState(false);
 
   const parkImage = item?.imageUrl
@@ -71,9 +72,27 @@ const CarouselItem = memo(({ item, index, carouselItemWidth, cities }) => {
     setIsModalOpen(false);
   };
 
+  const closeNewModal = () => setIsCitiesModalOpen(false);
+
   const toggleFlip = () => {
     setFlipped(!flipped);
   };
+
+  const openNewModal = (event) => {
+    event.stopPropagation(); // Останавливаем всплытие клика
+    setIsCitiesModalOpen(true);
+  };
+
+  const currentCity = cities.find(
+    (city) => city.id === item.selectedCityId
+  )?.title;
+
+  const cityTitles = item.averageCheckPerCity
+    .map(({ cityId }) => cities.find((city) => city.id === cityId)?.title)
+    .filter(Boolean);
+
+  const visibleCities = cityTitles.slice(0, 1);
+  const remainingCount = cityTitles.length - visibleCities.length;
 
   return (
     <div
@@ -100,6 +119,13 @@ const CarouselItem = memo(({ item, index, carouselItemWidth, cities }) => {
               <span>{item.rating}</span>
             </div>
             <div className="carousel-card-detail">
+              <BiMoneyWithdraw className="carousel-card-icon" />
+              <span>Выплаты:</span>{" "}
+              {item.transferPaymentCommission
+                ? item.transferPaymentCommission
+                : "Нет"}
+            </div>
+            <div className="carousel-card-detail">
               <MdPercent className="carousel-card-icon" />
               <span>Комиссия парка: {item.parkCommission}%</span>
             </div>
@@ -122,20 +148,29 @@ const CarouselItem = memo(({ item, index, carouselItemWidth, cities }) => {
                 <span>Парковое ИП</span>
               </div>
             ) : null}
-            <div className="carousel-card-detail">
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "20px 1fr",
+                gap: 10,
+              }}
+            >
               <FaLocationDot className="carousel-card-icon" />
-              {item?.cityIds?.map((cityId) => {
-                const cityTitle = cities?.find((city) => city.id === cityId);
-                return (
-                  <Tag
-                    color="yellow-inverse"
-                    style={{ color: "black" }}
-                    key={cityId}
-                  >
-                    {cityTitle?.title}
-                  </Tag>
-                );
-              })}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                <Tag
+                  color="yellow-inverse"
+                  style={{ color: "black", margin: 0 }}
+                >
+                  {currentCity}
+                </Tag>
+                <Tag
+                  color="yellow-inverse"
+                  style={{ color: "black", margin: 0, cursor: "pointer" }}
+                  onClick={openNewModal}
+                >
+                  +{remainingCount} городов
+                </Tag>
+              </div>
             </div>
             <div className="carousel-card-bonuses">
               <LuGift className="carousel-card-icon" />
@@ -198,7 +233,7 @@ const CarouselItem = memo(({ item, index, carouselItemWidth, cities }) => {
             </div>
             <div className="carousel-card-detail">
               <BiMoneyWithdraw className="carousel-card-icon" />
-              <span>Выплаты переводом:</span>{" "}
+              <span>Выплаты:</span>{" "}
               {item.transferPaymentCommission
                 ? item.transferPaymentCommission
                 : "Нет"}
@@ -274,6 +309,28 @@ const CarouselItem = memo(({ item, index, carouselItemWidth, cities }) => {
           </Button>
         </div>
       </Card>
+      <Modal
+        open={isCitiesModalOpen}
+        onCancel={closeNewModal}
+        footer={null}
+        title={`Доступные города – ${item.title}`}
+        maskClosable={false}
+      >
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {cityTitles
+            .slice()
+            .sort((a, b) => a.localeCompare(b))
+            .map((city, idx) => (
+              <Tag
+                key={idx}
+                color="yellow-inverse"
+                style={{ color: "black", margin: 0, cursor: "pointer" }}
+              >
+                {city}
+              </Tag>
+            ))}
+        </div>
+      </Modal>
       <ApplicationModal
         isOpen={isModalOpen}
         onClose={closeModal}

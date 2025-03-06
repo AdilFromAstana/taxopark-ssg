@@ -144,6 +144,12 @@ const SortableList = ({
         { priorityItems: [], allItems: [] }
       );
 
+      console.log(
+        "sortedData.priorityItems: ",
+        sortedData.priorityItems.map((item) => {
+          return `${item.title} ${item.priority}`;
+        })
+      );
       setPriorityItems(sortedData.priorityItems);
       setAllItems(sortedData.allItems);
     }
@@ -214,7 +220,7 @@ const SortableList = ({
             onDragEnd={(event) => onDragEnd(event, setPriorityItems)}
           >
             <SortableContext
-              items={priorityItems}
+              items={priorityItems.sort((a, b) => a.priority - b.priority)}
               strategy={verticalListSortingStrategy}
             >
               {priorityItems.map((item, index) => (
@@ -274,7 +280,10 @@ const SortableList = ({
             <Button type="primary" onClick={() => setIsEditing(true)}>
               Изменить приоритет
             </Button>
-            <Button type="default" onClick={() => setIsPriorityModalOpen(false)}>
+            <Button
+              type="default"
+              onClick={() => setIsPriorityModalOpen(false)}
+            >
               Закрыть
             </Button>
           </>

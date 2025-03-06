@@ -1,22 +1,33 @@
 /* eslint-disable react/prop-types */
-import { Skeleton, Button } from "antd";
+import { Skeleton, Button, Result } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { memo, useEffect, useRef, useState } from "react";
 import "./Carousel.css";
 import CarouselItem from "./CarouselItem/CarouselItem";
 
-const Carousel = memo(({ items, isLoading = true, cities }) => {
+const Carousel = memo(({ items = [], isLoading = true, cities }) => {
   const [carouselItemWidth, setCarouselItemWidth] = useState(0);
+  const [disableLeft, setDisableLeft] = useState(true);
+  const [disableRight, setDisableRight] = useState(false);
+
   const carouselWrapperRef = useRef(null);
   const carouselListRef = useRef(null);
   const listRef = useRef(null);
 
+  const updateButtonsState = () => {
+    if (!carouselListRef.current) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = carouselListRef.current;
+    setDisableLeft(scrollLeft <= 0);
+    setDisableRight(scrollLeft + clientWidth >= scrollWidth);
+  };
+
   const scrollToStart = () => {
     if (listRef.current) {
-      listRef.current.scrollTo({
-        left: 0,
-        behavior: "smooth",
-      });
+      listRef.current.scrollTo({ left: 0, behavior: "smooth" });
+    }
+    if (carouselListRef.current) {
+      carouselListRef.current.scrollTo({ left: 0, behavior: "smooth" });
     }
   };
 
@@ -59,9 +70,24 @@ const Carousel = memo(({ items, isLoading = true, cities }) => {
 
     updateItemWidth();
     scrollToStart();
+    updateButtonsState();
 
     window.addEventListener("resize", updateItemWidth);
     return () => window.removeEventListener("resize", updateItemWidth);
+  }, [items]);
+
+  useEffect(() => {
+    const handleScroll = () => updateButtonsState();
+    const list = carouselListRef.current;
+
+    if (list) {
+      list.addEventListener("scroll", handleScroll);
+    }
+    return () => {
+      if (list) {
+        list.removeEventListener("scroll", handleScroll);
+      }
+    };
   }, []);
 
   return (
@@ -74,38 +100,34 @@ const Carousel = memo(({ items, isLoading = true, cities }) => {
         position: "relative",
       }}
     >
-      {window.innerWidth >= 768 && (
+      {window.innerWidth >= 768 && items.length > 0 && (
         <>
           <Button
             className="related-carousel-button-left"
             onClick={scrollLeft}
             icon={<LeftOutlined />}
+            disabled={disableLeft}
           />
           <Button
             className="related-carousel-button-right"
             onClick={scrollRight}
             icon={<RightOutlined />}
+            disabled={disableRight}
           />
         </>
       )}
       <div ref={listRef} className="horizontal-scroll-container">
-        {/* {isLoading && ( */}
-        <div
-          ref={carouselListRef}
-          className="ant-list-items"
-          style={{ gap: 20 }}
-        >
-          {Array.from({ length: 3 }, (_, index) => (
-            <Skeleton
-              key={index}
-              active
-              className="flip-card"
-              style={{ height: 650 }}
-            />
-          ))}
-        </div>
-        {/* )} */}
-        {/* {items.length > 0 && (
+        {isLoading && (
+          <div className="ant-list-items">
+            {Array.from({ length: 3 }, (_, index) => (
+              <div key={index}>
+                <Skeleton active style={{ width: carouselItemWidth }} />
+                <Skeleton active style={{ width: carouselItemWidth }} />
+              </div>
+            ))}
+          </div>
+        )}
+        {items.length > 0 && (
           <div ref={carouselListRef} className="ant-list-items">
             {items.map((item) => {
               return (
@@ -119,7 +141,22 @@ const Carousel = memo(({ items, isLoading = true, cities }) => {
               );
             })}
           </div>
-        )} */}
+        )}
+        {items.length === 0 && (
+          <Result
+            title="Таксопарки не найдены!"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              height: 450,
+              border: "1px solid #f0f0f0",
+              borderRadius: 10,
+              background: "rgb(247, 247, 247)",
+            }}
+          />
+        )}
       </div>
     </div>
   );

@@ -63,7 +63,7 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
         supportLimited: supportTimeFilters.limited,
         active: true,
         sortField: "priority",
-        sortOrder: "desc",
+        sortOrder: "asc",
       }),
     keepPreviousData: true,
     staleTime: 5 * 60 * 1000,
@@ -94,6 +94,7 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
         return {
           ...park,
           approximateIncome,
+          selectedCityId,
         };
       });
 

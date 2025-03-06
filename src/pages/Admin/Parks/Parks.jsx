@@ -39,7 +39,7 @@ const debounce = (func, delay) => {
   };
 };
 
-const handleDownloadExcel = async () => {
+const handleDownloadExcel = async ({ sorter, searchFilters }) => {
   const { data: allParksData } = await fetchParks({
     page: 1,
     pageSize: 1000,
@@ -319,8 +319,8 @@ const Parks = memo(() => {
     },
     {
       title: "Город",
-      dataIndex: "cityIds",
-      key: "cityIds",
+      dataIndex: "averageCheckPerCity",
+      key: "averageCheckPerCity",
       filterDropdown: ({
         setSelectedKeys,
         selectedKeys,
@@ -333,9 +333,9 @@ const Parks = memo(() => {
             showSearch
             mode="multiple"
             style={{ width: 200, marginBottom: 8 }}
-            placeholder="Выберите таксопарк"
-            value={selectedKeys} // Теперь привязано к Ant Design API
-            onChange={(value) => setSelectedKeys(value)} // Сохраняем выбранные значения
+            placeholder="Выберите город"
+            value={selectedKeys}
+            onChange={(value) => setSelectedKeys(value)}
           >
             {citiesData?.map((city) => (
               <Select.Option key={city.id} value={city.id}>
@@ -356,9 +356,9 @@ const Parks = memo(() => {
             </Button>
             <Button
               onClick={() => {
-                clearFilters(); // Сбрасываем фильтры в Ant Design
-                handleCityFilterChange([]); // Очищаем `searchFilters` и отправляем запрос
-                confirm(); // Закрываем фильтр
+                clearFilters();
+                handleCityFilterChange([]); // Очищаем фильтры
+                confirm();
               }}
               size="small"
             >
@@ -368,10 +368,13 @@ const Parks = memo(() => {
         </div>
       ),
       render: (_, record) => {
-        if (!record.cityIds?.length) return "—";
+        if (!record.averageCheckPerCity?.length) return "—";
 
-        const cityTitles = record.cityIds
-          .map((id) => citiesData.find((city) => city.id === id)?.title)
+        // Получаем список городов из массива объектов
+        const cityTitles = record.averageCheckPerCity
+          .map(
+            ({ cityId }) => citiesData.find((city) => city.id === cityId)?.title
+          )
           .filter(Boolean);
 
         if (!cityTitles.length) return "—";
@@ -528,7 +531,10 @@ const Parks = memo(() => {
             Указать приоритет
           </Button>
         </div>
-        <Button type="primary" onClick={handleDownloadExcel}>
+        <Button
+          type="primary"
+          onClick={() => handleDownloadExcel({ searchFilters, sorter })}
+        >
           Скачать в Excel
         </Button>
       </div>
