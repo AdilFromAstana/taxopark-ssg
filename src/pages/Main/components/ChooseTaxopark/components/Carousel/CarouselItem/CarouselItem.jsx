@@ -79,7 +79,7 @@ const CarouselItem = memo(({ item, index, carouselItemWidth, cities }) => {
   };
 
   const openNewModal = (event) => {
-    event.stopPropagation(); // Останавливаем всплытие клика
+    event.stopPropagation();
     setIsCitiesModalOpen(true);
   };
 
@@ -163,29 +163,33 @@ const CarouselItem = memo(({ item, index, carouselItemWidth, cities }) => {
                 >
                   {currentCity}
                 </Tag>
-                <Tag
-                  color="yellow-inverse"
-                  style={{ color: "black", margin: 0, cursor: "pointer" }}
-                  onClick={openNewModal}
-                >
-                  +{remainingCount} городов
-                </Tag>
-              </div>
-            </div>
-            <div className="carousel-card-bonuses">
-              <LuGift className="carousel-card-icon" />
-              <div className="carousel-card-bonus-list">
-                {item.parkPromotions.map((bonus, idx) => (
+                {remainingCount > 0 && (
                   <Tag
                     color="yellow-inverse"
-                    style={{ color: "black" }}
-                    key={idx}
+                    style={{ color: "black", margin: 0, cursor: "pointer" }}
+                    onClick={openNewModal}
                   >
-                    {getPromotionLabel(bonus)}
+                    +{remainingCount} городов
                   </Tag>
-                ))}
+                )}
               </div>
             </div>
+            {item.parkPromotions.length > 0 && (
+              <div className="carousel-card-bonuses">
+                <LuGift className="carousel-card-icon" />
+                <div className="carousel-card-bonus-list">
+                  {item.parkPromotions.map((bonus, idx) => (
+                    <Tag
+                      color="yellow-inverse"
+                      style={{ color: "black" }}
+                      key={idx}
+                    >
+                      {getPromotionLabel(bonus)}
+                    </Tag>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <div
             style={{

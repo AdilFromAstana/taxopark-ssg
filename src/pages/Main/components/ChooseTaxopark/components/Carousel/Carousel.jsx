@@ -37,6 +37,7 @@ const Carousel = memo(({ items = [], isLoading = true, cities }) => {
         left: -carouselItemWidth,
         behavior: "smooth",
       });
+      setTimeout(updateButtonsState, 300);
     }
   };
 
@@ -46,6 +47,7 @@ const Carousel = memo(({ items = [], isLoading = true, cities }) => {
         left: carouselItemWidth,
         behavior: "smooth",
       });
+      setTimeout(updateButtonsState, 300);
     }
   };
 
@@ -117,17 +119,17 @@ const Carousel = memo(({ items = [], isLoading = true, cities }) => {
         </>
       )}
       <div ref={listRef} className="horizontal-scroll-container">
-        {isLoading && (
+        {isLoading ? (
           <div className="ant-list-items">
             {Array.from({ length: 3 }, (_, index) => (
               <div key={index}>
                 <Skeleton active style={{ width: carouselItemWidth }} />
                 <Skeleton active style={{ width: carouselItemWidth }} />
+                <Skeleton active style={{ width: carouselItemWidth }} />
               </div>
             ))}
           </div>
-        )}
-        {items.length > 0 && (
+        ) : items.length > 0 ? (
           <div ref={carouselListRef} className="ant-list-items">
             {items.map((item) => {
               return (
@@ -141,21 +143,22 @@ const Carousel = memo(({ items = [], isLoading = true, cities }) => {
               );
             })}
           </div>
-        )}
-        {items.length === 0 && (
-          <Result
-            title="Таксопарки не найдены!"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              height: 450,
-              border: "1px solid #f0f0f0",
-              borderRadius: 10,
-              background: "rgb(247, 247, 247)",
-            }}
-          />
+        ) : (
+          items.length === 0 && (
+            <Result
+              title="Таксопарки не найдены!"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                height: 450,
+                border: "1px solid #f0f0f0",
+                borderRadius: 10,
+                background: "rgb(247, 247, 247)",
+              }}
+            />
+          )
         )}
       </div>
     </div>
