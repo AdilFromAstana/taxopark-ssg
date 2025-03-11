@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
-import { Skeleton, Button, Result } from "antd";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { Skeleton, Result } from "antd";
 import { memo, useEffect, useRef, useState } from "react";
 import "./Carousel.css";
 import CarouselItem from "./CarouselItem/CarouselItem";
@@ -104,18 +103,20 @@ const Carousel = memo(({ items = [], isLoading = true, cities }) => {
     >
       {window.innerWidth >= 768 && items.length > 0 && (
         <>
-          <Button
+          <button
             className="related-carousel-button-left"
             onClick={scrollLeft}
-            icon={<LeftOutlined />}
             disabled={disableLeft}
-          />
-          <Button
+          >
+            ❮
+          </button>
+          <button
             className="related-carousel-button-right"
             onClick={scrollRight}
-            icon={<RightOutlined />}
             disabled={disableRight}
-          />
+          >
+            ❯
+          </button>
         </>
       )}
       <div ref={listRef} className="horizontal-scroll-container">

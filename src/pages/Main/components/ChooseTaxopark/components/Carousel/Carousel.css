@@ -1,146 +1,149 @@
 .horizontal-scroll-container .ant-list-items {
-    transition: transform 0.3s ease-in-out;
-    display: flex;
-    overflow-x: hidden;
-    scrollbar-width: thin;
+  transition: transform 0.3s ease-in-out;
+  display: flex;
+  overflow-x: hidden;
+  scrollbar-width: thin;
 }
 
 .horizontal-scroll-container::-webkit-scrollbar {
-    height: 8px;
-    /* Высота горизонтального скролла */
+  height: 8px;
+  /* Высота горизонтального скролла */
 }
 
 .horizontal-scroll-container::-webkit-scrollbar-thumb {
-    background: #888;
-    /* Цвет полосы прокрутки */
-    border-radius: 4px;
+  background: #888;
+  /* Цвет полосы прокрутки */
+  border-radius: 4px;
 }
 
 .horizontal-scroll-container::-webkit-scrollbar-thumb:hover {
-    background: #555;
+  background: #555;
 }
 
 .related-carousel-button-right {
-    z-index: 100;
-    right: -12px;
-    top: 50%;
-    position: absolute;
+  z-index: 100;
+  right: -12px;
+  top: 50%;
+  position: absolute;
 }
 
 .related-carousel-button-left {
-    z-index: 100;
-    left: -12px;
-    top: 50%;
-    position: absolute;
+  z-index: 100;
+  left: -12px;
+  top: 50%;
+  position: absolute;
 }
 
 .related-carousel-title {
-    margin: 10px 0;
-    font-size: 16px;
-    opacity: 0.5;
+  margin: 10px 0;
+  font-size: 16px;
+  opacity: 0.5;
 }
 
 .related-carousel-item-details {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .related-carousel-item-category {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-clamp: 1;
-    -webkit-line-clamp: 1;
-    color: rgba(0, 0, 0, 0.5);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-clamp: 1;
+  -webkit-line-clamp: 1;
+  color: rgba(0, 0, 0, 0.5);
 }
 
-/* .ant-list-items .related-carousel-item {
-    height: 100%;
-    display: flex;
-    border-radius: 10px;
-    padding: 0;
-    position: relative;
-    flex: 0 0 auto;
-    gap: 10px;
-    background: transparent;
-    border-color: transparent;
-    box-sizing: border-box;
-    overflow: hidden;
-} */
-
 .related-carousel-item-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    height: 100%;
-    width: 100%;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+  width: 100%;
+  align-items: center;
 }
 
 .related-carousel-item-details {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 10px;
-    flex-grow: 1;
-    width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex-grow: 1;
+  width: 100%;
 }
 
 .related-carousel-item-info {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .related-carousel-item-title {
-    font-size: 16px;
-    color: black;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+  font-size: 16px;
+  color: black;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .related-carousel-item-price {
-    font-size: 24px;
-    font-weight: 700;
-    margin-top: auto;
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: auto;
 }
 
 .related-carousel-item-image {
-    margin: 0;
-    max-height: 150px;
+  margin: 0;
+  max-height: 150px;
 }
 
 .related-carousel-item-details,
 .related-carousel-item-info {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 .related-carousel-item-price {
-    font-size: 20px;
-    font-weight: 700;
-    margin-top: auto;
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: auto;
 }
 
 @media (max-width: 768px) {
-    .horizontal-scroll-container .ant-list-items {
-        overflow-x: auto;
-    }
+  .horizontal-scroll-container .ant-list-items {
+    overflow-x: auto;
+  }
 
-    .related-carousel-item-image {
-        margin: 0;
-        max-height: 125px;
-    }
+  .related-carousel-item-image {
+    margin: 0;
+    max-height: 125px;
+  }
 }
 
 @media (min-width: 449px) {
-    .related-carousel-item-image {
-        margin: 0;
-        max-height: 150px;
-    }
+  .related-carousel-item-image {
+    margin: 0;
+    max-height: 150px;
+  }
+}
+
+.related-carousel-button-right,
+.related-carousel-button-left {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  height: 40px;
+  width: 40px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  z-index: 10;
+  transition: background 0.3s ease;
 }

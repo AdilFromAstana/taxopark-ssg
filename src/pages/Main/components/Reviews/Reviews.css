@@ -1,5 +1,5 @@
-/* Reviews.css */
-.reviews {
+/* Основные стили секции отзывов */
+.reviews-section {
   padding: 20px;
   text-align: center;
   opacity: 0;
@@ -7,11 +7,12 @@
   transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
-.reviews.visible {
+.reviews-visible {
   opacity: 1;
   transform: translateY(0);
 }
 
+/* Заголовок */
 .reviews-title {
   font-size: 2.5rem;
   font-weight: bold;
@@ -19,64 +20,132 @@
   color: #222;
 }
 
+/* Контейнер отзывов */
 .reviews-container {
   max-width: 1400px;
   margin: 0 auto;
 }
 
-.review-cards {
+/* Карусель */
+.reviews-carousel-container {
+  position: relative;
   display: flex;
-  justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 20px;
+  justify-content: center;
+  overflow: hidden;
 }
 
-.review-card {
+/* Список отзывов в карусели */
+.reviews-carousel-list {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none; /* IE и Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.reviews-carousel-list::-webkit-scrollbar {
+  display: none; /* Chrome и Safari */
+}
+
+/* Карточки отзывов */
+.reviews-card {
   border: 1px solid #ddd;
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 15px;
   text-align: center;
-  width: calc(100% / 4 - 80px);
   aspect-ratio: 1 / 1.2;
   box-sizing: border-box;
 }
 
-.review-photo {
+/* Фото в отзыве */
+.reviews-photo {
   width: 120px;
   height: 120px;
   border-radius: 50%;
   margin-bottom: 10px;
 }
 
-.review-name {
+/* Имя автора отзыва */
+.reviews-name {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 10px;
 }
 
-.review-text {
+/* Текст отзыва */
+.reviews-text {
   font-size: 18px;
   color: #555;
 }
 
+/* Кнопки карусели */
+.reviews-carousel-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  height: 40px;
+  width: 40px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  z-index: 10;
+  transition: background 0.3s ease;
+}
+
+.reviews-carousel-button:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+.reviews-carousel-button-left {
+  left: 10px;
+}
+
+.reviews-carousel-button-right {
+  right: 10px;
+}
+
+/* Блок, если нет отзывов */
+.reviews-no-reviews {
+  font-size: 18px;
+  color: gray;
+}
+
+/* Адаптивность */
 @media (max-width: 768px) {
   .reviews-title {
     font-size: 2rem;
   }
-  .review-cards {
-    display: flex;
-    gap: 30px;
-    flex-direction: column;
+
+  .reviews-carousel-container {
+    padding: 0 20px;
   }
-  .review-card {
+
+  .reviews-card {
     width: 100%;
-    aspect-ratio: 1 / 0.5;
+    aspect-ratio: 1 / 0.8;
   }
-  .review-photo {
+
+  .reviews-photo {
     width: 80px;
     height: 80px;
+  }
+
+  .reviews-carousel-button {
+    font-size: 20px;
+    padding: 8px 12px;
+  }
+
+  .reviews-carousel-button-left {
+    left: 5px;
+  }
+
+  .reviews-carousel-button-right {
+    right: 5px;
   }
 }
