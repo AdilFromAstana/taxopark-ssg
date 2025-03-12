@@ -77,7 +77,7 @@ const Reviews = () => {
         } else {
           cardWidth = carouselWidth / 5;
         }
-        setCarouselItemWidth(cardWidth);
+        setCarouselItemWidth(cardWidth - 20);
       }
     };
 
@@ -120,7 +120,7 @@ const Reviews = () => {
 
         {reviews.data.length > 0 && (
           <div ref={carouselWrapperRef} className="reviews-carousel-container">
-            {window.innerWidth >= 768 && (
+            {window.innerWidth >= 768 && reviews.data.length > 5 && (
               <>
                 <button
                   className="reviews-carousel-button reviews-carousel-button-left"
@@ -147,14 +147,13 @@ const Reviews = () => {
                   : "https://www.eg.ru/wp-content/uploads/2024/07/tyuremnye-sroki-lyubov-so-zvezdoy-doma-2-i-jizn-v-rossii-chto-stalo-so-zvezdoy-taksi-sami-naseri.jpg";
 
                 return (
-                  <div key={review.id}
-                  
-                  >
+                  <div key={review.id}>
                     <div
-                      className="reviews-card"
                       style={{
                         width: carouselItemWidth,
+                        margin: "10px",
                       }}
+                      className="reviews-card"
                     >
                       <img
                         src={reviewImage}

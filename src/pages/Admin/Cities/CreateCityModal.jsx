@@ -19,7 +19,7 @@ const CreateCityModal = ({ open, onClose, refreshData }) => {
       console.log("✅ Успешный ответ сервера:", response.data);
       message.success("🎉 Город успешно создан!");
 
-      refreshData(); // Обновление данных после создания
+      refreshData();
       onClose();
       form.resetFields(); // Очистка формы
     } catch (error) {

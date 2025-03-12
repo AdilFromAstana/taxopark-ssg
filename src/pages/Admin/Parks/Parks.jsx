@@ -1,7 +1,7 @@
 import { Table, Input, Button, DatePicker, Select, Tag, Modal } from "antd";
 import axios from "axios";
 import { useState, useCallback, memo } from "react";
-import CreateFormModal from "./CreateParkModal";
+import CreateParkModal from "./CreateParkModal";
 import EditParkModal from "./EditParkModal";
 import moment from "moment";
 import ExcelJS from "exceljs";
@@ -557,7 +557,7 @@ const Parks = memo(() => {
         onChange={handleTableChange}
       />
 
-      <CreateFormModal
+      <CreateParkModal
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         cities={citiesData}

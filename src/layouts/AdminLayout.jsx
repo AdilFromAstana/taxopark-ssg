@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 const AdminLayout = () => {
   const nav = useNavigate();
   const [selectedKey, setSelectedKey] = useState(
-    localStorage.getItem("selectedMenuKey") || "website"
+    localStorage.getItem("selectedMenuKey") || "parks"
   );
 
   const items = [
@@ -16,10 +16,12 @@ const AdminLayout = () => {
     { key: "promotions", label: "Акции" },
     { key: "cities", label: "Города" },
     { key: "reviews", label: "Отзывы" },
+    { key: "users", label: "Пользователи" },
   ];
 
   useEffect(() => {
     localStorage.setItem("selectedMenuKey", selectedKey);
+    nav(selectedKey);
   }, [selectedKey]);
 
   const onClick = (e) => {
