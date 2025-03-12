@@ -129,27 +129,33 @@ const Reviews = () => {
             </button>
 
             <div ref={carouselListRef} className="reviews-carousel-list">
-              {reviews.data.map((review) => (
-                <div
-                  key={review.id}
-                  style={{
-                    minWidth: carouselItemWidth,
-                  }}
-                >
-                  <div className="reviews-card" style={{ margin: "0px 10px" }}>
-                    <img
-                      src={
-                        review.photo ||
-                        "https://www.eg.ru/wp-content/uploads/2024/07/tyuremnye-sroki-lyubov-so-zvezdoy-doma-2-i-jizn-v-rossii-chto-stalo-so-zvezdoy-taksi-sami-naseri.jpg"
-                      }
-                      alt={review.name}
-                      className="reviews-photo"
-                    />
-                    <h3 className="reviews-name">{review.name}</h3>
-                    <p className="reviews-text">{review.description}</p>
+              {reviews.data.map((review) => {
+                const reviewImage = review?.imageUrl
+                  ? `${API_URL}/uploads/${review?.imageUrl}`
+                  : "https://www.eg.ru/wp-content/uploads/2024/07/tyuremnye-sroki-lyubov-so-zvezdoy-doma-2-i-jizn-v-rossii-chto-stalo-so-zvezdoy-taksi-sami-naseri.jpg";
+
+                return (
+                  <div
+                    key={review.id}
+                    style={{
+                      minWidth: carouselItemWidth,
+                    }}
+                  >
+                    <div
+                      className="reviews-card"
+                      style={{ margin: "0px 10px" }}
+                    >
+                      <img
+                        src={reviewImage}
+                        alt={review.name}
+                        className="reviews-photo"
+                      />
+                      <h3 className="reviews-name">{review.name}</h3>
+                      <p className="reviews-text">{review.description}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <button

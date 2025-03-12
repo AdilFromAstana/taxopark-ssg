@@ -647,7 +647,7 @@ const EditParkModal = memo(
             <Col span={8}>
               <Form.Item
                 name="image"
-                label="Изображение парка"
+                label="Изображение"
                 valuePropName="fileList"
                 getValueFromEvent={(e) => e && e.fileList}
               >
