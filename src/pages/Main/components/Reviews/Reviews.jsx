@@ -120,13 +120,25 @@ const Reviews = () => {
 
         {reviews.data.length > 0 && (
           <div ref={carouselWrapperRef} className="reviews-carousel-container">
-            <button
-              className="reviews-carousel-button reviews-carousel-button-left"
-              onClick={scrollLeft}
-              disabled={disableLeft}
-            >
-              ❮
-            </button>
+            {window.innerWidth >= 768 && (
+              <>
+                <button
+                  className="reviews-carousel-button reviews-carousel-button-left"
+                  onClick={scrollLeft}
+                  disabled={disableLeft}
+                >
+                  ❮
+                </button>
+
+                <button
+                  className="reviews-carousel-button reviews-carousel-button-right"
+                  onClick={scrollRight}
+                  disabled={disableRight}
+                >
+                  ❯
+                </button>
+              </>
+            )}
 
             <div ref={carouselListRef} className="reviews-carousel-list">
               {reviews.data.map((review) => {
@@ -135,15 +147,14 @@ const Reviews = () => {
                   : "https://www.eg.ru/wp-content/uploads/2024/07/tyuremnye-sroki-lyubov-so-zvezdoy-doma-2-i-jizn-v-rossii-chto-stalo-so-zvezdoy-taksi-sami-naseri.jpg";
 
                 return (
-                  <div
-                    key={review.id}
-                    style={{
-                      minWidth: carouselItemWidth,
-                    }}
+                  <div key={review.id}
+                  
                   >
                     <div
                       className="reviews-card"
-                      style={{ margin: "0px 10px" }}
+                      style={{
+                        width: carouselItemWidth,
+                      }}
                     >
                       <img
                         src={reviewImage}
@@ -157,14 +168,6 @@ const Reviews = () => {
                 );
               })}
             </div>
-
-            <button
-              className="reviews-carousel-button reviews-carousel-button-right"
-              onClick={scrollRight}
-              disabled={disableRight}
-            >
-              ❯
-            </button>
           </div>
         )}
 

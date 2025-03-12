@@ -13,7 +13,6 @@ import {
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
-  arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button, message } from "antd";
@@ -36,7 +35,7 @@ const useSavePriorities = () => {
       }
     },
     onSuccess: () => {
-      message.success("Priorities saved successfully.");
+      message.success("Приоритет успешно изменился!");
     },
     onError: (error) => {
       console.error(error);
@@ -144,12 +143,6 @@ const SortableList = ({
         { priorityItems: [], allItems: [] }
       );
 
-      console.log(
-        "sortedData.priorityItems: ",
-        sortedData.priorityItems.map((item) => {
-          return `${item.title} ${item.priority}`;
-        })
-      );
       setPriorityItems(sortedData.priorityItems);
       setAllItems(sortedData.allItems);
     }
@@ -161,16 +154,26 @@ const SortableList = ({
     })
   );
 
-  const onDragEnd = (event, listSetter) => {
+  const onDragEnd = (event) => {
     if (!isEditing) return;
     const { active, over } = event;
-    if (active.id !== over.id) {
-      listSetter((prevItems) => {
-        const oldIndex = prevItems.findIndex((item) => item.id === active.id);
-        const newIndex = prevItems.findIndex((item) => item.id === over.id);
-        return arrayMove(prevItems, oldIndex, newIndex);
-      });
+    if (!over) return;
+
+    const oldIndex = priorityItems.findIndex((item) => item.id === active.id);
+    const newIndex = priorityItems.findIndex((item) => item.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) {
+      console.warn("Элемент не найден в массиве", { oldIndex, newIndex });
+      return;
     }
+
+    setPriorityItems((prevItems) => {
+      const newItems = [...prevItems];
+      const [movedItem] = newItems.splice(oldIndex, 1);
+      newItems.splice(newIndex, 0, movedItem);
+
+      return [...newItems]; // Принудительное обновление
+    });
   };
 
   const moveToPriority = (id) => {
@@ -217,10 +220,12 @@ const SortableList = ({
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
-            onDragEnd={(event) => onDragEnd(event, setPriorityItems)}
+            onDragEnd={(event) => onDragEnd(event)}
           >
             <SortableContext
-              items={priorityItems.sort((a, b) => a.priority - b.priority)}
+              items={[...priorityItems]
+                .sort((a, b) => a.priority - b.priority)
+                .map((item) => item.id)}
               strategy={verticalListSortingStrategy}
             >
               {priorityItems.map((item, index) => (

@@ -118,16 +118,23 @@
 
 /* Адаптивность */
 @media (max-width: 768px) {
+  .reviews-section {
+    padding: 0px;
+  }
+  .reviews-carousel-list {
+    overflow-x: auto;
+  }
   .reviews-title {
     font-size: 2rem;
   }
 
   .reviews-carousel-container {
-    padding: 0 20px;
+    width: 90vw;
+    margin: 0px auto;
+    padding: 0px;
   }
 
   .reviews-card {
-    width: 100%;
     aspect-ratio: 1 / 0.8;
   }
 
