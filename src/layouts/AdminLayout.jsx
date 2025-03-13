@@ -1,32 +1,61 @@
 import { Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 const AdminLayout = () => {
   const nav = useNavigate();
+  const location = useLocation();
+  const user = JSON.parse(localStorage.getItem("user")); // Достаём пользователя из localStorage
   const [selectedKey, setSelectedKey] = useState(
-    localStorage.getItem("selectedMenuKey") || "parks"
+    localStorage.getItem("selectedMenuKey") ||
+      (user?.roles.includes("manager") ? "forms" : "parks")
   );
 
-  const items = [
-    { key: "website", label: "Веб-сайт" },
-    { key: "parks", label: "Таксопарки" },
-    { key: "forms", label: "Заявки" },
-    { key: "promotions", label: "Акции" },
-    { key: "cities", label: "Города" },
-    { key: "reviews", label: "Отзывы" },
-    { key: "users", label: "Пользователи" },
+  // Определяем доступные пункты меню в зависимости от роли
+  const adminItems = [
+    { key: "website", label: <span>Веб-сайт</span> },
+    { key: "parks", label: <span>Таксопарки</span> },
+    { key: "forms", label: <span>Заявки</span> },
+    { key: "promotions", label: <span>Акции</span> },
+    { key: "cities", label: <span>Города</span> },
+    { key: "reviews", label: <span>Отзывы</span> },
+    { key: "users", label: <span>Пользователи</span> },
   ];
 
+  const managerItems = [{ key: "forms", label: <span>Заявки</span> }];
+
+  // Выбираем меню в зависимости от роли
+  const items = user?.roles.includes("admin")
+    ? adminItems
+    : user?.roles.includes("manager")
+    ? managerItems
+    : [];
+
   useEffect(() => {
+    // Если нет пользователя или у него нет прав, редиректим на страницу логина
+    if (
+      !user ||
+      (!user.roles.includes("admin") && !user.roles.includes("manager"))
+    ) {
+      nav("/admin/login");
+      return;
+    }
+
     localStorage.setItem("selectedMenuKey", selectedKey);
-    nav(selectedKey);
-  }, [selectedKey]);
+
+    // Редирект при первом входе в админку (если пользователь не находится уже в нужном разделе)
+    if (location.pathname === "/admin") {
+      if (user.roles.includes("admin")) {
+        nav("/admin/parks", { replace: true });
+      } else if (user.roles.includes("manager")) {
+        nav("/admin/forms", { replace: true });
+      }
+    }
+  }, [selectedKey, user, location.pathname]);
 
   const onClick = (e) => {
-    setSelectedKey(e.key);
-    nav(e.key);
+    setSelectedKey(e.key); // Навигация происходит в useEffect
   };
 
   return (
