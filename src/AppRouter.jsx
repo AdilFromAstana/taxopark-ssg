@@ -6,21 +6,21 @@ import {
 } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
+import AdminLayout from "./layouts/AdminLayout";
 import MainLayout from "./layouts/MainLayout";
+import LoginPage from "./pages/Admin/Login/LoginPage";
 import HomePage from "./pages/Main";
 import PromotionsPage from "./pages/Promotions";
-import AdminLayout from "./layouts/AdminLayout";
 import Forms from "./pages/Admin/Forms/Forms";
 import Parks from "./pages/Admin/Parks/Parks";
 import Promotions from "./pages/Admin/Promotions/Promotions";
 import Cities from "./pages/Admin/Cities/Cities";
-import WebsiteInfo from "./pages/Admin/WebsiteInfo/WebsiteInfo";
+import Banners from "./pages/Admin/Banners/Banners";
 import Reviews from "./pages/Admin/Reviews/Reviews";
 import Users from "./pages/Admin/Users/Users";
-import LoginPage from "./pages/Admin/Login/LoginPage";
 
 const adminRoutes = [
-  { path: "website", element: <WebsiteInfo />, roles: ["admin"] },
+  { path: "banners", element: <Banners />, roles: ["admin"] },
   { path: "parks", element: <Parks />, roles: ["admin"] },
   { path: "forms", element: <Forms />, roles: ["admin", "manager"] },
   { path: "promotions", element: <Promotions />, roles: ["admin"] },
@@ -31,77 +31,69 @@ const adminRoutes = [
 
 const AppRouter = () => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
     if (token) {
       try {
-        const decoded = jwtDecode(token);
-
-        console.warn("Токен истёк");
-        localStorage.removeItem("token");
-        setUser(decoded);
-      } catch (error) {
-        console.error("Ошибка декодирования токена: ", error);
-        localStorage.removeItem("token");
+        setUser(jwtDecode(token));
+      } catch {
         setUser(null);
       }
     }
-  }, []);
+    setLoading(false);
+  }, [token]);
 
-  const getAvailableRoutes = () => {
-    if (!user) return [];
-    return adminRoutes.filter((route) =>
-      route.roles.some((role) => user.roles.includes(role))
-    );
-  };
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-  return (
-    <Router>
-      <Routes>
-        {/* Главная страница */}
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="promotions" element={<PromotionsPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-
-        {/* Логин */}
-        <Route path="/admin/login" element={<LoginPage />} />
-
-        {/* Админка с проверкой ролей */}
-        <Route
-          path="/admin/*"
-          element={
-            user ? <AdminLayout /> : <Navigate to="/admin/login" replace />
-          }
-        >
-          {getAvailableRoutes().map(({ path, element }) => (
-            <Route key={path} path={path} element={element} />
-          ))}
-
-          {/* Редирект для admin и manager */}
-          <Route
-            index
-            element={
-              user?.roles.includes("admin") ? (
-                <Navigate to="parks" replace />
-              ) : user?.roles.includes("manager") ? (
-                <Navigate to="forms" replace />
-              ) : (
-                <Navigate to="/" replace />
+  if (user) {
+    return (
+      <Router>
+        <Routes>
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="promotions" element={<PromotionsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+          <Route path="/admin/*" element={<AdminLayout />}>
+            {adminRoutes
+              .filter(({ roles }) =>
+                roles.some((role) => user.roles.includes(role))
               )
-            }
+              .map(({ path, element }) => (
+                <Route key={path} path={path} element={element} />
+              ))}
+            {user.roles.includes("admin") ? (
+              <Route index element={<Navigate to="parks" replace />} />
+            ) : (
+              <Route index element={<Navigate to="forms" replace />} />
+            )}
+          </Route>
+        </Routes>
+      </Router>
+    );
+  } else {
+    console.log("ada");
+    return (
+      <Router>
+        <Routes>
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="promotions" element={<PromotionsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+          <Route path="/admin/login" element={<LoginPage />} />
+          <Route
+            path="/admin/*"
+            element={<Navigate to="/admin/login" replace />}
           />
-
-          {/* Редирект менеджера, если он зашёл не в forms */}
-          {user?.roles.includes("manager") && (
-            <Route path="*" element={<Navigate to="/admin/forms" replace />} />
-          )}
-        </Route>
-      </Routes>
-    </Router>
-  );
+        </Routes>
+      </Router>
+    );
+  }
 };
 
 export default AppRouter;

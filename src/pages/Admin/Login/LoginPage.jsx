@@ -1,6 +1,7 @@
-import { useState } from "react";
 import { Form, Input, Button, Card, Typography } from "antd";
 import { useMutation } from "@tanstack/react-query";
+import { jwtDecode } from "jwt-decode";
+import { useState } from "react";
 import axios from "axios";
 import "antd/dist/reset.css";
 
@@ -17,14 +18,20 @@ export default function LoginPage() {
   const mutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
+      const decodedUser = jwtDecode(data.token);
       localStorage.setItem("token", data.token);
-      window.location.href = "/dashboard";
+      if (decodedUser.roles.includes("admin")) {
+        window.location.href = "/admin/parks";
+      } else {
+        window.location.href = "/admin/forms";
+      }
     },
     onError: (error) => {
       console.error(
         "Ошибка входа:",
         error.response?.data?.message || error.message
       );
+      setError("Ошибка входа:", error.response?.data?.message || error.message);
     },
   });
 

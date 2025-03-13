@@ -1,20 +1,50 @@
-import { Menu } from "antd";
+import { Menu, Modal, Button } from "antd";
 import Sider from "antd/es/layout/Sider";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { jwtDecode } from "jwt-decode";
 
 const AdminLayout = () => {
   const nav = useNavigate();
   const location = useLocation();
-  const user = JSON.parse(localStorage.getItem("user")); // Достаём пользователя из localStorage
+  const token = localStorage.getItem("token");
+  const [user, setUser] = useState(null);
   const [selectedKey, setSelectedKey] = useState(
-    localStorage.getItem("selectedMenuKey") ||
-      (user?.roles.includes("manager") ? "forms" : "parks")
+    localStorage.getItem("selectedMenuKey") || ""
   );
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // Определяем доступные пункты меню в зависимости от роли
+  useEffect(() => {
+    if (token) {
+      try {
+        const decodedUser = jwtDecode(token);
+        setUser(decodedUser);
+      } catch {
+        setUser(null);
+      }
+    }
+
+    if (!user || !user.roles) {
+      return;
+    }
+
+    if (!selectedKey) {
+      setSelectedKey(user.roles.includes("manager") ? "forms" : "parks");
+    }
+
+    localStorage.setItem("selectedMenuKey", selectedKey);
+
+    if (location.pathname === "/admin") {
+      if (user.roles.includes("admin")) {
+        nav("/admin/parks", { replace: true });
+      } else if (user.roles.includes("manager")) {
+        nav("/admin/forms", { replace: true });
+      }
+    }
+  }, [token]);
+
   const adminItems = [
-    { key: "website", label: <span>Веб-сайт</span> },
+    { key: "banners", label: <span>Баннеры</span> },
     { key: "parks", label: <span>Таксопарки</span> },
     { key: "forms", label: <span>Заявки</span> },
     { key: "promotions", label: <span>Акции</span> },
@@ -25,37 +55,29 @@ const AdminLayout = () => {
 
   const managerItems = [{ key: "forms", label: <span>Заявки</span> }];
 
-  // Выбираем меню в зависимости от роли
   const items = user?.roles.includes("admin")
     ? adminItems
     : user?.roles.includes("manager")
     ? managerItems
     : [];
 
-  useEffect(() => {
-    // Если нет пользователя или у него нет прав, редиректим на страницу логина
-    if (
-      !user ||
-      (!user.roles.includes("admin") && !user.roles.includes("manager"))
-    ) {
-      nav("/admin/login");
-      return;
-    }
-
-    localStorage.setItem("selectedMenuKey", selectedKey);
-
-    // Редирект при первом входе в админку (если пользователь не находится уже в нужном разделе)
-    if (location.pathname === "/admin") {
-      if (user.roles.includes("admin")) {
-        nav("/admin/parks", { replace: true });
-      } else if (user.roles.includes("manager")) {
-        nav("/admin/forms", { replace: true });
-      }
-    }
-  }, [selectedKey, user, location.pathname]);
-
   const onClick = (e) => {
-    setSelectedKey(e.key); // Навигация происходит в useEffect
+    if (e.key === "logout") {
+      showLogoutModal();
+    } else {
+      setSelectedKey(e.key);
+      nav(`/admin/${e.key}`);
+    }
+  };
+
+  const showLogoutModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.reload();
   };
 
   return (
@@ -72,12 +94,29 @@ const AdminLayout = () => {
           onClick={onClick}
           selectedKeys={[selectedKey]}
           mode="inline"
-          items={items}
+          items={[
+            ...items,
+            {
+              key: "logout",
+              label: "Выйти",
+            },
+          ]}
         />
       </Sider>
       <main style={{ width: "100%" }}>
         <Outlet />
       </main>
+
+      <Modal
+        title="Выход"
+        open={isModalVisible}
+        onOk={handleLogout}
+        onCancel={() => setIsModalVisible(false)}
+        okText="Да, выйти"
+        cancelText="Отмена"
+      >
+        <p>Вы уверены, что хотите выйти?</p>
+      </Modal>
     </div>
   );
 };

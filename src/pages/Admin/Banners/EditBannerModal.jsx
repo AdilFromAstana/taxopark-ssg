@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const EditCityModal = ({
+const EditBannerModal = ({
   open,
   onClose,
   record,
@@ -122,4 +122,4 @@ const EditCityModal = ({
   );
 };
 
-export default EditCityModal;
+export default EditBannerModal;
