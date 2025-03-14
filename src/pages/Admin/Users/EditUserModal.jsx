@@ -1,7 +1,22 @@
 /* eslint-disable react/prop-types */
-import { Modal, Form, Input, Button, Row, Col, message, Select } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  Button,
+  Row,
+  Col,
+  message,
+  Select,
+  Tooltip,
+} from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import {
+  EyeOutlined,
+  EyeInvisibleOutlined,
+  CopyOutlined,
+} from "@ant-design/icons";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -16,6 +31,25 @@ const EditUserModal = ({
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+
+  const [visible, setVisible] = useState(false);
+
+  const toggleVisibility = () => {
+    setVisible((prev) => !prev);
+  };
+
+  const handleCopy = async () => {
+    try {
+      const password = document
+        .getElementById("password-input")
+        ?.getAttribute("value");
+      if (password) {
+        await navigator.clipboard.writeText(password);
+      }
+    } catch (err) {
+      console.error("Ошибка копирования:", err);
+    }
+  };
 
   const handleCancel = () => {
     setIsEditMode(false);
@@ -128,6 +162,38 @@ const EditUserModal = ({
                 ]}
                 min={0}
                 style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item name="password" label="Пароль">
+              <Input.Password
+                id="password-input"
+                readOnly
+                visibilityToggle={false}
+                type={visible ? "text" : "password"}
+                suffix={
+                  <Space>
+                    <Tooltip title={visible ? "Скрыть" : "Показать"}>
+                      <Button
+                        type="text"
+                        icon={
+                          visible ? <EyeInvisibleOutlined /> : <EyeOutlined />
+                        }
+                        onClick={toggleVisibility}
+                      />
+                    </Tooltip>
+                    <Tooltip title="Копировать">
+                      <Button
+                        type="text"
+                        icon={<CopyOutlined />}
+                        onClick={handleCopy}
+                      />
+                    </Tooltip>
+                  </Space>
+                }
               />
             </Form.Item>
           </Col>
