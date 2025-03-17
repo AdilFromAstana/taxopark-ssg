@@ -5,10 +5,12 @@ import CreateUserModal from "./CreateUserModal";
 import EditUserModal from "./EditUserModal";
 import moment from "moment";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import CryptoJS from "crypto-js";
 
-const { RangePicker } = DatePicker;
-
+const SECRET_KEY = import.meta.env.VITE_SECRET_KEY;
+const IV = import.meta.env.VITE_IV;
 const API_URL = import.meta.env.VITE_API_URL;
+const { RangePicker } = DatePicker;
 
 const debounce = (func, delay) => {
   let timer;
@@ -32,6 +34,20 @@ const fetchUsers = async ({
   });
   return response.data;
 };
+
+function decryptPassword(encryptedPassword) {
+  const decrypted = CryptoJS.AES.decrypt(
+    encryptedPassword,
+    CryptoJS.enc.Utf8.parse(SECRET_KEY),
+    {
+      iv: CryptoJS.enc.Utf8.parse(IV),
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
+    }
+  );
+  console.log(decrypted.toString(CryptoJS.enc.Utf8));
+  return decrypted.toString(CryptoJS.enc.Utf8);
+}
 
 const roles = [
   { id: "admin", title: "Админ" },
@@ -314,7 +330,11 @@ const Users = memo(() => {
         }}
         onRow={(record) => ({
           onClick: () => {
-            setSelectedRecord(record);
+            const password = decryptPassword(record.password);
+            setSelectedRecord({
+              password,
+              ...record,
+            });
             setIsEditModalOpen(true);
           },
         })}

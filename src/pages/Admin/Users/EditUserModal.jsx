@@ -9,6 +9,7 @@ import {
   message,
   Select,
   Tooltip,
+  Space,
 } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -34,9 +35,7 @@ const EditUserModal = ({
 
   const [visible, setVisible] = useState(false);
 
-  const toggleVisibility = () => {
-    setVisible((prev) => !prev);
-  };
+  const toggleVisibility = () => setVisible((prev) => !prev);
 
   const handleCopy = async () => {
     try {
@@ -100,9 +99,7 @@ const EditUserModal = ({
 
   useEffect(() => {
     if (open && record) {
-      form.setFieldsValue({
-        ...record,
-      });
+      form.setFieldsValue(record);
     }
   }, [open, record]);
 
@@ -168,8 +165,9 @@ const EditUserModal = ({
         </Row>
         <Row gutter={16}>
           <Col span={24}>
-            <Form.Item name="password" label="Пароль">
-              <Input.Password
+            <Form.Item label="Пароль">
+              <Input
+                value={record.decryptPassword}
                 id="password-input"
                 readOnly
                 visibilityToggle={false}
