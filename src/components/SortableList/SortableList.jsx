@@ -99,7 +99,7 @@ const SortableList = ({
   fetchKey,
   fetchMethod,
   readKey,
-  updateEndpoint = "parks/updatePriorities",
+  updateEndpoint = null,
 }) => {
   const queryClient = useQueryClient();
   const [allItems, setAllItems] = useState([]);
@@ -146,7 +146,7 @@ const SortableList = ({
       setPriorityItems(sortedData.priorityItems);
       setAllItems(sortedData.allItems);
     }
-  }, [data]);
+  }, [data, updateEndpoint]);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -197,6 +197,10 @@ const SortableList = ({
     setIsPriorityModalOpen(false);
     setIsEditing(false);
   };
+
+  if (!updateEndpoint) {
+    return <h1>ENDPOINT</h1>;
+  }
 
   return (
     <div

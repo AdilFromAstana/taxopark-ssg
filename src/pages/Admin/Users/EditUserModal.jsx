@@ -12,7 +12,7 @@ import {
   Space,
 } from "antd";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   EyeOutlined,
   EyeInvisibleOutlined,
@@ -39,14 +39,10 @@ const EditUserModal = ({
 
   const handleCopy = async () => {
     try {
-      const password = document
-        .getElementById("password-input")
-        ?.getAttribute("value");
-      if (password) {
-        await navigator.clipboard.writeText(password);
-      }
+      await navigator.clipboard.writeText(record.password);
+      message.success("Пароль скопирован!");
     } catch (err) {
-      console.error("Ошибка копирования:", err);
+      message.error("Ошибка при копировании", err);
     }
   };
 
@@ -97,12 +93,6 @@ const EditUserModal = ({
     }
   };
 
-  useEffect(() => {
-    if (open && record) {
-      form.setFieldsValue(record);
-    }
-  }, [open, record]);
-
   return (
     <Modal
       open={open}
@@ -113,7 +103,12 @@ const EditUserModal = ({
       footer={null}
       maskClosable={false}
     >
-      <Form form={form} layout="vertical" onFinish={handleUpdate}>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleUpdate}
+        initialValues={record}
+      >
         <Row gutter={16}>
           <Col span={24}>
             <Form.Item
@@ -165,12 +160,10 @@ const EditUserModal = ({
         </Row>
         <Row gutter={16}>
           <Col span={24}>
-            <Form.Item label="Пароль">
+            <Form.Item label="Пароль" name="decryptPassword">
               <Input
-                value={record.decryptPassword}
                 id="password-input"
                 readOnly
-                visibilityToggle={false}
                 type={visible ? "text" : "password"}
                 suffix={
                   <Space>

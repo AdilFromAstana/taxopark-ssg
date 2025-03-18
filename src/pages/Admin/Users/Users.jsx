@@ -332,7 +332,7 @@ const Users = memo(() => {
           onClick: () => {
             const password = decryptPassword(record.password);
             setSelectedRecord({
-              password,
+              decryptPassword: password,
               ...record,
             });
             setIsEditModalOpen(true);

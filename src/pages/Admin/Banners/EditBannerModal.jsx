@@ -28,30 +28,63 @@ const EditBannerModal = ({
   const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [fileList, setFileList] = useState([]);
-  const [previewImage, setPreviewImage] = useState(`${API_URL}/uploads/${record?.bannerUrl}` || "");
+  const [previewImage, setPreviewImage] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
-    if (record?.image) {
+    if (record?.bannerUrl) {
       setFileList([
         {
           uid: "-1",
           name: "image",
           status: "done",
-          url: record.bannerUrl,
+          url: `${API_URL}/uploads/${record?.bannerUrl}`,
         },
       ]);
-      setPreviewImage(record.bannerUrl);
+      setPreviewImage(`${API_URL}/uploads/${record?.bannerUrl}`);
     } else {
       setFileList([]);
     }
+    form.setFieldsValue(record);
   }, [record]);
+
+  const handleChangeStatus = async () => {
+    setLoading(true);
+    try {
+      const updatedData = await axios.put(
+        `${API_URL}/banners/update/${record.id}`,
+        { active: !record.active }
+      );
+      queryClient.setQueryData(["banners", queryData], (oldData) => {
+        if (!oldData || !oldData.data) return oldData;
+        return {
+          ...oldData,
+          data: oldData.data.map((item) => {
+            if (item.id === record.id) {
+              setSelectedRecord(updatedData.data);
+              form.setFieldsValue(updatedData.data);
+              return updatedData.data;
+            } else {
+              return item;
+            }
+          }),
+        };
+      });
+      message.success("Запись успешно обновлена!");
+      onClose();
+    } catch (error) {
+      message.error(
+        `Ошибка: ${error?.response?.data?.message || "Неизвестная ошибка"}`
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCancel = () => {
     setIsEditMode(false);
-    form.setFieldsValue({
-      title: record.title,
-    });
+    form.setFieldsValue(record);
+    onClose();
   };
 
   const handleUpdate = async () => {
@@ -60,11 +93,11 @@ const EditBannerModal = ({
       setLoading(true);
 
       const updatedData = await axios.put(
-        `${API_URL}/cities/update/${record.id}`,
+        `${API_URL}/banners/update/${record.id}`,
         data
       );
 
-      queryClient.setQueryData(["cities", queryData], (oldData) => {
+      queryClient.setQueryData(["banners", queryData], (oldData) => {
         if (!oldData || !oldData.data) return oldData;
         return {
           ...oldData,
@@ -80,7 +113,7 @@ const EditBannerModal = ({
         };
       });
 
-      message.success("🎉 Город успешно обновлен!");
+      message.success("🎉 Баннер успешно обновлен!");
 
       setIsEditMode(false);
       onClose();
@@ -111,6 +144,7 @@ const EditBannerModal = ({
       title={isEditMode ? "Редактировать баннер" : "Просмотр баннера"}
       footer={null}
       maskClosable={false}
+      closeIcon={false}
     >
       <Form form={form} layout="vertical" onFinish={handleUpdate}>
         <Row gutter={16}>
@@ -126,7 +160,11 @@ const EditBannerModal = ({
         </Row>
         <Row gutter={16}>
           <Col span={24}>
-            <Form.Item name="link" label="Ссылка">
+            <Form.Item
+              name="link"
+              label="Ссылка"
+              rules={[{ type: "url", message: "Введите корректный URL" }]}
+            >
               <Input disabled={!isEditMode} />
             </Form.Item>
           </Col>
@@ -186,7 +224,18 @@ const EditBannerModal = ({
               <Button type="primary" onClick={() => setIsEditMode(true)}>
                 Редактировать
               </Button>
-              <Button type="default" danger onClick={onClose}>
+              <Button
+                type="primary"
+                style={{ backgroundColor: record.active ? "red" : "green" }}
+                onClick={handleChangeStatus}
+              >
+                {record.active ? "Архивировать" : "Активировать"}
+              </Button>
+              <Button
+                danger
+                onClick={handleCancel}
+                style={{ marginLeft: "auto" }}
+              >
                 Закрыть
               </Button>
             </>

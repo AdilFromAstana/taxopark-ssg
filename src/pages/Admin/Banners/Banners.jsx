@@ -1,21 +1,12 @@
-import {
-  Button,
-  DatePicker,
-  Image,
-  Input,
-  List,
-  Table,
-  Upload,
-  message,
-} from "antd";
-import { DeleteOutlined, InboxOutlined } from "@ant-design/icons";
+import { Button, DatePicker, Input, Modal, Select, Table, Tag } from "antd";
 import axios from "axios";
 import { useState, memo } from "react";
 import CreateBannerModal from "./CreateBannerModal";
 import EditBannerModal from "./EditBannerModal";
 import moment from "moment";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import "./style.css";
+import SortableList from "../../../components/SortableList/SortableList";
 
 const { RangePicker } = DatePicker;
 const API_URL = import.meta.env.VITE_API_URL;
@@ -44,6 +35,7 @@ const Banners = memo(() => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPriorityModalOpen, setIsPriorityModalOpen] = useState(false);
   const { data: banners, isLoading } = useQuery({
     queryKey: [
       "banners",
@@ -62,38 +54,9 @@ const Banners = memo(() => {
     cacheTime: 10 * 60 * 1000,
   });
 
-  const deleteBanner = useMutation({
-    mutationFn: async (id) => {
-      await axios.delete(`${API_URL}/banners/${id}`);
-    },
-    onSuccess: (data, id) => {
-      message.success("Баннер удален");
-      queryClient.setQueryData(["banners"], (oldData) => {
-        if (!oldData || !oldData.data) return oldData;
-        return {
-          ...oldData,
-          data: oldData.data.filter((banner) => banner.id !== id),
-        };
-      });
-    },
-    onError: () => {
-      message.error("Не удалось удалить баннер");
-    },
-  });
-
-  const handleUpload = async ({ file }) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      await axios.post(`${API_URL}/banners`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      message.success("Баннер успешно загружен!");
-      queryClient.invalidateQueries(["banners"]); // Обновляем список баннеров
-    } catch (error) {
-      message.error("Ошибка при загрузке баннера!");
-    }
+  const handleDateRangeChange = (value) => {
+    setSearchFilters((prev) => ({ ...prev, dateRange: value || [] }));
+    queryClient.invalidateQueries(["banners"]);
   };
 
   const handleTableChange = (pagination, _filters, sorter) => {
@@ -112,6 +75,14 @@ const Banners = memo(() => {
 
   const columns = [
     {
+      title: "Приоритет",
+      dataIndex: "priority",
+      key: "priority",
+      sorter: true,
+      width: 10,
+      render: (record) => record || "Не указан",
+    },
+    {
       title: "Заголовок",
       dataIndex: "title",
       key: "title",
@@ -121,7 +92,6 @@ const Banners = memo(() => {
           <Input
             placeholder="Поиск по заголовку"
             defaultValue={searchFilters.title}
-            onChange={(e) => handleSearchDebounced("title", e.target.value)}
             style={{ width: 188, marginBottom: 8, display: "block" }}
           />
         </div>
@@ -133,16 +103,44 @@ const Banners = memo(() => {
       dataIndex: "link",
       key: "link",
       sorter: true,
-      filterDropdown: () => (
+      width: 200,
+    },
+    {
+      title: "Статус",
+      dataIndex: "active",
+      key: "active",
+      render: (record) => {
+        return (
+          <Tag color={record ? "green" : "red"}>
+            {record ? "Активный" : "Архивирован"}
+          </Tag>
+        );
+      },
+      sorter: true,
+      filterDropdown: ({ selectedKeys, confirm, clearFilters }) => (
         <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Поиск по ссылке"
-            defaultValue={searchFilters.link}
-            onChange={(e) => handleSearchDebounced("link", e.target.value)}
-            style={{ width: 188, marginBottom: 8, display: "block" }}
-          />
+          <Select
+            style={{ width: 200 }}
+            placeholder="Выберите статус"
+            value={selectedKeys[0] ?? undefined} // Устанавливаем выбранное значение
+            onChange={(value) => {
+              setSearchFilters((prev) => ({
+                ...prev,
+                active: value,
+              }));
+              confirm();
+            }}
+            allowClear
+            onClear={clearFilters}
+          >
+            <Select.Option value={true}>Активный</Select.Option>
+            <Select.Option value={false}>Архивирован</Select.Option>
+          </Select>
         </div>
       ),
+      onFilter: (value, record) => {
+        return record.active === value;
+      },
       width: 200,
     },
     {
@@ -280,6 +278,22 @@ const Banners = memo(() => {
           record={selectedRecord}
         />
       )}
+      <Modal
+        width="75vw"
+        open={isPriorityModalOpen}
+        footer={null}
+        onCancel={() => setIsPriorityModalOpen(false)}
+        maskClosable={false}
+        closeIcon={false}
+      >
+        <SortableList
+          setIsPriorityModalOpen={setIsPriorityModalOpen}
+          fetchKey="allBanners"
+          fetchMethod={fetchBanners}
+          readKey="title"
+          updateEndpoint="banners/updatePriorities"
+        />
+      </Modal>
     </div>
   );
 });

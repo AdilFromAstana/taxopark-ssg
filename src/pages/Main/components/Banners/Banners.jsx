@@ -7,7 +7,13 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const fetchBanners = async ({ page, pageSize, filters }) => {
   const response = await axios.get(`${API_URL}/banners`, {
-    params: { page, limit: pageSize, ...filters },
+    params: {
+      page,
+      limit: pageSize,
+      sortField: "priority",
+      sortOrder: "asc",
+      ...filters,
+    },
   });
   return response.data;
 };
@@ -34,7 +40,7 @@ const Banners = memo(() => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["banners", {}],
+    queryKey: ["banners", { priority: "desc" }],
     queryFn: async ({ queryKey }) => {
       const [, params] = queryKey;
 
@@ -78,6 +84,11 @@ const Banners = memo(() => {
               }}
             >
               <img
+                onClick={() => {
+                  if (item.link) {
+                    window.open(item.link, "_blank", "noopener,noreferrer");
+                  }
+                }}
                 src={`${API_URL}/uploads/${item.bannerUrl}`}
                 alt={`Slide ${item.id}`}
                 style={{
