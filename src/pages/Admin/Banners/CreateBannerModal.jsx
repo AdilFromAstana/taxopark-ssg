@@ -1,12 +1,22 @@
 /* eslint-disable react/prop-types */
-import { Modal, Form, Input, Button, Row, Col, message, Upload, Image } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  Button,
+  Row,
+  Col,
+  message,
+  Upload,
+  Image,
+} from "antd";
 import axios from "axios";
 import { UploadOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const CreateBannerModal = ({ open, onClose, refreshData }) => {
+const CreateBannerModal = ({ open, onClose, queryClient, queryData }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState([]);
@@ -16,16 +26,31 @@ const CreateBannerModal = ({ open, onClose, refreshData }) => {
   const handleSubmit = async (values) => {
     try {
       setLoading(true);
-      console.log("🔄 Начало создания города...", values);
+      const formData = new FormData();
+      formData.append("title", values.title);
+      if (values.link) {
+        formData.append("link", values.link);
+      }
+      if (fileList.length > 0) {
+        formData.append("file", fileList[0].originFileObj);
+      }
 
-      const response = await axios.post(`${API_URL}/cities`, values);
+      const response = await axios.post(`${API_URL}/banners`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       console.log("✅ Успешный ответ сервера:", response.data);
-      message.success("🎉 Город успешно создан!");
+      message.success("🎉 Баннер успешно создан!");
 
-      refreshData(); // Обновление данных после создания
+      queryClient.setQueryData(["parks", queryData], (oldData) => {
+        if (!oldData || !oldData.data) return oldData;
+        return { ...oldData, data: [...oldData.data, data.data.dataValues] };
+      });
       onClose();
       form.resetFields(); // Очистка формы
+      setFileList([]);
     } catch (error) {
       console.error("❌ Ошибка при создании записи:", error);
       message.error(

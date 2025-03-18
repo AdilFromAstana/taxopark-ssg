@@ -18,7 +18,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import "./style.css";
 
 const { RangePicker } = DatePicker;
-const { Dragger } = Upload;
 const API_URL = import.meta.env.VITE_API_URL;
 
 const fetchBanners = async ({ page, pageSize, filters }) => {
@@ -256,6 +255,14 @@ const Banners = memo(() => {
       />
 
       <CreateBannerModal
+        queryData={{
+          page: pagination.current,
+          pageSize: pagination.pageSize,
+          sortField: sorter.field,
+          sortOrder: sorter.order,
+          filters: searchFilters,
+        }}
+        queryClient={queryClient}
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
       />
