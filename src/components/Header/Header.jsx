@@ -43,9 +43,9 @@ function Header() {
           >
             Акции и бонусы
           </a>
-          <a href="tel:+77767777777" className="header-phone-link">
+          {/* <a href="tel:+77767777777" className="header-phone-link">
             📞 +7-776-777-77-77
-          </a>
+          </a> */}
         </nav>
 
         {/* Кнопка бургера (мобилка) */}

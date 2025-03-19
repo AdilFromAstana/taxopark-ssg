@@ -35,19 +35,17 @@ const EditCityModal = ({
       );
 
       queryClient.setQueryData(["cities", queryData], (oldData) => {
-        if (!oldData || !oldData.data) return oldData;
-        return {
-          ...oldData,
-          data: oldData.data.map((item) => {
-            if (item.id === record.id) {
-              setSelectedRecord(updatedData.data);
-              form.setFieldsValue(updatedData.data);
-              return updatedData.data;
-            } else {
-              return item;
-            }
-          }),
-        };
+        console.log("oldData: ", oldData);
+        if (!oldData) return oldData;
+        return oldData.map((item) => {
+          if (item.id === record.id) {
+            setSelectedRecord(updatedData.data);
+            form.setFieldsValue(updatedData.data);
+            return updatedData.data.user;
+          } else {
+            return item;
+          }
+        });
       });
 
       message.success("🎉 Город успешно обновлен!");
@@ -81,6 +79,7 @@ const EditCityModal = ({
       onCancel={onClose}
       title={isEditMode ? "Редактировать город" : "Просмотр города"}
       footer={null}
+      closeIcon={false}
       maskClosable={false}
     >
       <Form form={form} layout="vertical" onFinish={handleUpdate}>
