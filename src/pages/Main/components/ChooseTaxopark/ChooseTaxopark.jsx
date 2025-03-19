@@ -9,7 +9,9 @@ import axios from "axios";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const fetchCities = async () => {
-  const response = await axios.get(`${API_URL}/cities?page=1&limit=1000`);
+  const response = await axios.get(
+    `${API_URL}/cities?page=1&limit=1000&active=true`
+  );
   return response.data;
 };
 
@@ -20,8 +22,8 @@ const ChooseTaxopark = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { data: cities = [], isLoading: citiesLoading } = useQuery({
-    queryKey: ["cities", {}],
+  const { data: cities, isLoading: citiesLoading } = useQuery({
+    queryKey: ["cities", { active: true }],
     queryFn: async ({ queryKey }) => {
       const [, params] = queryKey;
 
@@ -48,7 +50,7 @@ const ChooseTaxopark = () => {
       <div className="desktop-filters">
         <Filters
           setItems={setItems}
-          cities={cities}
+          cities={cities?.data || []}
           setIsLoading={setIsLoading}
           setItemsCount={setItemsCount}
         />
@@ -66,7 +68,7 @@ const ChooseTaxopark = () => {
       <Carousel
         items={items}
         isLoading={isLoading || citiesLoading}
-        cities={cities}
+        cities={cities?.data || []}
       />
       <Drawer
         open={isDrawerOpen}
@@ -76,7 +78,7 @@ const ChooseTaxopark = () => {
       >
         <Filters
           setItems={setItems}
-          cities={cities}
+          cities={cities?.data || []}
           setIsLoading={setIsLoading}
           setItemsCount={setItemsCount}
         />

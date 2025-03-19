@@ -24,6 +24,39 @@ const EditCityModal = ({
     });
   };
 
+  const handleChangeStatus = async () => {
+    setLoading(true);
+    try {
+      const updatedData = await axios.put(
+        `${API_URL}/cities/update/${record.id}`,
+        { active: !record.active }
+      );
+      queryClient.setQueryData(["cities", queryData], (oldData) => {
+        if (!oldData || !oldData.data) return oldData;
+        return {
+          ...oldData,
+          data: oldData.data.map((item) => {
+            if (item.id === record.id) {
+              setSelectedRecord(updatedData.data);
+              form.setFieldsValue(updatedData.data);
+              return updatedData.data;
+            } else {
+              return item;
+            }
+          }),
+        };
+      });
+      message.success("Запись успешно обновлена!");
+      onClose();
+    } catch (error) {
+      message.error(
+        `Ошибка: ${error?.response?.data?.message || "Неизвестная ошибка"}`
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleUpdate = async () => {
     const data = form.getFieldsValue();
     try {
@@ -110,7 +143,14 @@ const EditCityModal = ({
               <Button type="primary" onClick={() => setIsEditMode(true)}>
                 Редактировать
               </Button>
-              <Button type="default" danger onClick={onClose}>
+              <Button
+                type="primary"
+                style={{ backgroundColor: record.active ? "red" : "green" }}
+                onClick={handleChangeStatus}
+              >
+                {record.active ? "Архивировать" : "Активировать"}
+              </Button>
+              <Button danger onClick={onClose} style={{ marginLeft: "auto" }}>
                 Закрыть
               </Button>
             </>

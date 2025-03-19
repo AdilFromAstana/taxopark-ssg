@@ -337,7 +337,7 @@ const Parks = memo(() => {
             value={selectedKeys}
             onChange={(value) => setSelectedKeys(value)}
           >
-            {citiesData?.map((city) => (
+            {citiesData?.data?.map((city) => (
               <Select.Option key={city.id} value={city.id}>
                 {city.title}
               </Select.Option>
@@ -373,7 +373,8 @@ const Parks = memo(() => {
         // Получаем список городов из массива объектов
         const cityTitles = record.averageCheckPerCity
           .map(
-            ({ cityId }) => citiesData.find((city) => city.id === cityId)?.title
+            ({ cityId }) =>
+              citiesData?.data?.find((city) => city.id === cityId)?.title
           )
           .filter(Boolean);
 
@@ -560,7 +561,7 @@ const Parks = memo(() => {
       <CreateParkModal
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        cities={citiesData}
+        cities={citiesData?.data || []}
         queryData={{
           page: pagination.current,
           pageSize: pagination.pageSize,
@@ -584,7 +585,7 @@ const Parks = memo(() => {
           open={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           record={selectedRecord}
-          cities={citiesData}
+          cities={citiesData?.data || []}
         />
       )}
       <Modal

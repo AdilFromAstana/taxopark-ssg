@@ -13,14 +13,77 @@ import {
   Select,
   Flex,
   message,
+  Spin,
 } from "antd";
 import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import axios from "axios";
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 const { RangePicker } = TimePicker;
 const API_URL = import.meta.env.VITE_API_URL;
-
 const { TextArea } = Input;
+
+const debounce = (func, delay) => {
+  let timer;
+  return (...args) => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};
+
+const fetchParks = async ({
+  page,
+  pageSize,
+  sortField,
+  sortOrder,
+  filters,
+}) => {
+  const response = await axios.get(`${API_URL}/parks`, {
+    params: { page, limit: pageSize, sortField, sortOrder, ...filters },
+  });
+  return response.data;
+};
+
+function DebounceSelect({ fetchOptions, debounceTimeout = 800, ...props }) {
+  const [fetching, setFetching] = useState(false);
+  const [options, setOptions] = useState([]);
+  const fetchRef = useRef(0);
+
+  const debounceFetcher = useMemo(() => {
+    const loadOptions = (value) => {
+      fetchRef.current += 1;
+      const fetchId = fetchRef.current;
+      setFetching(true);
+      setOptions([]);
+      fetchOptions(value).then((newOptions) => {
+        if (fetchId !== fetchRef.current) return;
+        setOptions(newOptions);
+        setFetching(false);
+      });
+    };
+    return debounce(loadOptions, debounceTimeout);
+  }, [fetchOptions, debounceTimeout]);
+
+  return (
+    <Select
+      showSearch
+      labelInValue
+      filterOption={false}
+      onSearch={debounceFetcher}
+      notFoundContent={fetching ? <Spin size="small" /> : null}
+      {...props}
+      onChange={(selected) => {
+        if (selected) {
+          props.onChange(options.find((opt) => opt.value === selected.value));
+        } else {
+          props.onChange(null);
+        }
+      }}
+      options={options}
+    />
+  );
+}
 
 const CreateParkModal = ({
   open,
@@ -32,6 +95,10 @@ const CreateParkModal = ({
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [radioValues, setRadioValues] = useState({});
+
+  const [searchFilters, setSearchFilters] = useState({
+    title: "",
+  });
 
   const handleSubmit = async (values) => {
     try {
@@ -67,7 +134,48 @@ const CreateParkModal = ({
     <Modal
       open={open}
       onCancel={onClose}
-      title="Создать парк"
+      title={
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div>Создать парк</div>
+
+          <DebounceSelect
+            value={searchFilters.title}
+            placeholder="Поиск парков"
+            fetchOptions={(value) =>
+              fetchParks({
+                page: 1,
+                pageSize: 10,
+                sortField: "title",
+                sortOrder: "asc",
+                filters: { title: value },
+              }).then((data) => {
+                return data?.data?.map((park) => {
+                  return {
+                    label: park.title,
+                    value: park.id,
+                    park,
+                  };
+                });
+              })
+            }
+            style={{ width: "300px" }}
+            onChange={(newValue) => {
+              if (newValue) {
+                setSearchFilters({ title: newValue?.label });
+                form.setFieldsValue({ ...newValue?.park, title: null });
+              } else {
+                setSearchFilters({ title: null });
+                form.resetFields();
+              }
+            }}
+            allowClear
+            onClear={() => {
+              setSearchFilters({ title: null });
+              form.setFieldsValue(null);
+            }}
+          />
+        </div>
+      }
       footer={null}
       width="75vw"
       maskClosable={false}
