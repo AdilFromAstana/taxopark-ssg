@@ -1,11 +1,12 @@
 /* eslint-disable react/prop-types */
 import { memo, useEffect, useState } from "react";
 import { MdOutlineCalendarToday } from "react-icons/md";
+import { AiOutlineInfoCircle } from "react-icons/ai";
 import { LuClock3, LuGift } from "react-icons/lu";
 import { FiHeadphones } from "react-icons/fi";
 import { FaCarSide } from "react-icons/fa6";
 import { FaLocationDot } from "react-icons/fa6";
-import { Card, Checkbox, Col, Row, Select, Slider } from "antd";
+import { Card, Checkbox, Col, Row, Select, Slider, Tooltip } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -106,7 +107,21 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
 
   return (
     <Card className="filters-card">
-      <h2 className="filters-title">Выбрать таксопарк</h2>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <h2 className="filters-title">Выбрать таксопарк</h2>
+        <div className="filters-info">
+          <span style={{ fontSize: 14 }}>Расчет, указанный на сайте...</span>
+          <Tooltip title="Расчет, указанный на сайте, является ориентировочным. Итоговая сумма может отличаться в зависимости от условий конкретного таксопарка и текущего спроса на такси.">
+            <AiOutlineInfoCircle style={{ fontSize: 16, color: "#1677ff" }} />
+          </Tooltip>
+        </div>
+      </div>
       <Row className="filters-grid">
         <Col>
           <h4 className="filter-label">

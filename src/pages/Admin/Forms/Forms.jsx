@@ -36,6 +36,11 @@ const fetchParks = async () => {
   return response.data.data;
 };
 
+const fetchStatuses = async () => {
+  const response = await axios.get(`${API_URL}/forms/statuses/all`);
+  return response.data;
+};
+
 const debounce = (func, delay) => {
   let timer;
   return (...args) => {
@@ -108,8 +113,35 @@ const Forms = () => {
   });
 
   const { data: parks = [] } = useQuery({
-    queryKey: ["parks"],
-    queryFn: fetchParks,
+    queryKey: ["parks", {}],
+    queryFn: async ({ queryKey }) => {
+      const [, params] = queryKey;
+
+      const cachedData = queryClient.getQueryData(["parks", params]);
+      if (cachedData) {
+        return cachedData;
+      }
+
+      return fetchParks(params);
+    },
+    keepPreviousData: true,
+    staleTime: 60 * 1000,
+    cacheTime: 5 * 60 * 1000,
+  });
+
+  const { data: statuses = [] } = useQuery({
+    queryKey: ["statuses", {}],
+    queryFn: async ({ queryKey }) => {
+      const [, params] = queryKey;
+
+      const cachedData = queryClient.getQueryData(["statuses", params]);
+      if (cachedData) {
+        return cachedData;
+      }
+
+      return fetchStatuses(params);
+    },
+    keepPreviousData: true,
     staleTime: 60 * 1000,
     cacheTime: 5 * 60 * 1000,
   });
@@ -215,6 +247,37 @@ const Forms = () => {
       ),
     },
     {
+      title: "Статус",
+      dataIndex: "statusCode",
+      key: "statusCode",
+      sorter: true,
+      filterDropdown: ({ selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Select
+            style={{ width: 250 }}
+            placeholder="Выберите статус"
+            value={selectedKeys[0] ?? undefined}
+            onChange={(value) => {
+              setSearchFilters((prev) => ({
+                ...prev,
+                statusCode: value,
+              }));
+              confirm();
+            }}
+            allowClear
+            onClear={clearFilters}
+          >
+            {statuses?.map((status) => (
+              <Select.Option value={status.code} key={status.code}>
+                {status.title}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+      ),
+      render: (_, record) => <Tag color="blue">{record?.status?.title}</Tag>,
+    },
+    {
       title: "Тип заявки",
       dataIndex: "formType",
       key: "formType",
@@ -224,7 +287,7 @@ const Forms = () => {
           <Select
             style={{ width: 200 }}
             placeholder="Выберите тип заявки"
-            value={selectedKeys[0] ?? undefined} // Устанавливаем выбранное значение
+            value={selectedKeys[0] ?? undefined}
             onChange={(value) => {
               setSearchFilters((prev) => ({
                 ...prev,

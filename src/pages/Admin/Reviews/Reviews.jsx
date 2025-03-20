@@ -46,7 +46,7 @@ const Reviews = memo(() => {
     order: null,
   });
   const [searchFilters, setSearchFilters] = useState({
-    title: "",
+    name: "",
   });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);

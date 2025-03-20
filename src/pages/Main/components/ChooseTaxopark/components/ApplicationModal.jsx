@@ -89,8 +89,8 @@ const ApplicationModal = memo(
           step === 1
             ? "Отправить заявку"
             : step === 2
-              ? "Подтверждение OTP"
-              : "Успех!"
+            ? "Подтверждение OTP"
+            : "Успех!"
         }
         centered
       >
@@ -164,7 +164,14 @@ const StepTwo = ({
   timer,
 }) => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
       <p>Введите код из SMS для подтверждения заявки:</p>
       <Input.OTP
         type="text"

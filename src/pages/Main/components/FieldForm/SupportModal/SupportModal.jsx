@@ -22,6 +22,9 @@ const ApplicationModal = memo(
     setOtpSent,
     form,
   }) => {
+    console.log("timer: ", timer);
+    console.log("otpSent: ", otpSent);
+
     const [inputOtp, setInputOtp] = useState("");
 
     useEffect(() => {
@@ -88,6 +91,8 @@ const ApplicationModal = memo(
             setStep={setStep}
             onClose={onClose}
             handleSendOtp={handleSendOtp}
+            otpSent={otpSent}
+            timer={timer}
             handleVerifyOtp={handleVerifyOtp}
           />
         )}
@@ -106,7 +111,14 @@ const StepTwo = ({
   timer,
 }) => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
       <p>Введите код из SMS для подтверждения заявки:</p>
       <Input.OTP
         type="text"
