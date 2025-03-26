@@ -22,9 +22,6 @@ const ApplicationModal = memo(
     setOtpSent,
     form,
   }) => {
-    console.log("timer: ", timer);
-    console.log("otpSent: ", otpSent);
-
     const [inputOtp, setInputOtp] = useState("");
 
     useEffect(() => {
@@ -61,7 +58,7 @@ const ApplicationModal = memo(
         setStep(3); // Переход на следующий шаг
       } catch (error) {
         message.error(
-          error.response?.data?.error || "Ошибка при подтверждении OTP"
+          error.response?.data?.message || "Ошибка при подтверждении OTP"
         );
       }
     };
@@ -93,6 +90,7 @@ const ApplicationModal = memo(
             handleSendOtp={handleSendOtp}
             otpSent={otpSent}
             timer={timer}
+            setInputOtp={setInputOtp}
             handleVerifyOtp={handleVerifyOtp}
           />
         )}

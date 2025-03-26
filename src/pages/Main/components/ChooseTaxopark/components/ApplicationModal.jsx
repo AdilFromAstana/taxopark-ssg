@@ -15,6 +15,8 @@ const ApplicationModal = memo(
     const [timer, setTimer] = useState(60);
     const [inputOtp, setInputOtp] = useState("");
     const [formId, setFormId] = useState("");
+    const [smsCodeId, setSmsCodeId] = useState("");
+    const [isVerifing, setIsVerifing] = useState(false);
 
     const name = Form.useWatch("name", form);
     const phoneNumber = Form.useWatch("phoneNumber", form);
@@ -44,13 +46,31 @@ const ApplicationModal = memo(
           parkId,
         });
         setFormId(formData.data.id);
+        setSmsCodeId(formData.data.smsCodeId);
         message.success("OTP-код отправлен!");
         setStep(2);
         setOtpSent(true);
         setTimer(60);
       } catch (error) {
-        message.error("Ошибка при отправке заявки");
+        message.error(
+          error.response?.data?.message || "Ошибка при отправке заявки"
+        );
         console.error("Ошибка:", error);
+      }
+    };
+
+    const handleResendOtp = async () => {
+      try {
+        await axios.post(`${API_URL}/smsCodes/resendOtp`, {
+          smsCodeId,
+        });
+        setOtpSent(true);
+        setTimer(60);
+        message.success("OTP-код отправлен!");
+      } catch (error) {
+        message.error(
+          error.response?.data?.message || "Ошибка при подтверждении OTP"
+        );
       }
     };
 
@@ -65,8 +85,10 @@ const ApplicationModal = memo(
         setStep(3); // Переход на следующий шаг
       } catch (error) {
         message.error(
-          error.response?.data?.error || "Ошибка при подтверждении OTP"
+          error.response?.data?.message || "Ошибка при подтверждении OTP"
         );
+      } finally {
+        setIsVerifing(false);
       }
     };
 
@@ -105,8 +127,10 @@ const ApplicationModal = memo(
           )}
           {step === 2 && (
             <StepTwo
+              isVerifing={isVerifing}
               inputOtp={inputOtp}
               setInputOtp={setInputOtp}
+              handleResendOtp={handleResendOtp}
               handleVerifyOtp={handleVerifyOtp}
               handleSendOtp={handleSendOtp}
               otpSent={otpSent}
@@ -159,9 +183,10 @@ const StepTwo = ({
   inputOtp,
   setInputOtp,
   handleVerifyOtp,
-  handleSendOtp,
-  otpSent,
+    otpSent,
   timer,
+  isVerifing,
+  handleResendOtp,
 }) => {
   return (
     <div
@@ -180,13 +205,19 @@ const StepTwo = ({
         onChange={(e) => setInputOtp(e)}
         placeholder="Введите OTP-код"
       />
-      <Button type="primary" block onClick={handleVerifyOtp} className="mt-3">
+      <Button
+        loading={isVerifing}
+        type="primary"
+        block
+        onClick={handleVerifyOtp}
+        className="mt-3"
+      >
         Подтвердить
       </Button>
       <Button
         type="link"
         disabled={otpSent}
-        onClick={handleSendOtp}
+        onClick={handleResendOtp}
         className="mt-2"
       >
         {otpSent

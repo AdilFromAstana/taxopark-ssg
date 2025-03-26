@@ -76,7 +76,6 @@ const AppRouter = () => {
       </Router>
     );
   } else {
-    console.log("ada");
     return (
       <Router>
         <Routes>
