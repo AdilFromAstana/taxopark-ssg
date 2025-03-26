@@ -68,7 +68,7 @@ const ApplicationModal = memo(
       setStep(2);
       setInputOtp("");
       setOtpSent(false);
-      setTimer(60);
+      setTimer(180);
       onClose();
     };
 

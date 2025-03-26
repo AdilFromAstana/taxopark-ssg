@@ -13,7 +13,7 @@ function FieldForm() {
   const [step, setStep] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
-  const [timer, setTimer] = useState(60);
+  const [timer, setTimer] = useState(180);
   const [formId, setFormId] = useState("");
 
   const handleSendOtp = async () => {
@@ -27,7 +27,7 @@ function FieldForm() {
       message.success("OTP-код отправлен!");
       setStep(2);
       setOtpSent(true);
-      setTimer(60);
+      setTimer(180);
       setIsModalOpen(true);
     } catch (error) {
       message.error("Ошибка при отправке заявки");

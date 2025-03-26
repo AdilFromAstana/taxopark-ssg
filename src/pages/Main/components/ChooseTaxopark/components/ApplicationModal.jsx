@@ -12,7 +12,7 @@ const ApplicationModal = memo(
     const [form] = Form.useForm();
     const [step, setStep] = useState(1);
     const [otpSent, setOtpSent] = useState(false);
-    const [timer, setTimer] = useState(60);
+    const [timer, setTimer] = useState(180);
     const [inputOtp, setInputOtp] = useState("");
     const [formId, setFormId] = useState("");
     const [smsCodeId, setSmsCodeId] = useState("");
@@ -50,7 +50,7 @@ const ApplicationModal = memo(
         message.success("OTP-код отправлен!");
         setStep(2);
         setOtpSent(true);
-        setTimer(60);
+        setTimer(180);
       } catch (error) {
         message.error(
           error.response?.data?.message || "Ошибка при отправке заявки"
@@ -65,7 +65,7 @@ const ApplicationModal = memo(
           smsCodeId,
         });
         setOtpSent(true);
-        setTimer(60);
+        setTimer(180);
         message.success("OTP-код отправлен!");
       } catch (error) {
         message.error(
@@ -97,7 +97,7 @@ const ApplicationModal = memo(
       setStep(1);
       setInputOtp("");
       setOtpSent(false);
-      setTimer(60);
+      setTimer(180);
       onClose();
     };
 
