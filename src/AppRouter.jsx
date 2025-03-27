@@ -18,6 +18,7 @@ import Cities from "./pages/Admin/Cities/Cities";
 import Banners from "./pages/Admin/Banners/Banners";
 import Reviews from "./pages/Admin/Reviews/Reviews";
 import Users from "./pages/Admin/Users/Users";
+import Commissions from "./pages/Admin/Commissions/Commissions";
 
 const adminRoutes = [
   { path: "banners", element: <Banners />, roles: ["admin"] },
@@ -26,6 +27,7 @@ const adminRoutes = [
   { path: "promotions", element: <Promotions />, roles: ["admin"] },
   { path: "cities", element: <Cities />, roles: ["admin"] },
   { path: "reviews", element: <Reviews />, roles: ["admin"] },
+  { path: "commissions", element: <Commissions />, roles: ["admin"] },
   { path: "users", element: <Users />, roles: ["admin"] },
 ];
 

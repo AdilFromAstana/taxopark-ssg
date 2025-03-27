@@ -20,6 +20,11 @@ const allParkPromotions = [
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+const fetchCommission = async () => {
+  const response = await axios.get(`${API_URL}/commissions/yandex`);
+  return response.data;
+};
+
 const fetchParks = async (filters) => {
   const response = await axios.get(`${API_URL}/parks`, { params: filters });
   return response.data;
@@ -39,10 +44,26 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
 
   const [workDays, setWorkDays] = useState(10);
   const [orderPerDay, setOrderPerDay] = useState(10);
-  const yandexCommission = 7;
+  // const yandexCommission = 7;
   const [parkPromotions, setParkPromotions] = useState([]);
   const [selectedCityId, setSelectedCityId] = useState([]);
   const [isPaymentWithCommission, setIsPaymentWithCommission] = useState(false);
+
+  const { data: yandexCommission = { sum: 7 } } = useQuery({
+    queryKey: [
+      "yandexCommission",
+      {
+        code: "yandex",
+      },
+    ],
+    queryFn: () =>
+      fetchCommission({
+        code: "yandex",
+      }),
+    keepPreviousData: true,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: [
@@ -89,7 +110,7 @@ const Filters = memo(({ setItems, setIsLoading, cities, setItemsCount }) => {
           )?.averageCheck || 0;
         const approximateIncome =
           workDays * orderPerDay * Number(cityAverageCheck) -
-          (yandexCommission + Number(park.parkCommission)) *
+          (yandexCommission?.sum + Number(park.parkCommission)) *
             ((workDays * orderPerDay * Number(cityAverageCheck)) / 100);
 
         return {

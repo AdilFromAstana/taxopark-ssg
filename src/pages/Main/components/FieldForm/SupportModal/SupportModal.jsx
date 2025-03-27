@@ -108,6 +108,9 @@ const StepTwo = ({
   otpSent,
   timer,
 }) => {
+  const minutes = String(Math.floor(timer / 60)).padStart(2, "0");
+  const seconds = String(timer % 60).padStart(2, "0");
+
   return (
     <div
       style={{
@@ -135,7 +138,7 @@ const StepTwo = ({
         className="mt-2"
       >
         {otpSent
-          ? `Запросить код повторно через ${timer} сек.`
+          ? `Запросить код повторно через ${minutes}:${seconds}`
           : "Запросить новый код"}
       </Button>
     </div>

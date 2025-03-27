@@ -50,6 +50,7 @@ const AdminLayout = () => {
     { key: "promotions", label: <span>Акции</span> },
     { key: "cities", label: <span>Города</span> },
     { key: "reviews", label: <span>Отзывы</span> },
+    { key: "commissions", label: <span>Комиссии</span> },
     { key: "users", label: <span>Пользователи</span> },
   ];
 
