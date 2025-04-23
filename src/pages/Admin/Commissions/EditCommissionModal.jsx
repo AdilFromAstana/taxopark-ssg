@@ -1,5 +1,14 @@
 /* eslint-disable react/prop-types */
-import { Modal, Form, Input, Button, Row, Col, message } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  Button,
+  Row,
+  Col,
+  message,
+  InputNumber,
+} from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -37,18 +46,21 @@ const EditCommissionModal = ({
       queryClient.setQueryData(["commissions", queryData], (oldData) => {
         console.log("oldData: ", oldData);
         if (!oldData) return oldData;
-        return oldData.map((item) => {
-          if (item.id === record.id) {
-            setSelectedRecord(updatedData.data);
-            form.setFieldsValue(updatedData.data);
-            return updatedData.data.user;
-          } else {
-            return item;
-          }
-        });
+        return {
+          ...oldData,
+          data: oldData.data.map((item) => {
+            if (item.id === record.id) {
+              setSelectedRecord(updatedData.data);
+              form.setFieldsValue(updatedData.data);
+              return updatedData.data;
+            } else {
+              return item;
+            }
+          }),
+        };
       });
 
-      message.success("🎉 Город успешно обновлен!");
+      message.success("🎉 Коммисия успешно обновлена!");
 
       setIsEditMode(false);
       onClose();
@@ -109,12 +121,17 @@ const EditCommissionModal = ({
           <Col span={24}>
             <Form.Item
               name="sum"
-              label="Сумма"
+              label="Сумма комиссии"
               rules={[
-                { required: true, message: "Введите сумму", type: "number" },
+                { required: true, message: "Введите сумму" },
+                {
+                  type: "number",
+                  max: 100,
+                  message: "Максимальная сумма комиссии - 100",
+                },
               ]}
             >
-              <Input disabled={!isEditMode} />
+              <InputNumber disabled={!isEditMode} style={{ width: "100%" }} />
             </Form.Item>
           </Col>
         </Row>
@@ -122,7 +139,11 @@ const EditCommissionModal = ({
         <div style={{ display: "flex", gap: 10 }}>
           {isEditMode ? (
             <>
-              <Button type="primary" onClick={handleUpdate} loading={loading}>
+              <Button
+                type="primary"
+                onClick={() => form.submit()}
+                loading={loading}
+              >
                 Сохранить
               </Button>
               <Button type="default" onClick={handleCancel}>
