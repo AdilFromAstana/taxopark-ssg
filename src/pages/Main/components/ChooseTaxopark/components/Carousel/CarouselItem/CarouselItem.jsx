@@ -142,7 +142,7 @@ const CarouselItem = memo(({ item, index, carouselItemWidth, cities }) => {
                 <span>{supportTime}</span>
               </div>
             )}
-            {item.parkEntrepreneurSupport ? (
+            {item.entrepreneurSupport ? (
               <div className="carousel-card-detail">
                 <PiWallet className="carousel-card-icon" />
                 <span>Парковое ИП</span>
