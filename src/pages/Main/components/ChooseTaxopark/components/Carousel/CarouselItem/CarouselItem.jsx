@@ -249,14 +249,14 @@ const CarouselItem = memo(({ item, index, carouselItemWidth, cities }) => {
             <div className="carousel-card-detail">
               <MdBusinessCenter className="carousel-card-icon" />
               <span>Парковое ИП:</span>
-              {item.parkEntrepreneurSupport ? "Да" : "Нет"}
+              {item.entrepreneurSupport ? "Да" : "Нет"}
             </div>
             <div className="carousel-card-detail">
               <FaHandshake className="carousel-card-icon" />
               <span style={{ whiteSpace: "nowrap" }}>
                 Поддержка регистрации ИП:
               </span>
-              {item.entrepreneurSupport ? "Да" : "Нет"}
+              {item.parkEntrepreneurSupport ? "Да" : "Нет"}
             </div>
             <div className="carousel-card-detail">
               <TbCashRegister className="carousel-card-icon" />

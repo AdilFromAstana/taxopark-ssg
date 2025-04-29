@@ -62,7 +62,7 @@ const ChooseTaxopark = () => {
           onClick={() => setIsDrawerOpen(true)}
           type="primary"
         >
-          Расчитать доход
+          Калькулятор заработка
         </Button>
       </div>
       <Carousel
@@ -72,7 +72,7 @@ const ChooseTaxopark = () => {
       />
       <Drawer
         open={isDrawerOpen}
-        title="Расчитать доход"
+        title="Калькулятор заработка"
         onClose={() => setIsDrawerOpen(false)}
         className="carousel-drawer"
       >
